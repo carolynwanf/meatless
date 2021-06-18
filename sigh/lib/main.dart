@@ -23,6 +23,98 @@ class MyApp extends StatelessWidget {
 //   final bool pinned = false;
 // }
 
+// stuff for dishes
+
+class Dishes extends StatefulWidget {
+  _DishesState createState() => _DishesState();
+}
+
+Future<List> getDishes() async {
+  debugPrint('getting dishes');
+  final response =
+      await http.get(Uri.parse('http://localhost:4000/get-dishes'));
+
+  debugPrint('${jsonDecode(response.body)['dishes'][0]}');
+  // if (response.body.length > 100) {
+  // debugPrint(jsonDecode(response.body));
+  return jsonDecode(response.body)['dishes'];
+  // }
+}
+
+class _DishesState extends State<Dishes> {
+  late Future<List> _dishes;
+  void initState() {
+    super.initState();
+    debugPrint('debug printing');
+    _dishes = getDishes();
+    debugPrint('$_dishes');
+  }
+
+  Widget dishDesc(name, description, image) {
+    // var descriptionExists;
+    // if (description == 'nu')
+    return new ListTile(
+      // leading: Text('${friendliness}', style: _iconSize),
+      title: Text(name),
+      subtitle: description == 'none' ? null : Text(description),
+      // trailing: Icon(Icons.star)
+      // Star(pinned: alreadyPinned)
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Dishes'),
+        ),
+        body: Column(children: [
+          Row(
+            children: [
+              ElevatedButton(
+                child: Text('restaurants'),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Restaurants()));
+                },
+              ),
+              ElevatedButton(
+                child: Text('dishes'),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Dishes()));
+                },
+              ),
+            ],
+          ),
+          Expanded(
+              child: FutureBuilder<List>(
+            future: _dishes,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (_, int position) {
+                    return Card(
+                        child: dishDesc(
+                            snapshot.data![position]["name"],
+                            snapshot.data![position]["description"],
+                            snapshot.data![position]["images"]));
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+
+              // By default, show a loading spinner.
+              return CircularProgressIndicator();
+            },
+          ))
+        ]));
+  }
+}
+
+// stuff for restaurants
+
 class Restaurants extends StatefulWidget {
   final String name = '';
 
@@ -60,8 +152,8 @@ class _RestaurantsState extends State<Restaurants> {
       leading: Text('${friendliness}', style: _iconSize),
       title: Text(name),
       subtitle: Text(type),
-
-      // trailing: Star(pinned: alreadyPinned)
+      // trailing: Icon(Icons.star)
+      // Star(pinned: alreadyPinned)
     );
   }
 
@@ -71,29 +163,38 @@ class _RestaurantsState extends State<Restaurants> {
         appBar: AppBar(
           title: Text('Test App'),
         ),
-        body: Center(
-            child: FutureBuilder<List>(
-          future: _restaurants,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, int position) {
-                  return Card(
-                      child: restaurantDesc(
-                          snapshot.data![position]["name"],
-                          snapshot.data![position]["type"],
-                          snapshot.data![position]["friendliness"]
-                              .roundToDouble()));
-                },
-              );
-            } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
-            }
+        body: Column(children: [
+          ElevatedButton(
+            child: Text('dishes'),
+            onPressed: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Dishes()));
+            },
+          ),
+          Expanded(
+              child: FutureBuilder<List>(
+            future: _restaurants,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (_, int position) {
+                    return Card(
+                        child: restaurantDesc(
+                            snapshot.data![position]["name"],
+                            snapshot.data![position]["type"],
+                            snapshot.data![position]["friendliness"]
+                                .roundToDouble()));
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
 
-            // By default, show a loading spinner.
-            return CircularProgressIndicator();
-          },
-        )));
+              // By default, show a loading spinner.
+              return CircularProgressIndicator();
+            },
+          ))
+        ]));
   }
 }

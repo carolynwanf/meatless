@@ -42,17 +42,17 @@ app.get("/get-restaurants", async (req,res) => {
     
 })
 
-app.get("/get-items", async (req,res) => {
+app.get("/get-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
 
     try {
         const db = client.db('data');
 
-        const restaurants = await db.collection('items').find({ vegetarian: true}).sort({friendliness: -1}).toArray();
+        const dishes= await db.collection('items').find({ vegetarian: true}).sort({friendliness: -1}).toArray();
 
-        res.json({restaurants: restaurants})
+        res.json({dishes: dishes})
     } finally {
-        console.log('items successfully taken!')
+        console.log('dishes successfully taken!')
         
     }
     
