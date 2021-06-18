@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 // import 'package:english_words/english_words.dart';
@@ -12,6 +13,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(title: 'Test App', home: Restaurants());
   }
 }
+
+// class Star extends StatefulWidget {
+//   @override
+//   _StarState createState() => _StarState()
+// }
+
+// class StarState extends State<Star> {
+//   final bool pinned = false;
+// }
 
 class Restaurants extends StatefulWidget {
   final String name = '';
@@ -43,14 +53,17 @@ class _RestaurantsState extends State<Restaurants> {
     debugPrint('$_restaurants');
   }
 
-  // Widget _buildRow(WordPair pair) {
-  //   return ListTile(
-  //     title: Text(
-  //       pair.asPascalCase,
-  //       style: _biggerFont,
-  //     ),
-  //   );
-  // }
+  Widget restaurantDesc(name, type, friendliness) {
+    final _iconSize = const TextStyle(fontSize: 30);
+
+    return new ListTile(
+      leading: Text('${friendliness}', style: _iconSize),
+      title: Text(name),
+      subtitle: Text(type),
+
+      // trailing: Star(pinned: alreadyPinned)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +80,11 @@ class _RestaurantsState extends State<Restaurants> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (_, int position) {
                   return Card(
-                    child: ListTile(
-                      title: Text(snapshot.data![position]["name"]),
-                    ),
-                  );
+                      child: restaurantDesc(
+                          snapshot.data![position]["name"],
+                          snapshot.data![position]["type"],
+                          snapshot.data![position]["friendliness"]
+                              .roundToDouble()));
                 },
               );
             } else if (snapshot.hasError) {
