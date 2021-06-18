@@ -13,7 +13,7 @@ app.options('*', (req, res) => {
   
     res.sendStatus(200);
   
-  });
+});
 
 app.get("/get-restaurants", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");

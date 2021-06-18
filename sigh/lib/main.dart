@@ -6,21 +6,18 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Test App',
-      home: RandomWords(),
-    );
+    return MaterialApp(title: 'Test App', home: Restaurants());
   }
 }
 
-class RandomWords extends StatefulWidget {
-  const RandomWords({Key? key}) : super(key: key);
+class Restaurants extends StatefulWidget {
+  const Restaurants({Key? key}) : super(key: key);
 
   @override
-  _RandomWordsState createState() => _RandomWordsState();
+  _RestaurantsState createState() => _RestaurantsState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
+class _RestaurantsState extends State<Restaurants> {
   final _suggestions = <WordPair>[];
   final _biggerFont = const TextStyle(fontSize: 18);
 
