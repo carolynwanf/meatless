@@ -10,7 +10,7 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Test App', home: Restaurants());
+    return MaterialApp(title: 'Test App', home: Mainpage());
   }
 }
 
@@ -24,6 +24,48 @@ class MyApp extends StatelessWidget {
 // }
 
 // stuff for dishes
+
+class Mainpage extends StatefulWidget {
+  _MainpageState createState() => _MainpageState();
+}
+
+class _MainpageState extends State<Mainpage> {
+  var _displayRestaurants = true;
+
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: _displayRestaurants ? Text('Restaurants') : Text('Dishes'),
+        ),
+        body: Column(
+          children: [
+            Row(
+              children: [
+                ElevatedButton(
+                  child: Text('restaurants'),
+                  onPressed: () {
+                    setState(() {
+                      _displayRestaurants = true;
+                    });
+                  },
+                ),
+                ElevatedButton(
+                  child: Text('dishes'),
+                  onPressed: () {
+                    setState(() {
+                      _displayRestaurants = false;
+                    });
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: _displayRestaurants ? Restaurants() : Dishes(),
+            )
+          ],
+        ));
+  }
+}
 
 class Dishes extends StatefulWidget {
   _DishesState createState() => _DishesState();
@@ -64,52 +106,31 @@ class _DishesState extends State<Dishes> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Dishes'),
-        ),
         body: Column(children: [
-          Row(
-            children: [
-              ElevatedButton(
-                child: Text('restaurants'),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Restaurants()));
-                },
-              ),
-              ElevatedButton(
-                child: Text('dishes'),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Dishes()));
-                },
-              ),
-            ],
-          ),
-          Expanded(
-              child: FutureBuilder<List>(
-            future: _dishes,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (_, int position) {
-                    return Card(
-                        child: dishDesc(
-                            snapshot.data![position]["name"],
-                            snapshot.data![position]["description"],
-                            snapshot.data![position]["images"]));
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
+      Expanded(
+          child: FutureBuilder<List>(
+        future: _dishes,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (_, int position) {
+                return Card(
+                    child: dishDesc(
+                        snapshot.data![position]["name"],
+                        snapshot.data![position]["description"],
+                        snapshot.data![position]["images"]));
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
 
-              // By default, show a loading spinner.
-              return CircularProgressIndicator();
-            },
-          ))
-        ]));
+          // By default, show a loading spinner.
+          return CircularProgressIndicator();
+        },
+      ))
+    ]));
   }
 }
 
@@ -160,41 +181,31 @@ class _RestaurantsState extends State<Restaurants> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Test App'),
-        ),
         body: Column(children: [
-          ElevatedButton(
-            child: Text('dishes'),
-            onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Dishes()));
-            },
-          ),
-          Expanded(
-              child: FutureBuilder<List>(
-            future: _restaurants,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (_, int position) {
-                    return Card(
-                        child: restaurantDesc(
-                            snapshot.data![position]["name"],
-                            snapshot.data![position]["type"],
-                            snapshot.data![position]["friendliness"]
-                                .roundToDouble()));
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
+      Expanded(
+          child: FutureBuilder<List>(
+        future: _restaurants,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (_, int position) {
+                return Card(
+                    child: restaurantDesc(
+                        snapshot.data![position]["name"],
+                        snapshot.data![position]["type"],
+                        snapshot.data![position]["friendliness"]
+                            .roundToDouble()));
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
 
-              // By default, show a loading spinner.
-              return CircularProgressIndicator();
-            },
-          ))
-        ]));
+          // By default, show a loading spinner.
+          return CircularProgressIndicator();
+        },
+      ))
+    ]));
   }
 }
