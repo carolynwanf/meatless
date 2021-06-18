@@ -6,6 +6,12 @@ const uri = "mongodb+srv://carolyniann:"+`${password}`+"@cluster0.tmpij.mongodb.
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 var ObjectId = require('mongodb').ObjectId; 
 
+const connect = async () => {
+    await client.connect()
+}
+
+connect()
+
 app.options('*', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'POST,GET,DELETE,PUT,OPTIONS');
@@ -18,15 +24,19 @@ app.options('*', (req, res) => {
 app.get("/get-restaurants", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
 
+    console.log('pinged')
+
     try {
         await client.connect()
         const db = client.db('data');
 
         const restaurants = await db.collection('restaurants').find({}).sort({friendliness: -1}).toArray();
 
+        console.log(restaurants)
+
         res.json({restaurants: restaurants})
     } finally {
-        await client.close()
+        console.log('restaurants successfully taken!')
         
     }
     
@@ -36,14 +46,13 @@ app.get("/get-items", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
 
     try {
-        await client.connect()
         const db = client.db('data');
 
         const restaurants = await db.collection('items').find({ vegetarian: true}).sort({friendliness: -1}).toArray();
 
         res.json({restaurants: restaurants})
     } finally {
-        await client.close()
+        console.log('items successfully taken!')
         
     }
     
