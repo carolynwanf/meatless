@@ -107,29 +107,31 @@ class _DishesState extends State<Dishes> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(children: [
-      Expanded(
-          child: FutureBuilder<List>(
-        future: _dishes,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (_, int position) {
-                return Card(
-                    child: dishDesc(
-                        snapshot.data![position]["name"],
-                        snapshot.data![position]["description"],
-                        snapshot.data![position]["images"]));
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
+      SizedBox(
+          height: MediaQuery.of(context).size.height - 84,
+          child: Center(
+              child: FutureBuilder<List>(
+            future: _dishes,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (_, int position) {
+                    return Card(
+                        child: dishDesc(
+                            snapshot.data![position]["name"],
+                            snapshot.data![position]["description"],
+                            snapshot.data![position]["images"]));
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
 
-          // By default, show a loading spinner.
-          return CircularProgressIndicator();
-        },
-      ))
+              // By default, show a loading spinner.
+              return CircularProgressIndicator();
+            },
+          )))
     ]));
   }
 }
@@ -182,30 +184,37 @@ class _RestaurantsState extends State<Restaurants> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(children: [
-      Expanded(
-          child: FutureBuilder<List>(
-        future: _restaurants,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (_, int position) {
-                return Card(
-                    child: restaurantDesc(
-                        snapshot.data![position]["name"],
-                        snapshot.data![position]["type"],
-                        snapshot.data![position]["friendliness"]
-                            .roundToDouble()));
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
+      SizedBox(
+        height: MediaQuery.of(context).size.height - (84),
+        child: Center(
+            child: FutureBuilder<List>(
+          future: _restaurants,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (_, int position) {
+                  return Card(
+                      child: restaurantDesc(
+                          snapshot.data![position]["name"],
+                          snapshot.data![position]["type"],
+                          snapshot.data![position]["friendliness"]
+                              .roundToDouble()));
+                },
+              );
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
 
-          // By default, show a loading spinner.
-          return CircularProgressIndicator();
-        },
-      ))
+            // By default, show a loading spinner.
+            return SizedBox(
+              child: CircularProgressIndicator(),
+              height: 25.0,
+              width: 25.0,
+            );
+          },
+        )),
+      )
     ]));
   }
 }
