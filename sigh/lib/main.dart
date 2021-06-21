@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:html';
+// import 'dart:html';
 
 import 'package:flutter/material.dart';
 // import 'package:english_words/english_words.dart';
@@ -129,7 +129,11 @@ class _DishesState extends State<Dishes> {
               }
 
               // By default, show a loading spinner.
-              return CircularProgressIndicator();
+              return SizedBox(
+                child: CircularProgressIndicator(),
+                height: 50.0,
+                width: 50.0,
+              );
             },
           )))
     ]));
@@ -209,8 +213,8 @@ class _RestaurantsState extends State<Restaurants> {
             // By default, show a loading spinner.
             return SizedBox(
               child: CircularProgressIndicator(),
-              height: 25.0,
-              width: 25.0,
+              height: 50.0,
+              width: 50.0,
             );
           },
         )),
