@@ -71,10 +71,16 @@ class Dishes extends StatefulWidget {
   _DishesState createState() => _DishesState();
 }
 
-Future<List> getDishes() async {
+Future<List> getDishes(offset) async {
   debugPrint('getting dishes');
+  final String body = jsonEncode({"offset": offset});
   final response =
-      await http.get(Uri.parse('http://localhost:4000/get-dishes'));
+      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: body);
 
   debugPrint('${jsonDecode(response.body)['dishes'][0]}');
   // if (response.body.length > 100) {
@@ -85,10 +91,18 @@ Future<List> getDishes() async {
 
 class _DishesState extends State<Dishes> {
   late Future<List> _dishes;
+  var page = 1;
+
+  final fieldText = TextEditingController();
+
+  void clearText() {
+    fieldText.clear();
+  }
+
   void initState() {
     super.initState();
     debugPrint('debug printing');
-    _dishes = getDishes();
+    _dishes = getDishes(page);
     debugPrint('$_dishes');
   }
 
@@ -105,37 +119,110 @@ class _DishesState extends State<Dishes> {
   }
 
   Widget build(BuildContext context) {
+    debugPrint('$page');
+    isDisabled() {
+      if (page == 1) {
+        debugPrint('disabled $page');
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     return Scaffold(
         body: Column(children: [
       SizedBox(
-          height: MediaQuery.of(context).size.height - 84,
-          child: Center(
-              child: FutureBuilder<List>(
-            future: _dishes,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (_, int position) {
+        height: MediaQuery.of(context).size.height - (138),
+        child: Center(
+            child: FutureBuilder<List>(
+          future: _dishes,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data!.length < 8) {
+                snapshot.data!.add('end');
+                debugPrint('${snapshot.data}');
+              }
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (_, int position) {
+                  if (snapshot.data![position] != 'end') {
                     return Card(
                         child: dishDesc(
                             snapshot.data![position]["name"],
                             snapshot.data![position]["description"],
                             snapshot.data![position]["images"]));
-                  },
-                );
+                  } else {
+                    return Text('End of results');
+                  }
+                },
+              );
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+
+            // By default, show a loading spinner.
+            return SizedBox(
+              child: CircularProgressIndicator(),
+              height: 50.0,
+              width: 50.0,
+            );
+          },
+        )),
+      ),
+      Row(
+        children: [
+          ElevatedButton(
+              onPressed: isDisabled()
+                  ? null
+                  : () => {
+                        setState(() {
+                          page = page - 1;
+                          _dishes = getDishes(page);
+                        })
+                      },
+              child: Text('Prev')),
+          Container(
+              child: TextField(
+                controller: fieldText,
+                onSubmitted: (value) {
+                  debugPrint('debugging $value');
+                  var number = int.tryParse(value);
+                  if (number != null && 0 < number && number < 3937) {
+                    setState(() {
+                      page = number;
+                      _dishes = getDishes(number);
+                    });
+
+                    clearText();
+                  }
+                },
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(), hintText: 'page #'),
+              ),
+              width: 50),
+          FutureBuilder<List>(
+            future: _dishes,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ElevatedButton(
+                    onPressed: snapshot.data!.length < 7
+                        ? null
+                        : () => {
+                              setState(() {
+                                page = page + 1;
+                                _dishes = getDishes(page);
+                              })
+                            },
+                    child: Text('Next'));
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
+              } else {
+                return Text('');
               }
-
-              // By default, show a loading spinner.
-              return SizedBox(
-                child: CircularProgressIndicator(),
-                height: 50.0,
-                width: 50.0,
-              );
             },
-          )))
+          ),
+        ],
+      )
     ]));
   }
 }
@@ -143,8 +230,6 @@ class _DishesState extends State<Dishes> {
 // stuff for restaurants
 
 class Restaurants extends StatefulWidget {
-  final String name = '';
-
   @override
   _RestaurantsState createState() => _RestaurantsState();
 }
@@ -170,9 +255,13 @@ Future<List> getRestaurants(offset) async {
 class _RestaurantsState extends State<Restaurants> {
   late Future<List> _restaurants;
   var page = 1;
-  var waiting = true;
-  var end = false;
   // final _biggerFont = const TextStyle(fontSize: 18);
+
+  final fieldText = TextEditingController();
+
+  void clearText() {
+    fieldText.clear();
+  }
 
   void initState() {
     super.initState();
@@ -256,7 +345,6 @@ class _RestaurantsState extends State<Restaurants> {
               onPressed: isDisabled()
                   ? null
                   : () => {
-                        end = false,
                         setState(() {
                           page = page - 1;
                           _restaurants = getRestaurants(page);
@@ -265,6 +353,7 @@ class _RestaurantsState extends State<Restaurants> {
               child: Text('Prev')),
           Container(
               child: TextField(
+                controller: fieldText,
                 onSubmitted: (value) {
                   var number = int.tryParse(value);
                   if (number != null && 0 < number && number < 118) {
@@ -272,6 +361,8 @@ class _RestaurantsState extends State<Restaurants> {
                       page = number;
                       _restaurants = getRestaurants(number);
                     });
+
+                    clearText();
                   }
                 },
                 decoration: InputDecoration(
@@ -304,38 +395,3 @@ class _RestaurantsState extends State<Restaurants> {
     ]));
   }
 }
-
-// Define a custom Form widget.
-// class pageForm extends StatefulWidget {
-//   @override
-//   _pageFormState createState() => _pageFormState();
-// }
-
-// // Define a corresponding State class.
-// // This class holds the data related to the Form.
-// class _pageFormState extends State<pageForm> {
-//   // Create a text controller and use it to retrieve the current value
-//   // of the TextField.
-//   final myController = TextEditingController();
-
-//   @override
-//   void dispose() {
-//     // Clean up the controller when the widget is disposed.
-//     myController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Fill this out in the next step.
-//     return Container(
-//         child: TextField(
-//           controller: myController,
-//           decoration: InputDecoration(
-//               border: UnderlineInputBorder(), 
-//               hintText: 'page #',
-//               ),
-//         ),
-//         width: 50);
-//   }
-// }

@@ -52,13 +52,17 @@ app.post("/get-restaurants", async (req,res) => {
     
 })
 
-app.get("/get-dishes", async (req,res) => {
+app.post("/get-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
+    const offset = req.body.offset
 
     try {
+        await client.connect()
         const db = client.db('data');
 
-        const dishes= await db.collection('items').find({ vegetarian: true}).sort({friendliness: -1}).toArray();
+        const dishes = await db.collection('items').find({vegetarian:true}).sort({_id: -1}).skip((offset-1) *8).limit(8).toArray();
+
+        // console.log(restaurants)
 
         res.json({dishes: dishes})
     } finally {
