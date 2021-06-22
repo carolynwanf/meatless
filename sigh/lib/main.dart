@@ -209,7 +209,7 @@ class _RestaurantsState extends State<Restaurants> {
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height - (120),
+        height: MediaQuery.of(context).size.height - (138),
         child: Center(
             child: FutureBuilder<List>(
           future: _restaurants,
@@ -263,6 +263,21 @@ class _RestaurantsState extends State<Restaurants> {
                         })
                       },
               child: Text('Prev')),
+          Container(
+              child: TextField(
+                onSubmitted: (value) {
+                  var number = int.tryParse(value);
+                  if (number != null && 0 < number && number < 118) {
+                    setState(() {
+                      page = number;
+                      _restaurants = getRestaurants(number);
+                    });
+                  }
+                },
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(), hintText: 'page #'),
+              ),
+              width: 50),
           FutureBuilder<List>(
             future: _restaurants,
             builder: (context, snapshot) {
@@ -289,3 +304,38 @@ class _RestaurantsState extends State<Restaurants> {
     ]));
   }
 }
+
+// Define a custom Form widget.
+// class pageForm extends StatefulWidget {
+//   @override
+//   _pageFormState createState() => _pageFormState();
+// }
+
+// // Define a corresponding State class.
+// // This class holds the data related to the Form.
+// class _pageFormState extends State<pageForm> {
+//   // Create a text controller and use it to retrieve the current value
+//   // of the TextField.
+//   final myController = TextEditingController();
+
+//   @override
+//   void dispose() {
+//     // Clean up the controller when the widget is disposed.
+//     myController.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Fill this out in the next step.
+//     return Container(
+//         child: TextField(
+//           controller: myController,
+//           decoration: InputDecoration(
+//               border: UnderlineInputBorder(), 
+//               hintText: 'page #',
+//               ),
+//         ),
+//         width: 50);
+//   }
+// }
