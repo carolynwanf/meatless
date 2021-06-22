@@ -5,9 +5,14 @@ const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://carolyniann:"+`${password}`+"@cluster0.tmpij.mongodb.net/veggie-finder?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 var ObjectId = require('mongodb').ObjectId; 
+const bodyParser = require('body-parser');
+app.use(express.json());
+
 
 const connect = async () => {
+    
     await client.connect()
+    console.log('connected')
 }
 
 connect()
@@ -21,18 +26,23 @@ app.options('*', (req, res) => {
   
 });
 
-app.get("/get-restaurants", async (req,res) => {
+app.post("/get-restaurants", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
-
     console.log('pinged')
 
+
+    const offset = req.body.offset
+
+    console.log(offset)
+
+    
     try {
         await client.connect()
         const db = client.db('data');
 
-        const restaurants = await db.collection('restaurants').find({}).sort({friendliness: -1}).toArray();
+        const restaurants = await db.collection('restaurants').find({}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
 
-        console.log(restaurants)
+        // console.log(restaurants)
 
         res.json({restaurants: restaurants})
     } finally {

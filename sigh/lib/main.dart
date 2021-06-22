@@ -149,27 +149,37 @@ class Restaurants extends StatefulWidget {
   _RestaurantsState createState() => _RestaurantsState();
 }
 
-Future<List> getRestaurants() async {
+Future<List> getRestaurants(offset) async {
   debugPrint('getting restaurants');
-  final response =
-      await http.get(Uri.parse('http://localhost:4000/get-restaurants'));
 
-  debugPrint('${jsonDecode(response.body)['restaurants'][0]}');
-  // if (response.body.length > 100) {
-  // debugPrint(jsonDecode(response.body));
+  final String body = jsonEncode({"offset": offset});
+  final response =
+      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: body);
+
+  // debugPrint('response');
+  // debugPrint('${jsonDecode(response.body)['restaurants'][0]}');
+
   return jsonDecode(response.body)['restaurants'];
-  // }
 }
 
 class _RestaurantsState extends State<Restaurants> {
   late Future<List> _restaurants;
+  var page = 1;
+  var waiting = true;
+  var end = false;
   // final _biggerFont = const TextStyle(fontSize: 18);
 
   void initState() {
     super.initState();
     debugPrint('debug printing');
-    _restaurants = getRestaurants();
-    debugPrint('$_restaurants');
+    _restaurants = getRestaurants(page);
+
+    // debugPrint('$_restaurants');
   }
 
   Widget restaurantDesc(name, type, friendliness) {
@@ -186,24 +196,45 @@ class _RestaurantsState extends State<Restaurants> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('$page');
+    isDisabled() {
+      if (page == 1) {
+        debugPrint('disabled $page');
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height - (84),
+        height: MediaQuery.of(context).size.height - (120),
         child: Center(
             child: FutureBuilder<List>(
           future: _restaurants,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
+              while (snapshot.data![snapshot.data!.length - 1]
+                          ["friendliness"] ==
+                      null &&
+                  snapshot.data![snapshot.data!.length - 2]["friendliness"] ==
+                      null) {
+                snapshot.data!.removeAt(snapshot.data!.length - 1);
+              }
               return ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (_, int position) {
-                  return Card(
-                      child: restaurantDesc(
-                          snapshot.data![position]["name"],
-                          snapshot.data![position]["type"],
-                          snapshot.data![position]["friendliness"]
-                              .roundToDouble()));
+                  if (snapshot.data![position]["friendliness"] == null) {
+                    return Text('End of results');
+                  } else {
+                    return Card(
+                        child: restaurantDesc(
+                            snapshot.data![position]["name"],
+                            snapshot.data![position]["type"],
+                            snapshot.data![position]["friendliness"]
+                                .roundToDouble()));
+                  }
                 },
               );
             } else if (snapshot.hasError) {
@@ -218,6 +249,42 @@ class _RestaurantsState extends State<Restaurants> {
             );
           },
         )),
+      ),
+      Row(
+        children: [
+          ElevatedButton(
+              onPressed: isDisabled()
+                  ? null
+                  : () => {
+                        end = false,
+                        setState(() {
+                          page = page - 1;
+                          _restaurants = getRestaurants(page);
+                        })
+                      },
+              child: Text('Prev')),
+          FutureBuilder<List>(
+            future: _restaurants,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ElevatedButton(
+                    onPressed: snapshot.data![7]['friendliness'] == null
+                        ? null
+                        : () => {
+                              setState(() {
+                                page = page + 1;
+                                _restaurants = getRestaurants(page);
+                              })
+                            },
+                    child: Text('Next'));
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              } else {
+                return Text('');
+              }
+            },
+          ),
+        ],
       )
     ]));
   }
