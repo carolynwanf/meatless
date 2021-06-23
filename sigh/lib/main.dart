@@ -1,6 +1,7 @@
 import 'dart:convert';
 // import 'dart:html';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // import 'package:english_words/english_words.dart';
 import 'package:http/http.dart' as http;
@@ -271,14 +272,21 @@ class _RestaurantsState extends State<Restaurants> {
     // debugPrint('$_restaurants');
   }
 
-  Widget restaurantDesc(name, type, friendliness) {
+  Widget restaurantDesc(name, type, friendliness, id) {
     final _iconSize = const TextStyle(fontSize: 30);
+
+    var info = {'name': name, 'type': type, 'id': id};
 
     return new ListTile(
       leading: Text('${friendliness}', style: _iconSize),
       title: Text(name),
       subtitle: Text(type),
-      // onTap: ,
+      onTap: () => {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => RestaurantPage(info: info)),
+        )
+      },
       // trailing: Icon(Icons.star)
       // Star(pinned: alreadyPinned)
     );
@@ -323,7 +331,8 @@ class _RestaurantsState extends State<Restaurants> {
                             snapshot.data![position]["name"],
                             snapshot.data![position]["type"],
                             snapshot.data![position]["friendliness"]
-                                .roundToDouble()));
+                                .roundToDouble(),
+                            snapshot.data![position]["_id"]));
                   }
                 },
               );
@@ -394,5 +403,172 @@ class _RestaurantsState extends State<Restaurants> {
         ],
       )
     ]));
+  }
+}
+
+// stuff for restaurant page
+
+class RestaurantPage extends StatefulWidget {
+  var info;
+
+  RestaurantPage({Key? key, @required this.info}) : super(key: key);
+
+  _RestaurantPageState createState() => _RestaurantPageState();
+}
+
+Future<List> getPageDishes(id) async {
+  debugPrint('getting restaurants');
+
+  final String body = jsonEncode({"id": id});
+  final response =
+      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: body);
+
+  // debugPrint('response');
+  // debugPrint('${jsonDecode(response.body)['restaurants'][0]}');
+
+  return jsonDecode(response.body)['dishes'];
+}
+
+class _RestaurantPageState extends State<RestaurantPage> {
+  late Future<List> _dishes;
+
+  void initState() {
+    super.initState();
+    debugPrint('debug printing');
+    _dishes = getPageDishes(widget.info['id']);
+
+    // debugPrint('$_restaurants');
+  }
+
+  Widget itemDesc(name, images, description, price) {
+    Widget buildCard() {
+      if (images == 'none' && description == 'none') {
+        return Card(
+          child: Column(
+            children: [Text(name), Text(price)],
+          ),
+        );
+      } else if (description == 'none') {
+        return Card(
+          child: Column(
+            children: [
+              Container(
+                  child: Image.network(images != 'none' ? images : null,
+                      height: 150, fit: BoxFit.fill)),
+              Text(name),
+              Text(price)
+            ],
+          ),
+        );
+      } else if (images == 'none') {
+        return Card(
+          child: Column(
+            children: [
+              Text(name),
+              Text(description == 'none' ? '' : description),
+              Text(price)
+            ],
+          ),
+        );
+      } else {
+        return Card(
+          child: Column(
+            children: [
+              Container(
+                  child: Image.network(images != 'none' ? images : null,
+                      height: 150, fit: BoxFit.fill)),
+              Text(name),
+              Text(description == 'none' ? '' : description),
+              Text(price)
+            ],
+          ),
+        );
+      }
+    }
+
+    if (images != 'none') {
+      images = images.split(" 1920w,");
+      images = images[0];
+
+      images = images.split(
+          'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
+
+      images = images[1];
+    }
+
+    return Container(
+      height: 100,
+      child: buildCard(),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Meatless"),
+        ),
+        body: Column(
+          children: [
+            Text(widget.info['name']),
+            Column(
+              children: [
+                Text('Mains'),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - (138),
+                  child: FutureBuilder<List>(
+                    future: _dishes,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        var mains = [];
+
+                        for (var i = 0; i < snapshot.data!.length; i++) {
+                          if (!snapshot.data![i]["side"] &&
+                              !snapshot.data![i]["dessert"]) {
+                            mains.add(snapshot.data![i]);
+                          }
+                        }
+                        return GridView.builder(
+                          itemCount: mains.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount:
+                                MediaQuery.of(context).orientation ==
+                                        Orientation.landscape
+                                    ? 3
+                                    : 2,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: (1.5 / 1.2),
+                          ),
+                          itemBuilder: (context, index) {
+                            return itemDesc(
+                                mains[index]['name'],
+                                mains[index]['images'],
+                                mains[index]['description'],
+                                mains[index]['price']);
+                          },
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text("${snapshot.error}");
+                      }
+
+                      // By default, show a loading spinner.
+                      return SizedBox(
+                        child: CircularProgressIndicator(),
+                        height: 50.0,
+                        width: 50.0,
+                      );
+                    },
+                  ),
+                )
+              ],
+            )
+          ],
+        ));
   }
 }

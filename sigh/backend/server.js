@@ -57,7 +57,6 @@ app.post("/get-dishes", async (req,res) => {
     const offset = req.body.offset
 
     try {
-        await client.connect()
         const db = client.db('data');
 
         const dishes = await db.collection('items').find({vegetarian:true}).sort({_id: -1}).skip((offset-1) *8).limit(8).toArray();
@@ -67,6 +66,31 @@ app.post("/get-dishes", async (req,res) => {
         res.json({dishes: dishes})
     } finally {
         console.log('dishes successfully taken!')
+        
+    }
+    
+})
+
+app.post("/get-page-dishes", async (req,res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    const id = req.body.id
+
+    try {
+        const db = client.db('data');
+
+
+
+        const dishes = await db.collection('items').find({$and: [{restaurant_id: ObjectId(id)}, {vegetarian: true}]}).sort({_id: -1}).toArray();
+
+       
+
+        console.log(dishes)
+
+
+
+        res.json({dishes: dishes})
+    } finally {
+        console.log("restaurant's dishes successfully taken!");
         
     }
     
