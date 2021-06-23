@@ -278,6 +278,7 @@ class _RestaurantsState extends State<Restaurants> {
       leading: Text('${friendliness}', style: _iconSize),
       title: Text(name),
       subtitle: Text(type),
+      // onTap: ,
       // trailing: Icon(Icons.star)
       // Star(pinned: alreadyPinned)
     );
