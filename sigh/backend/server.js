@@ -77,18 +77,30 @@ app.post("/get-page-dishes", async (req,res) => {
 
     try {
         const db = client.db('data');
-
+        var mains = []
+        var sides = []
+        var desserts = []
 
 
         const dishes = await db.collection('items').find({$and: [{restaurant_id: ObjectId(id)}, {vegetarian: true}]}).sort({_id: -1}).toArray();
 
        
 
-        console.log(dishes)
+        for (const dish of dishes) {
+            if (dish.dessert) {
+                desserts.push(dish)
+            } else if (dish.side) {
+                sides.push(dish)
+            } else {
+                mains.push(dish)
+            }
+        }
+
+        console.log([mains,sides,desserts], dishes)
 
 
 
-        res.json({dishes: dishes})
+        res.json({dishes: [mains,sides,desserts]})
     } finally {
         console.log("restaurant's dishes successfully taken!");
         
