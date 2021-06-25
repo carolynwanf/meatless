@@ -434,6 +434,8 @@ Future<List> getPageDishes(id) async {
   return jsonDecode(response.body)['dishes'];
 }
 
+// stuff for restaurant page
+
 class _RestaurantPageState extends State<RestaurantPage> {
   late Future<List> _dishes;
 
@@ -510,10 +512,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
     );
   }
 
-  // Widget buildPage() {
-
-  // }
-
   Widget build(BuildContext context) {
     return Scaffold(
         body: CustomScrollView(
@@ -526,20 +524,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
           ),
         ),
         SliverToBoxAdapter(
-            child: Column(
-          children: [
-            Text('Mains'),
-            Container(
-                height: MediaQuery.of(context).size.height * (19 / 20),
-                child: FutureBuilder<List>(
-                    future: _dishes,
-                    builder: (context, snapshot) {
-                      debugPrint('$snapshot');
-                      if (snapshot.hasData) {
-                        if (snapshot.data![0].length > 0 &&
-                            snapshot.data![1].length == 0 &&
-                            snapshot.data![2].length == 0) {
-                          return GridView.builder(
+            child: FutureBuilder<List>(
+                future: _dishes,
+                builder: (context, snapshot) {
+                  debugPrint('$snapshot');
+                  if (snapshot.hasData) {
+                    // if (snapshot.data![0].length > 0 &&
+                    //     snapshot.data![1].length == 0 &&
+                    //     snapshot.data![2].length == 0) {
+                    return Column(children: [
+                      Text('Mains'),
+                      Container(
+                          height:
+                              MediaQuery.of(context).size.height * (19 / 20),
+                          child: GridView.builder(
                             itemCount: snapshot.data![0].length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
@@ -559,65 +557,73 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                   snapshot.data![0][index]['description'],
                                   snapshot.data![0][index]['price']);
                             },
-                          );
-                        }
-                      } else if (snapshot.hasError) {
-                        return Text("${snapshot.error}");
-                      }
-
-                      // By default, show a loading spinner.
-                      return Center(
-                        child: SizedBox(
-                          child: CircularProgressIndicator(),
-                          height: 50.0,
-                          width: 50.0,
-                        ),
-                      );
-                    })),
-          ],
-        )),
-        SliverToBoxAdapter(child: Text('Sides')),
-        SliverToBoxAdapter(
-            child: Container(
-          height: MediaQuery.of(context).size.height * (19 / 20),
-          child: FutureBuilder<List>(
-            future: _dishes,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var sides = [];
-
-                for (var i = 0; i < snapshot.data!.length; i++) {
-                  if (snapshot.data![i]["side"] &&
-                      !snapshot.data![i]["dessert"]) {
-                    sides.add(snapshot.data![i]);
+                          )),
+                      if (snapshot.data![1].length > 0) Text("Sides"),
+                      if (snapshot.data![1].length > 0)
+                        Container(
+                            height:
+                                MediaQuery.of(context).size.height * (19 / 20),
+                            child: GridView.builder(
+                              itemCount: snapshot.data![1].length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    MediaQuery.of(context).orientation ==
+                                            Orientation.landscape
+                                        ? 4
+                                        : 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: (1.5 / 1.2),
+                              ),
+                              itemBuilder: (context, index) {
+                                return itemDesc(
+                                    snapshot.data![1][index]['name'],
+                                    snapshot.data![1][index]['images'],
+                                    snapshot.data![1][index]['description'],
+                                    snapshot.data![1][index]['price']);
+                              },
+                            )),
+                      if (snapshot.data![2].length > 0) Text("Desserts"),
+                      if (snapshot.data![2].length > 0)
+                        Container(
+                            height:
+                                MediaQuery.of(context).size.height * (19 / 20),
+                            child: GridView.builder(
+                              itemCount: snapshot.data![2].length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    MediaQuery.of(context).orientation ==
+                                            Orientation.landscape
+                                        ? 4
+                                        : 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: (1.5 / 1.2),
+                              ),
+                              itemBuilder: (context, index) {
+                                return itemDesc(
+                                    snapshot.data![2][index]['name'],
+                                    snapshot.data![2][index]['images'],
+                                    snapshot.data![2][index]['description'],
+                                    snapshot.data![2][index]['price']);
+                              },
+                            )),
+                    ]);
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
                   }
-                }
 
-                return GridView.builder(
-                  itemCount: sides.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).orientation ==
-                            Orientation.landscape
-                        ? 4
-                        : 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: (1.5 / 1.2),
-                  ),
-                  itemBuilder: (context, index) {
-                    return itemDesc(
-                        sides[index]['name'],
-                        sides[index]['images'],
-                        sides[index]['description'],
-                        sides[index]['price']);
-                  },
-                );
-              } else {
-                return Text("${snapshot.error}");
-              }
-            },
-          ),
-        )),
+                  // By default, show a loading spinner.
+                  return Center(
+                    child: SizedBox(
+                      child: CircularProgressIndicator(),
+                      height: 50.0,
+                      width: 50.0,
+                    ),
+                  );
+                })),
       ],
     ));
   }

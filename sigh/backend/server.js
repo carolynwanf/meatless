@@ -96,7 +96,9 @@ app.post("/get-page-dishes", async (req,res) => {
             }
         }
 
-        console.log([mains,sides,desserts], dishes)
+        console.log(sides)
+
+        // console.log([mains,sides,desserts], dishes)
 
 
 
