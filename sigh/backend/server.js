@@ -59,7 +59,7 @@ app.post("/get-dishes", async (req,res) => {
     try {
         const db = client.db('data');
 
-        const dishes = await db.collection('items').find({vegetarian:true}).sort({_id: -1}).skip((offset-1) *8).limit(8).toArray();
+        const dishes = await db.collection('items').find({$and: [{vegetarian:true}, {side:false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
         // console.log(restaurants)
 

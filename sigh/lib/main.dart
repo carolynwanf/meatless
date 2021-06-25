@@ -36,7 +36,7 @@ class _MainpageState extends State<Mainpage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: _displayRestaurants ? Text('Restaurants') : Text('Dishes'),
+          title: Text('Meatless'),
         ),
         body: Column(
           children: [
@@ -44,19 +44,23 @@ class _MainpageState extends State<Mainpage> {
               children: [
                 ElevatedButton(
                   child: Text('restaurants'),
-                  onPressed: () {
-                    setState(() {
-                      _displayRestaurants = true;
-                    });
-                  },
+                  onPressed: !_displayRestaurants
+                      ? () {
+                          setState(() {
+                            _displayRestaurants = true;
+                          });
+                        }
+                      : null,
                 ),
                 ElevatedButton(
                   child: Text('dishes'),
-                  onPressed: () {
-                    setState(() {
-                      _displayRestaurants = false;
-                    });
-                  },
+                  onPressed: _displayRestaurants
+                      ? () {
+                          setState(() {
+                            _displayRestaurants = false;
+                          });
+                        }
+                      : null,
                 ),
               ],
             ),
@@ -108,15 +112,64 @@ class _DishesState extends State<Dishes> {
   }
 
   Widget dishDesc(name, description, image) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
+    if (description.length > 80) {
+      description = description.substring(0, 80);
+      description = description + "...";
+    }
+
+    if (image != 'none') {
+      image = image.split(" 1920w,");
+      image = image[0];
+
+      image = image.split(
+          'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
+
+      image = image[1];
+    }
     // var descriptionExists;
     // if (description == 'nu')
-    return new ListTile(
-      // leading: Text('${friendliness}', style: _iconSize),
-      title: Text(name),
-      subtitle: description == 'none' ? null : Text(description),
-      // trailing: Icon(Icons.star)
-      // Star(pinned: alreadyPinned)
-    );
+    debugPrint('$image');
+    return Container(
+        child: Column(children: [
+      if (image != 'none')
+        Container(
+          height: width / 10,
+          child: Image.network(image),
+        ),
+      Text(name,
+          style: TextStyle(
+              color: Colors.grey[800],
+              fontWeight: FontWeight.bold,
+              fontSize: height / 55),
+          textAlign: TextAlign.center),
+      if (description != 'none')
+        Text(description,
+            style: TextStyle(color: Colors.grey[800], fontSize: height / 60),
+            textAlign: TextAlign.center),
+      Icon(Icons.star_border)
+    ]));
+
+    // USE FOR MOBILE INTERFACE LATER ON
+    // return new ListTile(
+    //   leading: Container(
+    //     child: Column(
+    //       children: [
+    //         if (image != 'none')
+    //           Container(
+    //             height: MediaQuery.of(context).size.height / 17,
+    //             child: Image.network(image),
+    //           )
+    //       ],
+    //     ),
+    //   ),
+    //   title: Text(name),
+    //   subtitle: description == 'none' ? null : Text(description),
+    //   // trailing: Icon(Icons.star)
+    //   // Star(pinned: alreadyPinned)
+    // );
   }
 
   Widget build(BuildContext context) {
@@ -127,6 +180,18 @@ class _DishesState extends State<Dishes> {
         return true;
       } else {
         return false;
+      }
+    }
+
+    calculateCount(size) {
+      if (size.width < 480) {
+        return 2;
+      } else if (size.width < 767) {
+        return 3;
+      } else if (size.width < 991) {
+        return 4;
+      } else {
+        return 5;
       }
     }
 
@@ -143,8 +208,14 @@ class _DishesState extends State<Dishes> {
                 snapshot.data!.add('end');
                 debugPrint('${snapshot.data}');
               }
-              return ListView.builder(
+              return GridView.builder(
                 itemCount: snapshot.data!.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: calculateCount(MediaQuery.of(context).size),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: (1.3 / 1.5),
+                ),
                 itemBuilder: (_, int position) {
                   if (snapshot.data![position] != 'end') {
                     return Card(
@@ -529,9 +600,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 builder: (context, snapshot) {
                   debugPrint('$snapshot');
                   if (snapshot.hasData) {
-                    // if (snapshot.data![0].length > 0 &&
-                    //     snapshot.data![1].length == 0 &&
-                    //     snapshot.data![2].length == 0) {
                     return Column(children: [
                       Text('Mains'),
                       Container(
