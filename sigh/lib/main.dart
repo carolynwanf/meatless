@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
 // stuff for dishes
 
 class Mainpage extends StatefulWidget {
+  var pins = <String>{};
   _MainpageState createState() => _MainpageState();
 }
 
@@ -65,7 +66,9 @@ class _MainpageState extends State<Mainpage> {
               ],
             ),
             Expanded(
-              child: _displayRestaurants ? Restaurants() : Dishes(),
+              child: _displayRestaurants
+                  ? Restaurants(pins: widget.pins)
+                  : Dishes(pins: widget.pins),
             )
           ],
         ));
@@ -73,6 +76,9 @@ class _MainpageState extends State<Mainpage> {
 }
 
 class Dishes extends StatefulWidget {
+  var pins;
+
+  Dishes({this.pins});
   _DishesState createState() => _DishesState();
 }
 
@@ -91,10 +97,11 @@ Future<List> getDishes(offset) async {
   // }
 }
 
+// class PinnedItems extends
+
 class _DishesState extends State<Dishes> {
   late Future<List> _dishes;
   var page = 1;
-  var _pinned = <String>{};
 
   final fieldText = TextEditingController();
 
@@ -148,23 +155,23 @@ class _DishesState extends State<Dishes> {
           onPressed: !pinned
               ? () {
                   debugPrint('pressed');
-                  var temp = _pinned;
+                  var temp = widget.pins;
                   debugPrint('$temp');
                   temp.add(id);
 
                   setState(() {
-                    _pinned = temp;
+                    widget.pins = temp;
                   });
                 }
               : () {
                   debugPrint('pressed');
-                  var temp = _pinned;
+                  var temp = widget.pins;
                   debugPrint('$temp');
                   temp.remove(id);
 
                   setState(() {
                     debugPrint('setting state');
-                    _pinned = temp;
+                    widget.pins = temp;
                   });
                 },
           icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
@@ -229,7 +236,7 @@ class _DishesState extends State<Dishes> {
               for (var i = 0; i < snapshot.data!.length; i++) {
                 var item = snapshot.data![i]["_id"];
 
-                if (_pinned.contains(item)) {
+                if (widget.pins.contains(item)) {
                   snapshot.data![i]['pinned'] = true;
                 } else {
                   snapshot.data![i]['pinned'] = false;
@@ -332,6 +339,8 @@ class _DishesState extends State<Dishes> {
 // stuff for restaurants
 
 class Restaurants extends StatefulWidget {
+  var pins;
+  Restaurants({this.pins});
   @override
   _RestaurantsState createState() => _RestaurantsState();
 }
@@ -357,6 +366,7 @@ Future<List> getRestaurants(offset) async {
 class _RestaurantsState extends State<Restaurants> {
   late Future<List> _restaurants;
   var page = 1;
+
   // final _biggerFont = const TextStyle(fontSize: 18);
 
   final fieldText = TextEditingController();
@@ -385,7 +395,8 @@ class _RestaurantsState extends State<Restaurants> {
       onTap: () => {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => RestaurantPage(info: info)),
+          MaterialPageRoute(
+              builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
         )
       },
       // trailing: Icon(Icons.star)
@@ -511,8 +522,9 @@ class _RestaurantsState extends State<Restaurants> {
 
 class RestaurantPage extends StatefulWidget {
   var info;
+  var pins;
 
-  RestaurantPage({Key? key, @required this.info}) : super(key: key);
+  RestaurantPage({Key? key, @required this.info, this.pins}) : super(key: key);
 
   _RestaurantPageState createState() => _RestaurantPageState();
 }
@@ -542,68 +554,80 @@ class _RestaurantPageState extends State<RestaurantPage> {
     // debugPrint('$_restaurants');
   }
 
-  Widget itemDesc(name, images, description, price) {
-    Widget buildCard() {
-      if (images == 'none' && description == 'none') {
-        return Card(
-          child: Column(
-            children: [Text(name), Text(price)],
-          ),
-        );
-      } else if (description == 'none') {
-        return Card(
-          child: Column(
-            children: [
-              Container(
-                  child: Image.network(images != 'none' ? images : null,
-                      width: MediaQuery.of(context).size.width / 6,
-                      fit: BoxFit.fill)),
-              Text(name),
-              Text(price)
-            ],
-          ),
-        );
-      } else if (images == 'none') {
-        return Card(
-          child: Column(
-            children: [
-              Text(name),
-              Text(description == 'none' ? '' : description),
-              Text(price)
-            ],
-          ),
-        );
-      } else {
-        return Card(
-          child: Column(
-            children: [
-              Container(
-                  child: Image.network(images != 'none' ? images : null,
-                      width: MediaQuery.of(context).size.width / 6,
-                      fit: BoxFit.fill)),
-              Text(name),
-              Text(description == 'none' ? '' : description),
-              Text(price)
-            ],
-          ),
-        );
-      }
+  Widget itemDesc(name, description, image, price, restaurant, pinned, id) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
+    if (description.length > 80) {
+      description = description.substring(0, 80);
+      description = description + "...";
     }
 
-    if (images != 'none') {
-      images = images.split(" 1920w,");
-      images = images[0];
+    if (image != 'none') {
+      image = image.split(" 1920w,");
+      image = image[0];
 
-      images = images.split(
+      image = image.split(
           'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
 
-      images = images[1];
+      image = image[1];
     }
+    // var descriptionExists;
+    // if (description == 'nu')
+    return Card(
+        child: Column(children: [
+      if (image != 'none')
+        Container(
+          height: width / 10,
+          child: Image.network(image),
+        ),
+      Text(name,
+          style: TextStyle(
+              color: Colors.grey[800],
+              fontWeight: FontWeight.bold,
+              fontSize: height / 55),
+          textAlign: TextAlign.center),
+      if (description != 'none')
+        Text(description,
+            style: TextStyle(color: Colors.grey[800], fontSize: height / 60),
+            textAlign: TextAlign.center),
+      IconButton(
+          onPressed: !pinned
+              ? () {
+                  debugPrint('pressed');
+                  var temp = widget.pins;
+                  debugPrint('$temp');
+                  temp.add(id);
 
-    return Container(
-      height: 100,
-      child: buildCard(),
-    );
+                  setState(() {
+                    widget.pins = temp;
+                  });
+                }
+              : () {
+                  debugPrint('pressed');
+                  var temp = widget.pins;
+                  debugPrint('$temp');
+                  temp.remove(id);
+
+                  setState(() {
+                    debugPrint('setting state');
+                    widget.pins = temp;
+                  });
+                },
+          icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
+    ]));
+  }
+
+  calculateCount(size) {
+    if (size.width < 480) {
+      return 2;
+    } else if (size.width < 767) {
+      return 3;
+    } else if (size.width < 991) {
+      return 4;
+    } else {
+      return 5;
+    }
   }
 
   Widget build(BuildContext context) {
@@ -623,6 +647,17 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 builder: (context, snapshot) {
                   debugPrint('$snapshot');
                   if (snapshot.hasData) {
+                    for (var i = 0; i < snapshot.data!.length; i++) {
+                      for (var j = 0; j < snapshot.data![i].length; j++) {
+                        var item = snapshot.data![i][j]["_id"];
+
+                        if (widget.pins.contains(item)) {
+                          snapshot.data![i][j]['pinned'] = true;
+                        } else {
+                          snapshot.data![i][j]['pinned'] = false;
+                        }
+                      }
+                    }
                     return Column(children: [
                       Text('Mains'),
                       Container(
@@ -633,20 +668,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
-                                  MediaQuery.of(context).orientation ==
-                                          Orientation.landscape
-                                      ? 4
-                                      : 2,
+                                  calculateCount(MediaQuery.of(context).size),
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
-                              childAspectRatio: (1.5 / 1.2),
+                              childAspectRatio: (1.3 / 1.5),
                             ),
                             itemBuilder: (context, index) {
                               return itemDesc(
                                   snapshot.data![0][index]['name'],
-                                  snapshot.data![0][index]['images'],
                                   snapshot.data![0][index]['description'],
-                                  snapshot.data![0][index]['price']);
+                                  snapshot.data![0][index]['images'],
+                                  snapshot.data![0][index]['price'],
+                                  snapshot.data![0][index]['restuarant_name'],
+                                  snapshot.data![0][index]['pinned'],
+                                  snapshot.data![0][index]['_id']);
                             },
                           )),
                       if (snapshot.data![1].length > 0) Text("Sides"),
@@ -659,20 +694,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount:
-                                    MediaQuery.of(context).orientation ==
-                                            Orientation.landscape
-                                        ? 4
-                                        : 2,
+                                    calculateCount(MediaQuery.of(context).size),
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: (1.5 / 1.2),
+                                childAspectRatio: (1.3 / 1.5),
                               ),
                               itemBuilder: (context, index) {
                                 return itemDesc(
                                     snapshot.data![1][index]['name'],
-                                    snapshot.data![1][index]['images'],
                                     snapshot.data![1][index]['description'],
-                                    snapshot.data![1][index]['price']);
+                                    snapshot.data![1][index]['images'],
+                                    snapshot.data![1][index]['price'],
+                                    snapshot.data![1][index]['restuarant_name'],
+                                    snapshot.data![0][index]['pinned'],
+                                    snapshot.data![1][index]['_id']);
                               },
                             )),
                       if (snapshot.data![2].length > 0) Text("Desserts"),
@@ -685,20 +720,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount:
-                                    MediaQuery.of(context).orientation ==
-                                            Orientation.landscape
-                                        ? 4
-                                        : 2,
+                                    calculateCount(MediaQuery.of(context).size),
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: (1.5 / 1.2),
+                                childAspectRatio: (1.3 / 1.5),
                               ),
                               itemBuilder: (context, index) {
                                 return itemDesc(
                                     snapshot.data![2][index]['name'],
-                                    snapshot.data![2][index]['images'],
                                     snapshot.data![2][index]['description'],
-                                    snapshot.data![2][index]['price']);
+                                    snapshot.data![2][index]['images'],
+                                    snapshot.data![2][index]['price'],
+                                    snapshot.data![2][index]['restuarant_name'],
+                                    snapshot.data![0][index]['pinned'],
+                                    snapshot.data![2][index]['_id']);
                               },
                             )),
                     ]);
