@@ -77,7 +77,6 @@ class Dishes extends StatefulWidget {
 }
 
 Future<List> getDishes(offset) async {
-  debugPrint('getting dishes');
   final String body = jsonEncode({"offset": offset});
   final response =
       await http.post(Uri.parse('http://localhost:4000/get-dishes'),
@@ -87,9 +86,7 @@ Future<List> getDishes(offset) async {
           },
           body: body);
 
-  debugPrint('${jsonDecode(response.body)['dishes'][0]}');
   // if (response.body.length > 100) {
-  // debugPrint(jsonDecode(response.body));
   return jsonDecode(response.body)['dishes'];
   // }
 }
@@ -97,6 +94,7 @@ Future<List> getDishes(offset) async {
 class _DishesState extends State<Dishes> {
   late Future<List> _dishes;
   var page = 1;
+  var _pinned = <String>{};
 
   final fieldText = TextEditingController();
 
@@ -106,12 +104,10 @@ class _DishesState extends State<Dishes> {
 
   void initState() {
     super.initState();
-    debugPrint('debug printing');
     _dishes = getDishes(page);
-    debugPrint('$_dishes');
   }
 
-  Widget dishDesc(name, description, image) {
+  Widget dishDesc(name, description, image, price, restaurant, pinned, id) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
@@ -131,7 +127,6 @@ class _DishesState extends State<Dishes> {
     }
     // var descriptionExists;
     // if (description == 'nu')
-    debugPrint('$image');
     return Container(
         child: Column(children: [
       if (image != 'none')
@@ -149,7 +144,30 @@ class _DishesState extends State<Dishes> {
         Text(description,
             style: TextStyle(color: Colors.grey[800], fontSize: height / 60),
             textAlign: TextAlign.center),
-      Icon(Icons.star_border)
+      IconButton(
+          onPressed: !pinned
+              ? () {
+                  debugPrint('pressed');
+                  var temp = _pinned;
+                  debugPrint('$temp');
+                  temp.add(id);
+
+                  setState(() {
+                    _pinned = temp;
+                  });
+                }
+              : () {
+                  debugPrint('pressed');
+                  var temp = _pinned;
+                  debugPrint('$temp');
+                  temp.remove(id);
+
+                  setState(() {
+                    debugPrint('setting state');
+                    _pinned = temp;
+                  });
+                },
+          icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
     ]));
 
     // USE FOR MOBILE INTERFACE LATER ON
@@ -176,7 +194,6 @@ class _DishesState extends State<Dishes> {
     debugPrint('$page');
     isDisabled() {
       if (page == 1) {
-        debugPrint('disabled $page');
         return true;
       } else {
         return false;
@@ -206,7 +223,17 @@ class _DishesState extends State<Dishes> {
             if (snapshot.hasData) {
               if (snapshot.data!.length < 8) {
                 snapshot.data!.add('end');
-                debugPrint('${snapshot.data}');
+              }
+
+              // labels items from snapshot as pinned/not based on state
+              for (var i = 0; i < snapshot.data!.length; i++) {
+                var item = snapshot.data![i]["_id"];
+
+                if (_pinned.contains(item)) {
+                  snapshot.data![i]['pinned'] = true;
+                } else {
+                  snapshot.data![i]['pinned'] = false;
+                }
               }
               return GridView.builder(
                 itemCount: snapshot.data!.length,
@@ -222,7 +249,11 @@ class _DishesState extends State<Dishes> {
                         child: dishDesc(
                             snapshot.data![position]["name"],
                             snapshot.data![position]["description"],
-                            snapshot.data![position]["images"]));
+                            snapshot.data![position]["images"],
+                            snapshot.data![position]["price"],
+                            snapshot.data![position]['restuarant_name'],
+                            snapshot.data![position]['pinned'],
+                            snapshot.data![position]['_id']));
                   } else {
                     return Text('End of results');
                   }
@@ -257,7 +288,6 @@ class _DishesState extends State<Dishes> {
               child: TextField(
                 controller: fieldText,
                 onSubmitted: (value) {
-                  debugPrint('debugging $value');
                   var number = int.tryParse(value);
                   if (number != null && 0 < number && number < 3937) {
                     setState(() {
@@ -488,8 +518,6 @@ class RestaurantPage extends StatefulWidget {
 }
 
 Future<List> getPageDishes(id) async {
-  debugPrint('getting restaurants');
-
   final String body = jsonEncode({"id": id});
   final response =
       await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
@@ -498,9 +526,6 @@ Future<List> getPageDishes(id) async {
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // debugPrint('response');
-  // debugPrint('${jsonDecode(response.body)['restaurants'][0]}');
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -512,8 +537,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
   void initState() {
     super.initState();
-
-    debugPrint('debug printing');
     _dishes = getPageDishes(widget.info['id']);
 
     // debugPrint('$_restaurants');
