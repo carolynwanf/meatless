@@ -27,7 +27,10 @@ class MyApp extends StatelessWidget {
 // stuff for dishes
 
 class Mainpage extends StatefulWidget {
-  var pins = <String>{};
+  var pins = {
+    'ids': <String>{},
+    'items': [],
+  };
   _MainpageState createState() => _MainpageState();
 }
 
@@ -38,6 +41,17 @@ class _MainpageState extends State<Mainpage> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Meatless'),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => PinnedItems(pins: widget.pins)),
+                  );
+                },
+                icon: Icon(Icons.star))
+          ],
         ),
         body: Column(
           children: [
@@ -97,8 +111,6 @@ Future<List> getDishes(offset) async {
   // }
 }
 
-// class PinnedItems extends
-
 class _DishesState extends State<Dishes> {
   late Future<List> _dishes;
   var page = 1;
@@ -114,7 +126,14 @@ class _DishesState extends State<Dishes> {
     _dishes = getDishes(page);
   }
 
-  Widget dishDesc(name, description, image, price, restaurant, pinned, id) {
+  Widget dishDesc(item) {
+    var name = item['name'],
+        description = item['description'],
+        image = item['images'],
+        price = item['price'],
+        pinned = item['pinned'],
+        restaurant = item['restuarant_name'],
+        id = item['_id'];
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
@@ -157,7 +176,8 @@ class _DishesState extends State<Dishes> {
                   debugPrint('pressed');
                   var temp = widget.pins;
                   debugPrint('$temp');
-                  temp.add(id);
+                  temp['ids'].add(id);
+                  temp['items'].push(item);
 
                   setState(() {
                     widget.pins = temp;
@@ -167,8 +187,13 @@ class _DishesState extends State<Dishes> {
                   debugPrint('pressed');
                   var temp = widget.pins;
                   debugPrint('$temp');
-                  temp.remove(id);
-
+                  temp['ids'].remove(id);
+                  for (var i = 0; i < temp['items'].length; i++) {
+                    if (temp['items'][i] == id) {
+                      temp['items'].removeAt(i);
+                      break;
+                    }
+                  }
                   setState(() {
                     debugPrint('setting state');
                     widget.pins = temp;
@@ -234,9 +259,9 @@ class _DishesState extends State<Dishes> {
 
               // labels items from snapshot as pinned/not based on state
               for (var i = 0; i < snapshot.data!.length; i++) {
-                var item = snapshot.data![i]["_id"];
+                var item_id = snapshot.data![i]["_id"];
 
-                if (widget.pins.contains(item)) {
+                if (widget.pins['ids'].contains(item_id)) {
                   snapshot.data![i]['pinned'] = true;
                 } else {
                   snapshot.data![i]['pinned'] = false;
@@ -252,15 +277,7 @@ class _DishesState extends State<Dishes> {
                 ),
                 itemBuilder: (_, int position) {
                   if (snapshot.data![position] != 'end') {
-                    return Card(
-                        child: dishDesc(
-                            snapshot.data![position]["name"],
-                            snapshot.data![position]["description"],
-                            snapshot.data![position]["images"],
-                            snapshot.data![position]["price"],
-                            snapshot.data![position]['restuarant_name'],
-                            snapshot.data![position]['pinned'],
-                            snapshot.data![position]['_id']));
+                    return Card(child: dishDesc(snapshot.data![position]));
                   } else {
                     return Text('End of results');
                   }
@@ -554,9 +571,15 @@ class _RestaurantPageState extends State<RestaurantPage> {
     // debugPrint('$_restaurants');
   }
 
-  Widget itemDesc(name, description, image, price, restaurant, pinned, id) {
-    final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
+  Widget itemDesc(item) {
+    var name = item['name'],
+        description = item['description'],
+        image = item['images'],
+        pinned = item['pinned'],
+        id = item['_id'];
+
+    final height = MediaQuery.of(context).size.height,
+        width = MediaQuery.of(context).size.width;
 
     if (description.length > 80) {
       description = description.substring(0, 80);
@@ -597,7 +620,8 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   debugPrint('pressed');
                   var temp = widget.pins;
                   debugPrint('$temp');
-                  temp.add(id);
+                  temp['ids'].add(id);
+                  temp['items'].push(item);
 
                   setState(() {
                     widget.pins = temp;
@@ -607,8 +631,13 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   debugPrint('pressed');
                   var temp = widget.pins;
                   debugPrint('$temp');
-                  temp.remove(id);
-
+                  temp['ids'].remove(id);
+                  for (var i = 0; i < temp['items'].length; i++) {
+                    if (temp['items'][i] == id) {
+                      temp['items'].removeAt(i);
+                      break;
+                    }
+                  }
                   setState(() {
                     debugPrint('setting state');
                     widget.pins = temp;
@@ -649,9 +678,9 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   if (snapshot.hasData) {
                     for (var i = 0; i < snapshot.data!.length; i++) {
                       for (var j = 0; j < snapshot.data![i].length; j++) {
-                        var item = snapshot.data![i][j]["_id"];
+                        var item_id = snapshot.data![i][j]["_id"];
 
-                        if (widget.pins.contains(item)) {
+                        if (widget.pins['ids'].contains(item_id)) {
                           snapshot.data![i][j]['pinned'] = true;
                         } else {
                           snapshot.data![i][j]['pinned'] = false;
@@ -674,14 +703,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               childAspectRatio: (1.3 / 1.5),
                             ),
                             itemBuilder: (context, index) {
-                              return itemDesc(
-                                  snapshot.data![0][index]['name'],
-                                  snapshot.data![0][index]['description'],
-                                  snapshot.data![0][index]['images'],
-                                  snapshot.data![0][index]['price'],
-                                  snapshot.data![0][index]['restuarant_name'],
-                                  snapshot.data![0][index]['pinned'],
-                                  snapshot.data![0][index]['_id']);
+                              return itemDesc(snapshot.data![0][index]);
                             },
                           )),
                       if (snapshot.data![1].length > 0) Text("Sides"),
@@ -701,13 +723,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               ),
                               itemBuilder: (context, index) {
                                 return itemDesc(
-                                    snapshot.data![1][index]['name'],
-                                    snapshot.data![1][index]['description'],
-                                    snapshot.data![1][index]['images'],
-                                    snapshot.data![1][index]['price'],
-                                    snapshot.data![1][index]['restuarant_name'],
-                                    snapshot.data![0][index]['pinned'],
-                                    snapshot.data![1][index]['_id']);
+                                    snapshot.data![1][index]['name']);
                               },
                             )),
                       if (snapshot.data![2].length > 0) Text("Desserts"),
@@ -726,14 +742,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 childAspectRatio: (1.3 / 1.5),
                               ),
                               itemBuilder: (context, index) {
-                                return itemDesc(
-                                    snapshot.data![2][index]['name'],
-                                    snapshot.data![2][index]['description'],
-                                    snapshot.data![2][index]['images'],
-                                    snapshot.data![2][index]['price'],
-                                    snapshot.data![2][index]['restuarant_name'],
-                                    snapshot.data![0][index]['pinned'],
-                                    snapshot.data![2][index]['_id']);
+                                return itemDesc(snapshot.data![2][index]);
                               },
                             )),
                     ]);
@@ -752,5 +761,30 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 })),
       ],
     ));
+  }
+}
+
+class PinnedItems extends StatefulWidget {
+  var pins;
+
+  PinnedItems({this.pins});
+
+  _PinnedItemsState createState() => _PinnedItemsState();
+}
+
+class _PinnedItemsState extends State<PinnedItems> {
+  Widget build(BuildContext context) {
+    var pins = widget.pins.toList();
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Meatless'),
+          actions: [IconButton(onPressed: null, icon: Icon(Icons.star))],
+        ),
+        body: ListView.builder(
+            itemCount: pins.length,
+            itemBuilder: (_, int position) {
+              debugPrint('${pins}');
+              return ListTile(title: Text('${pins[position]}'));
+            }));
   }
 }
