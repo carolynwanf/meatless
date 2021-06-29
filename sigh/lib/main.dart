@@ -328,7 +328,7 @@ class _DishesState extends State<Dishes> {
                   }
                 },
                 decoration: InputDecoration(
-                    border: UnderlineInputBorder(), hintText: 'page #'),
+                    border: UnderlineInputBorder(), hintText: '$page'),
               ),
               width: 50),
           FutureBuilder<List>(
@@ -510,7 +510,7 @@ class _RestaurantsState extends State<Restaurants> {
                   }
                 },
                 decoration: InputDecoration(
-                    border: UnderlineInputBorder(), hintText: 'page #'),
+                    border: UnderlineInputBorder(), hintText: '  $page'),
               ),
               width: 50),
           FutureBuilder<List>(
@@ -602,83 +602,97 @@ class _RestaurantPageState extends State<RestaurantPage> {
     }
     // var descriptionExists;
     // if (description == 'nu')
-    return Card(
-        child: Column(children: [
-      if (image != 'none')
-        Container(
-          height: width / 10,
-          child: Image.network(image),
-        ),
-      Text(name,
-          style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: height / 55),
-          textAlign: TextAlign.center),
-      if (description != 'none')
-        Text(description,
-            style: TextStyle(color: Colors.grey[800], fontSize: height / 60),
+    return GestureDetector(
+      child: Card(
+          child: Column(children: [
+        if (image != 'none')
+          Container(
+            height: width / 10,
+            child: Image.network(image),
+          ),
+        Text(name,
+            style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+                fontSize: height / 55),
             textAlign: TextAlign.center),
-      IconButton(
-          onPressed: !pinned
-              ? () {
-                  debugPrint('pressed');
-                  var temp = widget.pins;
+        if (description != 'none')
+          Text(description,
+              style: TextStyle(color: Colors.grey[800], fontSize: height / 60),
+              textAlign: TextAlign.center),
+        IconButton(
+            onPressed: !pinned
+                ? () {
+                    debugPrint('pressed');
+                    var temp = widget.pins;
 
-                  temp['ids'].add(id);
-                  temp['items'].add(item);
-                  debugPrint('$temp');
+                    temp['ids'].add(id);
+                    temp['items'].add(item);
+                    debugPrint('$temp');
 
-                  setState(() {
-                    // debugPrint('setting state');
-                    widget.pins = temp;
-                  });
-                }
-              : () {
-                  debugPrint('pressed');
-                  var temp = widget.pins;
-                  debugPrint('$temp');
-                  temp['ids'].remove(id);
-                  for (var i = 0; i < temp['items'].length; i++) {
-                    if (temp['items'][i] == id) {
-                      temp['items'].removeAt(i);
-                      break;
-                    }
+                    setState(() {
+                      // debugPrint('setting state');
+                      widget.pins = temp;
+                    });
                   }
-                  setState(() {
-                    // debugPrint('setting state');
-                    widget.pins = temp;
-                  });
-                },
-          icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
-    ]));
-  }
-
-  calculateCount(size) {
-    if (size.width < 480) {
-      return 2;
-    } else if (size.width < 767) {
-      return 3;
-    } else if (size.width < 991) {
-      return 4;
-    } else {
-      return 5;
-    }
+                : () {
+                    debugPrint('pressed');
+                    var temp = widget.pins;
+                    debugPrint('$temp');
+                    temp['ids'].remove(id);
+                    for (var i = 0; i < temp['items'].length; i++) {
+                      if (temp['items'][i] == id) {
+                        temp['items'].removeAt(i);
+                        break;
+                      }
+                    }
+                    setState(() {
+                      // debugPrint('setting state');
+                      widget.pins = temp;
+                    });
+                  },
+            icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
+      ])),
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ItemDialog(pins: widget.pins, item: item);
+            }).then((val) => setState(() {}));
+      },
+    );
   }
 
   Widget build(BuildContext context) {
-    Widget main = SliverToBoxAdapter(child: Text('Mains')),
-        side = SliverToBoxAdapter(child: Text('')),
-        sides = SliverToBoxAdapter(child: Text('')),
-        dessert = SliverToBoxAdapter(child: Text('')),
-        desserts = SliverToBoxAdapter(child: Text(''));
     return Scaffold(
         appBar: AppBar(
-          title: Text('${widget.info['name']}'),
+          title: Text('Meatless'),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => PinnedItems(pins: widget.pins)),
+                  ).then((val) => setState(() {}));
+                },
+                icon: Icon(Icons.star))
+          ],
         ),
         body: FutureBuilder<List>(
             future: _dishes,
             builder: (context, snapshot) {
+              Widget restaurantName = SliverToBoxAdapter(
+                  child: Text('${widget.info['name']}',
+                      style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: MediaQuery.of(context).size.height / 30)));
+              Widget main = SliverToBoxAdapter(child: Text('')),
+                  side = SliverToBoxAdapter(child: Text('')),
+                  sides = SliverToBoxAdapter(child: Text('')),
+                  dessert = SliverToBoxAdapter(child: Text('')),
+                  desserts = SliverToBoxAdapter(child: Text(''));
               Widget mains = SliverToBoxAdapter(
                   child: SizedBox(
                 child: CircularProgressIndicator(),
@@ -698,7 +712,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     }
                   }
                 }
-
+                main = SliverToBoxAdapter(child: Text('Mains'));
                 mains = SliverGrid(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 250.0,
@@ -748,73 +762,102 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 return Text("${snapshot.error}");
               }
 
+              return CustomScrollView(
+                slivers: <Widget>[
+                  restaurantName,
+                  main,
+                  mains,
+                  side,
+                  sides,
+                  dessert,
+                  desserts
+                ],
+              );
+
               // By default, show a loading spinner.
               // return Text("AHH");
-              return CustomScrollView(
-                slivers: <Widget>[main, mains, side, sides, dessert, desserts],
-              );
             }));
   }
 }
 
-// return Column(children: [
-//   Text('Mains'),
-//   Container(
-//       height:
-//           MediaQuery.of(context).size.height * (19 / 20),
-//       child: GridView.builder(
-//         itemCount: snapshot.data![0].length,
-//         gridDelegate:
-//             SliverGridDelegateWithFixedCrossAxisCount(
-//           crossAxisCount:
-//               calculateCount(MediaQuery.of(context).size),
-//           crossAxisSpacing: 10,
-//           mainAxisSpacing: 10,
-//           childAspectRatio: (1.3 / 1.5),
-//         ),
-//         itemBuilder: (context, index) {
-//           return itemDesc(snapshot.data![0][index]);
-//         },
-//       )),
-//   if (snapshot.data![1].length > 0) Text("Sides"),
-//   if (snapshot.data![1].length > 0)
-//     Container(
-//         height:
-//             MediaQuery.of(context).size.height * (19 / 20),
-//         child: GridView.builder(
-//           itemCount: snapshot.data![1].length,
-//           gridDelegate:
-//               SliverGridDelegateWithFixedCrossAxisCount(
-//             crossAxisCount:
-//                 calculateCount(MediaQuery.of(context).size),
-//             crossAxisSpacing: 10,
-//             mainAxisSpacing: 10,
-//             childAspectRatio: (1.3 / 1.5),
-//           ),
-//           itemBuilder: (context, index) {
-//             return itemDesc(snapshot.data![1][index]);
-//           },
-//         )),
-//   if (snapshot.data![2].length > 0) Text("Desserts"),
-//   if (snapshot.data![2].length > 0)
-//     Container(
-//         height:
-//             MediaQuery.of(context).size.height * (19 / 20),
-//         child: GridView.builder(
-//           itemCount: snapshot.data![2].length,
-//           gridDelegate:
-//               SliverGridDelegateWithFixedCrossAxisCount(
-//             crossAxisCount:
-//                 calculateCount(MediaQuery.of(context).size),
-//             crossAxisSpacing: 10,
-//             mainAxisSpacing: 10,
-//             childAspectRatio: (1.3 / 1.5),
-//           ),
-//           itemBuilder: (context, index) {
-//             return itemDesc(snapshot.data![2][index]);
-//           },
-//         )),
-// ]);
+// stuff for item popups
+
+class ItemDialog extends StatefulWidget {
+  var pins;
+  var item;
+  ItemDialog({this.pins, this.item});
+  _ItemDialogState createState() => _ItemDialogState();
+}
+
+class _ItemDialogState extends State<ItemDialog> {
+  Widget build(BuildContext context) {
+    var item = widget.item, id = item['_id'];
+    var pinned = item['pinned'];
+    return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
+        insetPadding: EdgeInsets.symmetric(
+            horizontal: (MediaQuery.of(context).size.width) / 4,
+            vertical: (MediaQuery.of(context).size.height) / 20),
+        // backgroundColor: Colors.transparent,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+                child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                IconButton(
+                  icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border),
+                  onPressed: !pinned
+                      ? () {
+                          debugPrint('pressed');
+                          var temp = widget.pins;
+
+                          temp['ids'].add(id);
+                          temp['items'].add(item);
+                          debugPrint('$temp');
+
+                          setState(() {
+                            widget.pins = temp;
+                            item['pinned'] = true;
+                          });
+                        }
+                      : () {
+                          debugPrint('pressed');
+                          var temp = widget.pins;
+                          debugPrint('$temp');
+                          temp['ids'].remove(id);
+                          for (var i = 0; i < temp['items'].length; i++) {
+                            if (temp['items'][i]['_id'] == id) {
+                              temp['items'].removeAt(i);
+                              break;
+                            }
+                          }
+                          setState(() {
+                            debugPrint('setting state');
+                            widget.pins = temp;
+                            item['pinned'] = false;
+                          });
+                        },
+                ),
+              ],
+            )),
+            SliverToBoxAdapter(
+                child: Text('${widget.item['name']}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: MediaQuery.of(context).size.height / 30)))
+          ],
+        ));
+  }
+}
+
+// stuff for pinned page
 
 class PinnedItems extends StatefulWidget {
   var pins;
@@ -823,6 +866,14 @@ class PinnedItems extends StatefulWidget {
 
   _PinnedItemsState createState() => _PinnedItemsState();
 }
+
+// var headerStyle =
+//   TextStyle(
+//                                       color: Colors.grey[800],
+//                                       fontWeight: FontWeight.bold,
+//                                       fontSize:
+//                                           MediaQuery.of(context).size.height /
+//                                               30)
 
 class _PinnedItemsState extends State<PinnedItems> {
   sortByRestaurant(items) {
@@ -864,6 +915,8 @@ class _PinnedItemsState extends State<PinnedItems> {
         ),
         body: CustomScrollView(
           slivers: [
+            if (items.length == 0)
+              SliverToBoxAdapter(child: Text('No pins yet!')),
             for (var itemList in items)
               SliverFixedExtentList(
                   delegate: SliverChildBuilderDelegate(
