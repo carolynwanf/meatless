@@ -667,108 +667,154 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   Widget build(BuildContext context) {
+    Widget main = SliverToBoxAdapter(child: Text('Mains')),
+        side = SliverToBoxAdapter(child: Text('')),
+        sides = SliverToBoxAdapter(child: Text('')),
+        dessert = SliverToBoxAdapter(child: Text('')),
+        desserts = SliverToBoxAdapter(child: Text(''));
     return Scaffold(
-        body: CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          expandedHeight: MediaQuery.of(context).size.height / 15,
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(widget.info['name']),
-          ),
+        appBar: AppBar(
+          title: Text('${widget.info['name']}'),
         ),
-        SliverToBoxAdapter(
-            child: FutureBuilder<List>(
-                future: _dishes,
-                builder: (context, snapshot) {
-                  debugPrint('$snapshot');
-                  if (snapshot.hasData) {
-                    for (var i = 0; i < snapshot.data!.length; i++) {
-                      for (var j = 0; j < snapshot.data![i].length; j++) {
-                        var item_id = snapshot.data![i][j]["_id"];
+        body: FutureBuilder<List>(
+            future: _dishes,
+            builder: (context, snapshot) {
+              Widget mains = SliverToBoxAdapter(
+                  child: SizedBox(
+                child: CircularProgressIndicator(),
+                height: 50.0,
+                width: 50.0,
+              ));
+              debugPrint('$snapshot');
+              if (snapshot.hasData) {
+                for (var i = 0; i < snapshot.data!.length; i++) {
+                  for (var j = 0; j < snapshot.data![i].length; j++) {
+                    var itemId = snapshot.data![i][j]["_id"];
 
-                        if (widget.pins['ids'].contains(item_id)) {
-                          snapshot.data![i][j]['pinned'] = true;
-                        } else {
-                          snapshot.data![i][j]['pinned'] = false;
-                        }
-                      }
+                    if (widget.pins['ids'].contains(itemId)) {
+                      snapshot.data![i][j]['pinned'] = true;
+                    } else {
+                      snapshot.data![i][j]['pinned'] = false;
                     }
-                    return Column(children: [
-                      Text('Mains'),
-                      Container(
-                          height:
-                              MediaQuery.of(context).size.height * (19 / 20),
-                          child: GridView.builder(
-                            itemCount: snapshot.data![0].length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  calculateCount(MediaQuery.of(context).size),
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              childAspectRatio: (1.3 / 1.5),
-                            ),
-                            itemBuilder: (context, index) {
-                              return itemDesc(snapshot.data![0][index]);
-                            },
-                          )),
-                      if (snapshot.data![1].length > 0) Text("Sides"),
-                      if (snapshot.data![1].length > 0)
-                        Container(
-                            height:
-                                MediaQuery.of(context).size.height * (19 / 20),
-                            child: GridView.builder(
-                              itemCount: snapshot.data![1].length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount:
-                                    calculateCount(MediaQuery.of(context).size),
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                childAspectRatio: (1.3 / 1.5),
-                              ),
-                              itemBuilder: (context, index) {
-                                return itemDesc(snapshot.data![1][index]);
-                              },
-                            )),
-                      if (snapshot.data![2].length > 0) Text("Desserts"),
-                      if (snapshot.data![2].length > 0)
-                        Container(
-                            height:
-                                MediaQuery.of(context).size.height * (19 / 20),
-                            child: GridView.builder(
-                              itemCount: snapshot.data![2].length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount:
-                                    calculateCount(MediaQuery.of(context).size),
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                childAspectRatio: (1.3 / 1.5),
-                              ),
-                              itemBuilder: (context, index) {
-                                return itemDesc(snapshot.data![2][index]);
-                              },
-                            )),
-                    ]);
-                  } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
                   }
+                }
 
-                  // By default, show a loading spinner.
-                  return Center(
-                    child: SizedBox(
-                      child: CircularProgressIndicator(),
-                      height: 50.0,
-                      width: 50.0,
+                mains = SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 250.0,
+                    mainAxisSpacing: 10.0,
+                    crossAxisSpacing: 10.0,
+                    childAspectRatio: (1.3 / 1.5),
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                    return itemDesc(snapshot.data![0][index]);
+                  }, childCount: snapshot.data![0].length),
+                );
+                if (snapshot.data![1].length > 0) {
+                  side = SliverToBoxAdapter(child: Text('Sides'));
+                  sides = SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 250.0,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10.0,
+                      childAspectRatio: (1.3 / 1.5),
                     ),
+                    delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                      return itemDesc(snapshot.data![1][index]);
+                    }, childCount: snapshot.data![1].length),
                   );
-                })),
-      ],
-    ));
+                }
+
+                if (snapshot.data![2].length > 0) {
+                  dessert = SliverToBoxAdapter(child: Text('Desserts'));
+                  desserts = SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 250.0,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10.0,
+                      childAspectRatio: (1.3 / 1.5),
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                      return itemDesc(snapshot.data![2][index]);
+                    }, childCount: snapshot.data![2].length),
+                  );
+                }
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+
+              // By default, show a loading spinner.
+              // return Text("AHH");
+              return CustomScrollView(
+                slivers: <Widget>[main, mains, side, sides, dessert, desserts],
+              );
+            }));
   }
 }
+
+// return Column(children: [
+//   Text('Mains'),
+//   Container(
+//       height:
+//           MediaQuery.of(context).size.height * (19 / 20),
+//       child: GridView.builder(
+//         itemCount: snapshot.data![0].length,
+//         gridDelegate:
+//             SliverGridDelegateWithFixedCrossAxisCount(
+//           crossAxisCount:
+//               calculateCount(MediaQuery.of(context).size),
+//           crossAxisSpacing: 10,
+//           mainAxisSpacing: 10,
+//           childAspectRatio: (1.3 / 1.5),
+//         ),
+//         itemBuilder: (context, index) {
+//           return itemDesc(snapshot.data![0][index]);
+//         },
+//       )),
+//   if (snapshot.data![1].length > 0) Text("Sides"),
+//   if (snapshot.data![1].length > 0)
+//     Container(
+//         height:
+//             MediaQuery.of(context).size.height * (19 / 20),
+//         child: GridView.builder(
+//           itemCount: snapshot.data![1].length,
+//           gridDelegate:
+//               SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount:
+//                 calculateCount(MediaQuery.of(context).size),
+//             crossAxisSpacing: 10,
+//             mainAxisSpacing: 10,
+//             childAspectRatio: (1.3 / 1.5),
+//           ),
+//           itemBuilder: (context, index) {
+//             return itemDesc(snapshot.data![1][index]);
+//           },
+//         )),
+//   if (snapshot.data![2].length > 0) Text("Desserts"),
+//   if (snapshot.data![2].length > 0)
+//     Container(
+//         height:
+//             MediaQuery.of(context).size.height * (19 / 20),
+//         child: GridView.builder(
+//           itemCount: snapshot.data![2].length,
+//           gridDelegate:
+//               SliverGridDelegateWithFixedCrossAxisCount(
+//             crossAxisCount:
+//                 calculateCount(MediaQuery.of(context).size),
+//             crossAxisSpacing: 10,
+//             mainAxisSpacing: 10,
+//             childAspectRatio: (1.3 / 1.5),
+//           ),
+//           itemBuilder: (context, index) {
+//             return itemDesc(snapshot.data![2][index]);
+//           },
+//         )),
+// ]);
 
 class PinnedItems extends StatefulWidget {
   var pins;
