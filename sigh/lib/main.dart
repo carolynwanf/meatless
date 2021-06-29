@@ -782,14 +782,19 @@ class _PinnedItemsState extends State<PinnedItems> {
   sortByRestaurant(items) {
     var idsSeen = <String>{};
     var preSorted = {};
+
+    debugPrint('$items');
     for (var i = 0; i < items.length; i++) {
-      if (idsSeen.contains(items[i]["_id"])) {
+      if (idsSeen.contains(items[i]["restaurant_id"])) {
         preSorted[items[i]['restuarant_name']].add(items[i]);
       } else {
-        idsSeen.add(items[i]["_id"]);
+        idsSeen.add(items[i]["restaurant_id"]);
         preSorted[items[i]['restuarant_name']] = [items[i]];
       }
+      debugPrint('$preSorted, $idsSeen, AAHHH');
     }
+
+    debugPrint('$preSorted');
 
     var sorted = [];
 
