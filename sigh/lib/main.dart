@@ -37,6 +37,10 @@ class Mainpage extends StatefulWidget {
 class _MainpageState extends State<Mainpage> {
   var _displayRestaurants = true;
 
+  // getRequests(async) {
+  //   ;
+  // }
+
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -48,7 +52,7 @@ class _MainpageState extends State<Mainpage> {
                     context,
                     MaterialPageRoute(
                         builder: (_) => PinnedItems(pins: widget.pins)),
-                  );
+                  ).then((val) => setState(() {}));
                 },
                 icon: Icon(Icons.star))
           ],
@@ -175,9 +179,10 @@ class _DishesState extends State<Dishes> {
               ? () {
                   debugPrint('pressed');
                   var temp = widget.pins;
-                  debugPrint('$temp');
+
                   temp['ids'].add(id);
-                  temp['items'].push(item);
+                  temp['items'].add(item);
+                  debugPrint('$temp');
 
                   setState(() {
                     widget.pins = temp;
@@ -189,7 +194,7 @@ class _DishesState extends State<Dishes> {
                   debugPrint('$temp');
                   temp['ids'].remove(id);
                   for (var i = 0; i < temp['items'].length; i++) {
-                    if (temp['items'][i] == id) {
+                    if (temp['items'][i]['_id'] == id) {
                       temp['items'].removeAt(i);
                       break;
                     }
@@ -403,7 +408,7 @@ class _RestaurantsState extends State<Restaurants> {
   Widget restaurantDesc(name, type, friendliness, id) {
     final _iconSize = const TextStyle(fontSize: 30);
 
-    var info = {'name': name, 'type': type, 'id': id};
+    var info = {'name': name, 'id': id};
 
     return new ListTile(
       leading: Text('${friendliness}', style: _iconSize),
@@ -619,11 +624,13 @@ class _RestaurantPageState extends State<RestaurantPage> {
               ? () {
                   debugPrint('pressed');
                   var temp = widget.pins;
-                  debugPrint('$temp');
+
                   temp['ids'].add(id);
-                  temp['items'].push(item);
+                  temp['items'].add(item);
+                  debugPrint('$temp');
 
                   setState(() {
+                    // debugPrint('setting state');
                     widget.pins = temp;
                   });
                 }
@@ -639,7 +646,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     }
                   }
                   setState(() {
-                    debugPrint('setting state');
+                    // debugPrint('setting state');
                     widget.pins = temp;
                   });
                 },
@@ -722,8 +729,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 childAspectRatio: (1.3 / 1.5),
                               ),
                               itemBuilder: (context, index) {
-                                return itemDesc(
-                                    snapshot.data![1][index]['name']);
+                                return itemDesc(snapshot.data![1][index]);
                               },
                             )),
                       if (snapshot.data![2].length > 0) Text("Desserts"),
@@ -773,18 +779,168 @@ class PinnedItems extends StatefulWidget {
 }
 
 class _PinnedItemsState extends State<PinnedItems> {
+  sortByRestaurant(items) {
+    var idsSeen = <String>{};
+    var preSorted = {};
+    for (var i = 0; i < items.length; i++) {
+      if (idsSeen.contains(items[i]["_id"])) {
+        preSorted[items[i]['restuarant_name']].add(items[i]);
+      } else {
+        idsSeen.add(items[i]["_id"]);
+        preSorted[items[i]['restuarant_name']] = [items[i]];
+      }
+    }
+
+    var sorted = [];
+
+    preSorted.forEach((key, value) {
+      var id = value[0]["restaurant_id"];
+      var newObject = {'id': id, 'name': key};
+      value.insert(0, newObject);
+      sorted.add(value);
+    });
+
+    return sorted;
+  }
+
   Widget build(BuildContext context) {
-    var pins = widget.pins.toList();
+    var items = sortByRestaurant(widget.pins['items']);
+
     return Scaffold(
         appBar: AppBar(
           title: Text('Meatless'),
           actions: [IconButton(onPressed: null, icon: Icon(Icons.star))],
         ),
-        body: ListView.builder(
-            itemCount: pins.length,
-            itemBuilder: (_, int position) {
-              debugPrint('${pins}');
-              return ListTile(title: Text('${pins[position]}'));
-            }));
+        body: CustomScrollView(
+          slivers: [
+            for (var itemList in items)
+              SliverFixedExtentList(
+                  delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                    debugPrint('$itemList');
+
+                    if (index == 0) {
+                      return Container(
+                          child: InkWell(
+                              child: Text('${itemList[index]['name']}',
+                                  style: TextStyle(
+                                      color: Colors.grey[800],
+                                      fontWeight: FontWeight.bold,
+                                      fontSize:
+                                          MediaQuery.of(context).size.height /
+                                              30)),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => RestaurantPage(
+                                          info: itemList[0],
+                                          pins: widget.pins)),
+                                );
+                              }),
+                          alignment: Alignment.bottomLeft);
+                    } else {
+                      var image = itemList[index]['images'],
+                          name = itemList[index]['name'],
+                          description = itemList[index]['description'],
+                          id = itemList[index]['_id'];
+                      if (image != 'none') {
+                        image = image.split(" 1920w,");
+                        image = image[0];
+
+                        image = image.split(
+                            'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
+
+                        image = image[1];
+                      }
+                      return Card(
+                          child: ListTile(
+                        leading: Container(
+                            child: Column(
+                          children: [
+                            if (image != 'none')
+                              Container(
+                                height: MediaQuery.of(context).size.height / 17,
+                                child: Image.network(image),
+                              )
+                          ],
+                        )),
+                        title: Text(itemList[index]['name']),
+                        subtitle: description.length == 'none'
+                            ? null
+                            : Text(description),
+                        trailing: IconButton(
+                            onPressed: () {
+                              var temp = widget.pins;
+                              debugPrint('$temp');
+                              temp['ids'].remove(id);
+                              for (var i = 0; i < temp['items'].length; i++) {
+                                if (temp['items'][i]['_id'] == id) {
+                                  temp['items'].removeAt(i);
+                                  break;
+                                }
+                              }
+                              setState(() {
+                                debugPrint('setting state');
+                                widget.pins = temp;
+                              });
+                            },
+                            icon: Icon(Icons.cancel)),
+                      ));
+                    }
+                  }, childCount: itemList.length),
+                  itemExtent: MediaQuery.of(context).size.height / 10)
+          ],
+        ));
   }
+
+  // itemCount: items.length,
+  //           itemBuilder: (_, int position) {
+  //             var image = items[position]['images'],
+  //                 name = items[position]['name'],
+  //                 description = items[position]['description'],
+  //                 id = items[position]['_id'];
+  //             if (image != 'none') {
+  //               image = image.split(" 1920w,");
+  //               image = image[0];
+
+  //               image = image.split(
+  //                   'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
+
+  //               image = image[1];
+  //             }
+  //             return Card(
+  //                 child: ListTile(
+  //               leading: Container(
+  //                   child: Column(
+  //                 children: [
+  //                   if (image != 'none')
+  //                     Container(
+  //                       height: MediaQuery.of(context).size.height / 17,
+  //                       child: Image.network(image),
+  //                     )
+  //                 ],
+  //               )),
+  //               title: Text(items[position]['name']),
+  //               subtitle:
+  //                   description.length == 'none' ? null : Text(description),
+  //               trailing: IconButton(
+  //                   onPressed: () {
+  //                     var temp = widget.pins;
+  //                     debugPrint('$temp');
+  //                     temp['ids'].remove(id);
+  //                     for (var i = 0; i < temp['items'].length; i++) {
+  //                       if (temp['items'][i]['_id'] == id) {
+  //                         temp['items'].removeAt(i);
+  //                         break;
+  //                       }
+  //                     }
+  //                     setState(() {
+  //                       debugPrint('setting state');
+  //                       widget.pins = temp;
+  //                     });
+  //                   },
+  //                   icon: Icon(Icons.cancel)),
+  //             ));
+  //           }
 }
