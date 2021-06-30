@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'reviewForm.dart';
 
 class ItemDialog extends StatefulWidget {
   var pins;
@@ -82,20 +83,21 @@ class _ItemDialogState extends State<ItemDialog> {
                 ),
               ],
             )),
-            if (description != 'none')
-              SliverToBoxAdapter(child: Text('$description')),
             SliverToBoxAdapter(
                 child: Text('${widget.item['name']}',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: MediaQuery.of(context).size.height / 30))),
+            if (description != 'none')
+              SliverToBoxAdapter(child: Text('$description')),
             SliverToBoxAdapter(child: Text('$price • $restaurant')),
             if (image != 'none')
               SliverToBoxAdapter(
                   child: Container(
                 height: MediaQuery.of(context).size.height / 2,
                 child: Image.network(image),
-              ))
+              )),
+            SliverToBoxAdapter(child: ReviewForm())
           ],
         ));
   }

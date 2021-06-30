@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'restaurantPage.dart';
+import 'itemDialog.dart';
 
 class PinnedItems extends StatefulWidget {
   var pins;
@@ -97,6 +98,14 @@ class _PinnedItemsState extends State<PinnedItems> {
                       }
                       return Card(
                           child: ListTile(
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ItemDialog(
+                                    pins: widget.pins, item: itemList[index]);
+                              }).then((val) => setState(() {}));
+                        },
                         leading: Container(
                             child: Column(
                           children: [
