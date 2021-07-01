@@ -1,8 +1,10 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 import 'reviewForm.dart';
+
+import 'restaurantPage.dart';
 
 class ItemDialog extends StatefulWidget {
   var pins;
@@ -18,7 +20,13 @@ class _ItemDialogState extends State<ItemDialog> {
         image = item['images'],
         description = item['description'],
         price = item['price'],
-        restaurant = item['restuarant_name'];
+        restaurant = item['restuarant_name'],
+        restaurantId = item['restaurant_id'];
+
+    var info = {
+      'name': restaurant,
+      "id": restaurantId,
+    };
     if (image != 'none') {
       image = image.split(" 1920w,");
       image = image[0];
@@ -90,14 +98,24 @@ class _ItemDialogState extends State<ItemDialog> {
                         fontSize: MediaQuery.of(context).size.height / 30))),
             if (description != 'none')
               SliverToBoxAdapter(child: Text('$description')),
-            SliverToBoxAdapter(child: Text('$price • $restaurant')),
+            SliverToBoxAdapter(
+                child: InkWell(
+                    child: Text('$price • $restaurant'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                RestaurantPage(info: info, pins: widget.pins)),
+                      );
+                    })),
             if (image != 'none')
               SliverToBoxAdapter(
                   child: Container(
                 height: MediaQuery.of(context).size.height / 2,
                 child: Image.network(image),
               )),
-            SliverToBoxAdapter(child: ReviewForm())
+            SliverToBoxAdapter(child: ReviewForm(id: id))
           ],
         ));
   }

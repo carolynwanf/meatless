@@ -71,6 +71,46 @@ app.post("/get-dishes", async (req,res) => {
     
 })
 
+app.post("/review-or-rating", async (req,res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    
+    const review = req.body.review;
+    const id = req.body.id
+    console.log(id)
+
+    try {
+        const db = client.db('data');
+
+        const item = await db.collection('items').findOne(ObjectId(id))
+
+        if (item.rating != "N/A") {
+            item.rating = ((item.reviews.length * item.rating) + review.rating)/ (item.reviews.length +1)
+        } else {
+            item.rating = review.rating
+        }
+
+        item.reviews.push(review)
+
+        console.log(item.rating, item.reviews)
+
+        await db.collection('items').updateOne({'_id': ObjectId(id)}, {
+            $set: {rating: item.rating, reviews: item.reviews}
+        })
+
+        
+
+
+        
+    } finally {
+        res.sendStatus(200)
+        console.log("review written");
+        
+    }
+
+
+
+})
+
 app.post("/get-page-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
     const id = req.body.id

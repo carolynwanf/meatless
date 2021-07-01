@@ -85,7 +85,7 @@ class _RestaurantsState extends State<Restaurants> {
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height - (138),
+        height: (MediaQuery.of(context).size.height) * (3 / 4),
         child: Center(
             child: FutureBuilder<List>(
           future: _restaurants,

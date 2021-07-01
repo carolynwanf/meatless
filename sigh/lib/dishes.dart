@@ -45,9 +45,9 @@ class _DishesState extends State<Dishes> {
     var name = item['name'],
         description = item['description'],
         image = item['images'],
-        price = item['price'],
+        // price = item['price'],
         pinned = item['pinned'],
-        restaurant = item['restuarant_name'],
+        // restaurant = item['restuarant_name'],
         id = item['_id'];
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
@@ -172,7 +172,7 @@ class _DishesState extends State<Dishes> {
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height - (138),
+        height: (MediaQuery.of(context).size.height) * (3 / 4),
         child: Center(
             child: FutureBuilder<List>(
           future: _dishes,
@@ -184,9 +184,9 @@ class _DishesState extends State<Dishes> {
 
               // labels items from snapshot as pinned/not based on state
               for (var i = 0; i < snapshot.data!.length; i++) {
-                var item_id = snapshot.data![i]["_id"];
+                var itemId = snapshot.data![i]["_id"];
 
-                if (widget.pins['ids'].contains(item_id)) {
+                if (widget.pins['ids'].contains(itemId)) {
                   snapshot.data![i]['pinned'] = true;
                 } else {
                   snapshot.data![i]['pinned'] = false;

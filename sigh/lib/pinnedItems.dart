@@ -1,7 +1,7 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 import 'restaurantPage.dart';
 import 'itemDialog.dart';
@@ -84,7 +84,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                           alignment: Alignment.bottomLeft);
                     } else {
                       var image = itemList[index]['images'],
-                          name = itemList[index]['name'],
+                          // name = itemList[index]['name'],
                           description = itemList[index]['description'],
                           id = itemList[index]['_id'];
                       if (image != 'none') {
