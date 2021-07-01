@@ -6,13 +6,14 @@ import 'itemDialog.dart';
 
 class Dishes extends StatefulWidget {
   var pins;
+  var zipCode;
 
-  Dishes({this.pins});
+  Dishes({this.pins, this.zipCode});
   _DishesState createState() => _DishesState();
 }
 
-Future<List> getDishes(offset) async {
-  final String body = jsonEncode({"offset": offset});
+Future<List> getDishes(offset, zipCode) async {
+  final String body = jsonEncode({"offset": offset, 'zipCode': zipCode});
   final response =
       await http.post(Uri.parse('http://localhost:4000/get-dishes'),
           headers: {
@@ -38,7 +39,7 @@ class _DishesState extends State<Dishes> {
 
   void initState() {
     super.initState();
-    _dishes = getDishes(page);
+    _dishes = getDishes(page, widget.zipCode);
   }
 
   Widget dishDesc(item) {
@@ -229,7 +230,7 @@ class _DishesState extends State<Dishes> {
                   : () => {
                         setState(() {
                           page = page - 1;
-                          _dishes = getDishes(page);
+                          _dishes = getDishes(page, widget.zipCode);
                         })
                       },
               child: Text('Prev')),
@@ -241,7 +242,7 @@ class _DishesState extends State<Dishes> {
                   if (number != null && 0 < number && number < 3937) {
                     setState(() {
                       page = number;
-                      _dishes = getDishes(number);
+                      _dishes = getDishes(number, widget.zipCode);
                     });
 
                     clearText();
@@ -261,7 +262,7 @@ class _DishesState extends State<Dishes> {
                         : () => {
                               setState(() {
                                 page = page + 1;
-                                _dishes = getDishes(page);
+                                _dishes = getDishes(page, widget.zipCode);
                               })
                             },
                     child: Text('Next'));

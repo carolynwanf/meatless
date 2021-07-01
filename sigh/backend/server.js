@@ -32,19 +32,24 @@ app.post("/get-restaurants", async (req,res) => {
 
 
     const offset = req.body.offset
+    const zipCode = req.body.zipCode
 
-    console.log(offset)
+    console.log(zipCode)
 
     
     try {
-        await client.connect()
         const db = client.db('data');
 
-        const restaurants = await db.collection('restaurants').find({}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+        const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
 
-        // console.log(restaurants)
+        // console.log(restaurants.length)
 
-        res.json({restaurants: restaurants})
+        if (restaurants.length > 0) {
+            res.json({restaurants: restaurants})
+        } else {
+            res.json({restaurants: ['no results']})
+        }
+        
     } finally {
         console.log('restaurants successfully taken!')
         
@@ -55,13 +60,14 @@ app.post("/get-restaurants", async (req,res) => {
 app.post("/get-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
     const offset = req.body.offset
+    const zipCode = req.body.zipCode
 
     try {
         const db = client.db('data');
 
-        const dishes = await db.collection('items').find({$and: [{vegetarian:true}, {side:false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
+        const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
-        // console.log(restaurants)
+        console.log(dishes.length)
 
         res.json({dishes: dishes})
     } finally {

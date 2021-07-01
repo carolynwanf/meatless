@@ -108,7 +108,7 @@ class _ReviewFormState extends State<ReviewForm> {
               );
             },
             validator: (value) {
-              if (value == 0) {
+              if (value == null) {
                 debugPrint('stars $value');
                 return "Please rate this dish";
               }
@@ -186,6 +186,7 @@ class _ReviewFormState extends State<ReviewForm> {
                       body: jsonEncode(body));
 
                   debugPrint('${response}');
+
                   // If the form is valid, display a snackbar. In the real world,
                   // you'd often call a server or save the information in a database.
                   ScaffoldMessenger.of(context)
