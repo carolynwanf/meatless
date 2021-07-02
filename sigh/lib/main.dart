@@ -116,10 +116,9 @@ class Mainpage extends StatefulWidget {
 
 class _MainpageState extends State<Mainpage> {
   var _displayRestaurants = true;
+  var formVal;
 
-  // getRequests(async) {
-  //   ;
-  // }
+  final _formKey = GlobalKey<FormState>();
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +138,60 @@ class _MainpageState extends State<Mainpage> {
         ),
         body: Column(
           children: [
+            Container(
+                height: MediaQuery.of(context).size.height / 10,
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: SizedBox(
+                            height: MediaQuery.of(context).size.height / 10,
+                            child: Form(
+                              key: _formKey,
+                              child: TextFormField(
+                                  decoration: InputDecoration(
+                                      border: UnderlineInputBorder(),
+                                      hintText: '${widget.zipCode}'),
+                                  validator: (value) {
+                                    RegExp validate = RegExp(r'^[0-9]{5}$');
+                                    var isValid;
+                                    if (value is String) {
+                                      var temp = validate.stringMatch(value);
+                                      if (temp == null) {
+                                        isValid = false;
+                                      } else {
+                                        isValid = true;
+                                      }
+                                    }
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter a zip code';
+                                    } else if (!isValid) {
+                                      return 'Please enter a valid zip code';
+                                    }
+
+                                    // regex
+                                  },
+                                  onSaved: (value) {
+                                    if (value is String) {
+                                      formVal = value;
+                                    }
+                                  }),
+                            ))),
+                    ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+
+                            setState(() {
+                              debugPrint('setting zipCode $formVal');
+                              widget.zipCode = formVal;
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          }
+                        },
+                        child: Text('Search'))
+                  ],
+                )),
             Row(
               children: [
                 ElevatedButton(

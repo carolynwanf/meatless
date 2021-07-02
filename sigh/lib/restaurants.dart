@@ -44,15 +44,15 @@ class _RestaurantsState extends State<Restaurants> {
   }
 
   void initState() {
+    var zipCode = widget.zipCode;
     super.initState();
     debugPrint('debug printing');
-    _restaurants = getRestaurants(page, widget.zipCode);
+    _restaurants = getRestaurants(page, zipCode);
 
     // debugPrint('$_restaurants');
   }
 
   Widget restaurantDesc(name, type, friendliness, id) {
-    debugPrint(widget.zipCode);
     final _iconSize = const TextStyle(fontSize: 30);
 
     var info = {'name': name, 'id': id};
@@ -75,10 +75,10 @@ class _RestaurantsState extends State<Restaurants> {
 
   @override
   Widget build(BuildContext context) {
+    var zipCode = widget.zipCode;
     debugPrint('$page');
     isDisabled() {
       if (page == 1) {
-        debugPrint('disabled $page');
         return true;
       } else {
         return false;
@@ -88,10 +88,10 @@ class _RestaurantsState extends State<Restaurants> {
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: (MediaQuery.of(context).size.height) * (3 / 4),
+        height: (MediaQuery.of(context).size.height) * (7 / 10),
         child: Center(
             child: FutureBuilder<List>(
-          future: _restaurants,
+          future: getRestaurants(page, zipCode),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               debugPrint('${snapshot.data}');
@@ -143,7 +143,7 @@ class _RestaurantsState extends State<Restaurants> {
                   : () => {
                         setState(() {
                           page = page - 1;
-                          _restaurants = getRestaurants(page, widget.zipCode);
+                          _restaurants = getRestaurants(page, zipCode);
                         })
                       },
               child: Text('Prev')),
@@ -155,7 +155,7 @@ class _RestaurantsState extends State<Restaurants> {
                   if (number != null && 0 < number && number < 118) {
                     setState(() {
                       page = number;
-                      _restaurants = getRestaurants(number, widget.zipCode);
+                      _restaurants = getRestaurants(number, zipCode);
                     });
 
                     clearText();
@@ -183,8 +183,7 @@ class _RestaurantsState extends State<Restaurants> {
                         : () => {
                               setState(() {
                                 page = page + 1;
-                                _restaurants =
-                                    getRestaurants(page, widget.zipCode);
+                                _restaurants = getRestaurants(page, zipCode);
                               })
                             },
                     child: Text('Next'));
