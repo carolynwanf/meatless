@@ -169,11 +169,13 @@ class _RestaurantsState extends State<Restaurants> {
             future: _restaurants,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                var nullfriendly = true;
+                var nullfriendly;
                 if (snapshot.data![0] != 'no results') {
                   for (var i = 0; i < snapshot.data!.length; i++) {
-                    if (snapshot.data![i]['friendliness'] != null) {
+                    if (snapshot.data![i]['friendliness'] == null) {
                       nullfriendly = false;
+                    } else {
+                      nullfriendly = true;
                     }
                   }
                 }

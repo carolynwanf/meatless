@@ -65,11 +65,17 @@ app.post("/get-dishes", async (req,res) => {
     try {
         const db = client.db('data');
 
-        const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
+        const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
         console.log(dishes.length)
 
-        res.json({dishes: dishes})
+        if (dishes.length > 0) {
+            res.json({dishes: dishes})
+        } else {
+            res.json({dishes: 'no results'})
+        }
+
+        
     } finally {
         console.log('dishes successfully taken!')
         

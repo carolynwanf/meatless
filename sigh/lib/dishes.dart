@@ -173,10 +173,10 @@ class _DishesState extends State<Dishes> {
     return Scaffold(
         body: Column(children: [
       SizedBox(
-        height: (MediaQuery.of(context).size.height) * (3 / 4),
+        height: (MediaQuery.of(context).size.height) * (7 / 10),
         child: Center(
             child: FutureBuilder<List>(
-          future: _dishes,
+          future: getDishes(page, widget.zipCode),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data!.length < 8) {
