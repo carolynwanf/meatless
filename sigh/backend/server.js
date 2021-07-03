@@ -28,27 +28,81 @@ app.options('*', (req, res) => {
 
 app.post("/get-restaurants", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
-    console.log('pinged')
 
+    const offset = req.body.offset;
+    const zipCode = req.body.zipCode;
+    const sort = req.body.sort;
+    const search = req.body.search;
 
-    const offset = req.body.offset
-    const zipCode = req.body.zipCode
+    console.log(sort, search)
 
     console.log(zipCode)
 
     
     try {
         const db = client.db('data');
+        if (search) {
+            const query = req.body.query 
+            if (sort == 'friendliness') {
 
-        const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+                console.log('search, friendliness')
+                
 
-        // console.log(restaurants.length)
+                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({friendliness: -1,_id: -1}).skip((offset-1) *8).limit(8).toArray();
 
-        if (restaurants.length > 0) {
-            res.json({restaurants: restaurants})
+                // console.log(restaurants.length)
+
+                if (restaurants.length > 0) {
+                    res.json({restaurants: restaurants})
+                } else {
+                    res.json({restaurants: ['no results']})
+                }
+            } else if (sort == "# of meatless dishes") {
+                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({totalVegItems: -1,_id: -1}).skip((offset-1) *8).limit(8).toArray();
+
+                // console.log(restaurants.length)
+
+                if (restaurants.length > 0) {
+                    res.json({restaurants: restaurants})
+                } else {
+                    res.json({restaurants: ['no results']})
+                }
+            }
+
         } else {
-            res.json({restaurants: ['no results']})
+
+            if (sort == 'friendliness') {
+
+                console.log('no search, friendliness')
+    
+                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+    
+                // console.log(restaurants.length)
+    
+                if (restaurants.length > 0) {
+                    res.json({restaurants: restaurants})
+                } else {
+                    res.json({restaurants: ['no results']})
+                }
+            } else if (sort == "# of meatless dishes") {
+
+                console.log("no search, number of veg")
+
+                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({totalVegItems: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+    
+                // console.log(restaurants.length)
+    
+                if (restaurants.length > 0) {
+                    res.json({restaurants: restaurants})
+                } else {
+                    res.json({restaurants: ['no results']})
+                }
+
+            }
+            
+
         }
+        
         
     } finally {
         console.log('restaurants successfully taken!')

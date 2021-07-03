@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,16 +8,25 @@ import 'restaurantPage.dart';
 class Restaurants extends StatefulWidget {
   var pins;
   var zipCode;
+  var sort = 'friendliness';
+  var search = false;
+  var query = '';
 
   Restaurants({this.pins, this.zipCode});
   @override
   _RestaurantsState createState() => _RestaurantsState();
 }
 
-Future<List> getRestaurants(offset, zipCode) async {
-  debugPrint('getting restaurants, $zipCode');
+Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
+  debugPrint('getting restaurants, $zipCode, $sort, $search');
 
-  final String body = jsonEncode({"offset": offset, 'zipCode': zipCode});
+  final String body = jsonEncode({
+    "offset": offset,
+    'zipCode': zipCode,
+    'sort': sort,
+    "search": search,
+    "query": query
+  });
   final response =
       await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
           headers: {
@@ -34,6 +44,8 @@ Future<List> getRestaurants(offset, zipCode) async {
 class _RestaurantsState extends State<Restaurants> {
   late Future<List> _restaurants;
   var page = 1;
+  final _formKey = GlobalKey<FormState>();
+  var formVal;
 
   // final _biggerFont = const TextStyle(fontSize: 18);
 
@@ -47,7 +59,8 @@ class _RestaurantsState extends State<Restaurants> {
     var zipCode = widget.zipCode;
     super.initState();
     debugPrint('debug printing');
-    _restaurants = getRestaurants(page, zipCode);
+    _restaurants =
+        getRestaurants(page, zipCode, widget.sort, widget.search, widget.query);
 
     // debugPrint('$_restaurants');
   }
@@ -87,34 +100,108 @@ class _RestaurantsState extends State<Restaurants> {
 
     return Scaffold(
         body: Column(children: [
+      Container(
+          height: MediaQuery.of(context).size.height / 10,
+          child: Row(
+            children: [
+              DropdownButton(
+                value: widget.sort,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (String? value) {
+                  setState(() {
+                    debugPrint('changed $value');
+                    widget.sort = value!;
+                    page = 1;
+                  });
+                },
+                items: [
+                  DropdownMenuItem<String>(
+                      value: 'friendliness', child: Text('friendliness')),
+                  DropdownMenuItem<String>(
+                      value: '# of meatless dishes',
+                      child: Text('# of meatless dishes'))
+                ],
+              ),
+              SizedBox(
+                  height: MediaQuery.of(context).size.height / 10,
+                  width: MediaQuery.of(context).size.height / 10,
+                  child: Form(
+                    key: _formKey,
+                    child: TextFormField(
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            hintText: widget.search
+                                ? '${widget.query}'
+                                : 'search within results'),
+                        onSaved: (value) {
+                          if (value is String) {
+                            formVal = value;
+                          }
+                        }),
+                  )),
+              ElevatedButton(
+                  onPressed: () {
+                    _formKey.currentState!.save();
+                    if (formVal == null ||
+                        formVal.isEmpty ||
+                        formVal == ' ' ||
+                        formVal == '') {
+                      setState(() {
+                        widget.search = false;
+                        page = 1;
+
+                        // _displayRestaurants = !_displayRestaurants;
+                      });
+                    } else {
+                      setState(() {
+                        widget.search = true;
+                        widget.query = formVal;
+                        page = 1;
+
+                        // _displayRestaurants = !_displayRestaurants;
+                      });
+                    }
+                  },
+                  child: Text('Search'))
+            ],
+          )),
       SizedBox(
-        height: (MediaQuery.of(context).size.height) * (7 / 10),
+        height: (MediaQuery.of(context).size.height) * (3 / 5),
         child: Center(
             child: FutureBuilder<List>(
-          future: getRestaurants(page, zipCode),
+          future: getRestaurants(
+              page, zipCode, widget.sort, widget.search, widget.query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              debugPrint('${snapshot.data}');
+              debugPrint('${widget.sort}');
               if (snapshot.data![0] != 'no results') {
-                while (snapshot.data![snapshot.data!.length - 1]
-                            ["friendliness"] ==
-                        null &&
-                    snapshot.data![snapshot.data!.length - 2]["friendliness"] ==
-                        null) {
-                  snapshot.data!.removeAt(snapshot.data!.length - 1);
-                }
+                snapshot.data![snapshot.data!.length - 1]["end"] = true;
+
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (_, int position) {
-                    if (snapshot.data![position]["friendliness"] == null) {
+                    if (snapshot.data![position]["end"] == true) {
                       return Text('End of results');
                     } else {
+                      if (snapshot.data![position]["friendliness"].runtimeType
+                          is Float) {
+                        snapshot.data![position]["friendliness"]
+                            .roundToDouble();
+                      } else {
+                        snapshot.data![position]["friendliness"] = "N/A";
+                      }
                       return Card(
                           child: restaurantDesc(
                               snapshot.data![position]["name"],
                               snapshot.data![position]["type"],
-                              snapshot.data![position]["friendliness"]
-                                  .roundToDouble(),
+                              snapshot.data![position]["friendliness"],
                               snapshot.data![position]["_id"]));
                     }
                   },
@@ -143,7 +230,6 @@ class _RestaurantsState extends State<Restaurants> {
                   : () => {
                         setState(() {
                           page = page - 1;
-                          _restaurants = getRestaurants(page, zipCode);
                         })
                       },
               child: Text('Prev')),
@@ -155,7 +241,6 @@ class _RestaurantsState extends State<Restaurants> {
                   if (number != null && 0 < number && number < 118) {
                     setState(() {
                       page = number;
-                      _restaurants = getRestaurants(number, zipCode);
                     });
 
                     clearText();
@@ -169,23 +254,20 @@ class _RestaurantsState extends State<Restaurants> {
             future: _restaurants,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                var nullfriendly;
+                var end = true;
                 if (snapshot.data![0] != 'no results') {
                   for (var i = 0; i < snapshot.data!.length; i++) {
-                    if (snapshot.data![i]['friendliness'] == null) {
-                      nullfriendly = false;
-                    } else {
-                      nullfriendly = true;
+                    if (snapshot.data!.length < 8) {
+                      end = false;
                     }
                   }
                 }
                 return ElevatedButton(
-                    onPressed: nullfriendly
+                    onPressed: end
                         ? null
                         : () => {
                               setState(() {
                                 page = page + 1;
-                                _restaurants = getRestaurants(page, zipCode);
                               })
                             },
                     child: Text('Next'));
