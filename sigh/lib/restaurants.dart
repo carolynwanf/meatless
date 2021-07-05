@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -50,6 +49,7 @@ class _RestaurantsState extends State<Restaurants> {
   // final _biggerFont = const TextStyle(fontSize: 18);
 
   final fieldText = TextEditingController();
+  final searchResultsController = TextEditingController();
 
   void clearText() {
     fieldText.clear();
@@ -131,10 +131,11 @@ class _RestaurantsState extends State<Restaurants> {
               ),
               SizedBox(
                   height: MediaQuery.of(context).size.height / 10,
-                  width: MediaQuery.of(context).size.height / 10,
+                  width: MediaQuery.of(context).size.width / 4,
                   child: Form(
                     key: _formKey,
                     child: TextFormField(
+                        controller: searchResultsController,
                         decoration: InputDecoration(
                             border: UnderlineInputBorder(),
                             hintText: widget.search
@@ -147,29 +148,46 @@ class _RestaurantsState extends State<Restaurants> {
                         }),
                   )),
               ElevatedButton(
-                  onPressed: () {
-                    _formKey.currentState!.save();
-                    if (formVal == null ||
-                        formVal.isEmpty ||
-                        formVal == ' ' ||
-                        formVal == '') {
-                      setState(() {
-                        widget.search = false;
-                        page = 1;
+                  onPressed: widget.search
+                      ? () {
+                          searchResultsController.clear();
+                          setState(() {
+                            widget.search = false;
+                            widget.query = '';
+                            page = 1;
+                            _restaurants = getRestaurants(
+                                1, zipCode, widget.sort, false, '');
 
-                        // _displayRestaurants = !_displayRestaurants;
-                      });
-                    } else {
-                      setState(() {
-                        widget.search = true;
-                        widget.query = formVal;
-                        page = 1;
+                            // _displayRestaurants = !_displayRestaurants;
+                          });
+                        }
+                      : () {
+                          _formKey.currentState!.save();
+                          if (formVal == null ||
+                              formVal.isEmpty ||
+                              formVal == ' ' ||
+                              formVal == '') {
+                            setState(() {
+                              widget.search = false;
+                              page = 1;
+                              _restaurants = getRestaurants(
+                                  1, zipCode, widget.sort, false, widget.query);
 
-                        // _displayRestaurants = !_displayRestaurants;
-                      });
-                    }
-                  },
-                  child: Text('Search'))
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          } else {
+                            setState(() {
+                              widget.search = true;
+                              widget.query = formVal;
+                              page = 1;
+                              _restaurants = getRestaurants(
+                                  1, zipCode, widget.sort, true, formVal);
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          }
+                        },
+                  child: widget.search ? Text('Clear') : Text('Search'))
             ],
           )),
       SizedBox(
@@ -180,9 +198,15 @@ class _RestaurantsState extends State<Restaurants> {
               page, zipCode, widget.sort, widget.search, widget.query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              debugPrint('${widget.sort}');
-              if (snapshot.data![0] != 'no results') {
-                snapshot.data![snapshot.data!.length - 1]["end"] = true;
+              debugPrint('${snapshot.data}');
+              if (snapshot.data![0] == 'no results') {
+                return Text('no results');
+              } else {
+                if (snapshot.data!.length < 8 &&
+                    snapshot.data![snapshot.data!.length - 1]["end"] != true) {
+                  const end = {"end": true};
+                  snapshot.data!.add(end);
+                }
 
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
@@ -190,10 +214,12 @@ class _RestaurantsState extends State<Restaurants> {
                     if (snapshot.data![position]["end"] == true) {
                       return Text('End of results');
                     } else {
-                      if (snapshot.data![position]["friendliness"].runtimeType
-                          is Float) {
-                        snapshot.data![position]["friendliness"]
-                            .roundToDouble();
+                      debugPrint(
+                          'type ${snapshot.data![position]["friendliness"]}');
+                      if (snapshot.data![position]["friendliness"] != null &&
+                          snapshot.data![position]["friendliness"] != 'N/A') {
+                        snapshot.data![position]["friendliness"] =
+                            snapshot.data![position]["friendliness"].round();
                       } else {
                         snapshot.data![position]["friendliness"] = "N/A";
                       }
@@ -206,8 +232,6 @@ class _RestaurantsState extends State<Restaurants> {
                     }
                   },
                 );
-              } else {
-                return Text('no results');
               }
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
@@ -251,15 +275,16 @@ class _RestaurantsState extends State<Restaurants> {
               ),
               width: 50),
           FutureBuilder<List>(
-            future: _restaurants,
+            future: getRestaurants(
+                page, zipCode, widget.sort, widget.search, widget.query),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                debugPrint(
+                    'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
                 var end = true;
                 if (snapshot.data![0] != 'no results') {
-                  for (var i = 0; i < snapshot.data!.length; i++) {
-                    if (snapshot.data!.length < 8) {
-                      end = false;
-                    }
+                  if (snapshot.data!.length == 8) {
+                    end = false;
                   }
                 }
                 return ElevatedButton(

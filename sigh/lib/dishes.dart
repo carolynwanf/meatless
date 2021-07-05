@@ -7,13 +7,16 @@ import 'itemDialog.dart';
 class Dishes extends StatefulWidget {
   var pins;
   var zipCode;
+  var search = false;
+  var query = '';
 
   Dishes({this.pins, this.zipCode});
   _DishesState createState() => _DishesState();
 }
 
-Future<List> getDishes(offset, zipCode) async {
-  final String body = jsonEncode({"offset": offset, 'zipCode': zipCode});
+Future<List> getDishes(offset, zipCode, search, query) async {
+  final String body = jsonEncode(
+      {"offset": offset, 'zipCode': zipCode, 'search': search, 'query': query});
   final response =
       await http.post(Uri.parse('http://localhost:4000/get-dishes'),
           headers: {
@@ -31,7 +34,11 @@ class _DishesState extends State<Dishes> {
   late Future<List> _dishes;
   var page = 1;
 
+  final _formKey = GlobalKey<FormState>();
+  var formVal;
+
   final fieldText = TextEditingController();
+  final searchResultsController = TextEditingController();
 
   void clearText() {
     fieldText.clear();
@@ -39,7 +46,7 @@ class _DishesState extends State<Dishes> {
 
   void initState() {
     super.initState();
-    _dishes = getDishes(page, widget.zipCode);
+    _dishes = getDishes(page, widget.zipCode, widget.search, widget.query);
   }
 
   Widget dishDesc(item) {
@@ -172,11 +179,68 @@ class _DishesState extends State<Dishes> {
 
     return Scaffold(
         body: Column(children: [
+      Row(
+        children: [
+          SizedBox(
+              height: MediaQuery.of(context).size.height / 10,
+              width: MediaQuery.of(context).size.width / 4,
+              child: Form(
+                key: _formKey,
+                child: TextFormField(
+                    controller: searchResultsController,
+                    decoration: InputDecoration(
+                        border: UnderlineInputBorder(),
+                        hintText: widget.search
+                            ? '${widget.query}'
+                            : 'search within results'),
+                    onSaved: (value) {
+                      if (value is String) {
+                        formVal = value;
+                      }
+                    }),
+              )),
+          ElevatedButton(
+              onPressed: widget.search
+                  ? () {
+                      searchResultsController.clear();
+                      setState(() {
+                        widget.search = false;
+                        widget.query = '';
+                        page = 1;
+
+                        // _displayRestaurants = !_displayRestaurants;
+                      });
+                    }
+                  : () {
+                      _formKey.currentState!.save();
+                      if (formVal == null ||
+                          formVal.isEmpty ||
+                          formVal == ' ' ||
+                          formVal == '') {
+                        setState(() {
+                          widget.search = false;
+                          page = 1;
+
+                          // _displayRestaurants = !_displayRestaurants;
+                        });
+                      } else {
+                        setState(() {
+                          widget.search = true;
+                          widget.query = formVal;
+                          page = 1;
+
+                          // _displayRestaurants = !_displayRestaurants;
+                        });
+                      }
+                    },
+              child: widget.search ? Text('Clear') : Text('Search'))
+        ],
+      ),
       SizedBox(
-        height: (MediaQuery.of(context).size.height) * (7 / 10),
+        height: (MediaQuery.of(context).size.height) * (3 / 5),
         child: Center(
             child: FutureBuilder<List>(
-          future: getDishes(page, widget.zipCode),
+          future: getDishes(page, widget.zipCode, widget.search, widget.query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data!.length < 8) {
@@ -230,7 +294,6 @@ class _DishesState extends State<Dishes> {
                   : () => {
                         setState(() {
                           page = page - 1;
-                          _dishes = getDishes(page, widget.zipCode);
                         })
                       },
               child: Text('Prev')),
@@ -242,7 +305,6 @@ class _DishesState extends State<Dishes> {
                   if (number != null && 0 < number && number < 3937) {
                     setState(() {
                       page = number;
-                      _dishes = getDishes(number, widget.zipCode);
                     });
 
                     clearText();
@@ -262,7 +324,6 @@ class _DishesState extends State<Dishes> {
                         : () => {
                               setState(() {
                                 page = page + 1;
-                                _dishes = getDishes(page, widget.zipCode);
                               })
                             },
                     child: Text('Next'));
