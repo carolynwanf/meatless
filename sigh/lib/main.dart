@@ -1,12 +1,11 @@
-import 'dart:convert';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import 'dishes.dart';
 import 'restaurants.dart';
 // import 'restaurantPage.dart';
 import 'pinnedItems.dart';
+import 'appColors.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,8 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Test App',
       theme: ThemeData(
-          primaryColor: Colors.teal[400],
-          accentColor: Colors.orange[800],
+          primaryColor: AppColors.primary,
+          accentColor: AppColors.accent,
           visualDensity: VisualDensity.adaptivePlatformDensity),
       home: HomePage(),
     );
@@ -34,6 +33,10 @@ class MyApp extends StatelessWidget {
 // }
 
 class HomePage extends StatefulWidget {
+  var pins = {
+    'ids': <String>{},
+    'items': [],
+  };
   _HomePageState createState() => _HomePageState();
 }
 
@@ -42,85 +45,103 @@ class _HomePageState extends State<HomePage> {
   final _formKey = GlobalKey<FormState>();
 
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Find meatless meals near you",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: MediaQuery.of(context).size.height / 30)),
-          Container(
-              height: MediaQuery.of(context).size.height / 10,
-              child: Row(
+          child: Container(
+              padding: EdgeInsets.only(bottom: height / 7),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                      child: SizedBox(
-                          height: MediaQuery.of(context).size.height / 10,
-                          child: Form(
-                            key: _formKey,
-                            child: TextFormField(
-                                decoration: InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    hintText: 'Enter 5-digit zip code'),
-                                validator: (value) {
-                                  RegExp validate = RegExp(r'^[0-9]{5}$');
-                                  var isValid;
-                                  if (value is String) {
-                                    var temp = validate.stringMatch(value);
-                                    if (temp == null) {
-                                      isValid = false;
-                                    } else {
-                                      isValid = true;
-                                    }
-                                  }
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a zip code';
-                                  } else if (!isValid) {
-                                    return 'Please enter a valid zip code';
-                                  }
+                  Text("Find meatless meals near you",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: AppColors.darkText,
+                          fontWeight: FontWeight.normal,
+                          fontSize: height / 20)),
+                  Container(
+                      padding: EdgeInsets.only(top: height / 35),
+                      height: height / 12,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                              height: height / 10,
+                              width: height / 3,
+                              child: Form(
+                                key: _formKey,
+                                child: TextFormField(
+                                    decoration: InputDecoration(
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColors.darkGrey,
+                                              width: 1.5),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColors.medGrey,
+                                              width: 1.0),
+                                        ),
+                                        hintText: 'Enter 5-digit zip code'),
+                                    validator: (value) {
+                                      RegExp validate = RegExp(r'^[0-9]{5}$');
+                                      var isValid;
+                                      if (value is String) {
+                                        var temp = validate.stringMatch(value);
+                                        if (temp == null) {
+                                          isValid = false;
+                                        } else {
+                                          isValid = true;
+                                        }
+                                      }
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a zip code';
+                                      } else if (!isValid) {
+                                        return 'Please enter a valid zip code';
+                                      }
 
-                                  // regex
-                                },
-                                onSaved: (value) {
-                                  if (value is String) {
-                                    zipCode = value;
-                                  }
-                                }),
-                          ))),
-                  ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
+                                      // regex
+                                    },
+                                    onSaved: (value) {
+                                      if (value is String) {
+                                        zipCode = value;
+                                      }
+                                    }),
+                              )),
+                        ],
+                      )),
+                  Container(
+                      padding: EdgeInsets.only(top: height / 25),
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: AppColors.primary,
+                              minimumSize: Size(height / 8, height / 17)),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
 
-                          var body = zipCode;
-                          debugPrint(zipCode);
+                              debugPrint(zipCode);
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => Mainpage(zipCode: zipCode)),
-                          );
-                        }
-                      },
-                      child: Text('Search'))
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => Mainpage(
+                                        zipCode: zipCode, pins: widget.pins)),
+                              );
+                            }
+                          },
+                          child: Text('Search')))
                 ],
-              ))
-        ],
-      )),
+              ))),
     );
   }
 }
 
 class Mainpage extends StatefulWidget {
   var zipCode;
-  var pins = {
-    'ids': <String>{},
-    'items': [],
-  };
+  var pins;
 
-  Mainpage({this.zipCode});
+  Mainpage({this.zipCode, this.pins});
   _MainpageState createState() => _MainpageState();
 }
 
