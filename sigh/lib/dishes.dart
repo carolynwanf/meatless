@@ -243,36 +243,40 @@ class _DishesState extends State<Dishes> {
           future: getDishes(page, widget.zipCode, widget.search, widget.query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              if (snapshot.data!.length < 8) {
-                snapshot.data!.add('end');
-              }
-
-              // labels items from snapshot as pinned/not based on state
-              for (var i = 0; i < snapshot.data!.length; i++) {
-                var itemId = snapshot.data![i]["_id"];
-
-                if (widget.pins['ids'].contains(itemId)) {
-                  snapshot.data![i]['pinned'] = true;
-                } else {
-                  snapshot.data![i]['pinned'] = false;
+              if (snapshot.data![0] == 'no results') {
+                return Text('no results');
+              } else {
+                if (snapshot.data!.length < 8) {
+                  snapshot.data!.add('end');
                 }
-              }
-              return GridView.builder(
-                itemCount: snapshot.data!.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: calculateCount(MediaQuery.of(context).size),
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: (1.3 / 1.5),
-                ),
-                itemBuilder: (_, int position) {
-                  if (snapshot.data![position] != 'end') {
-                    return dishDesc(snapshot.data![position]);
+
+                // labels items from snapshot as pinned/not based on state
+                for (var i = 0; i < snapshot.data!.length; i++) {
+                  var itemId = snapshot.data![i]["_id"];
+
+                  if (widget.pins['ids'].contains(itemId)) {
+                    snapshot.data![i]['pinned'] = true;
                   } else {
-                    return Text('End of results');
+                    snapshot.data![i]['pinned'] = false;
                   }
-                },
-              );
+                }
+                return GridView.builder(
+                  itemCount: snapshot.data!.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: calculateCount(MediaQuery.of(context).size),
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: (1.3 / 1.5),
+                  ),
+                  itemBuilder: (_, int position) {
+                    if (snapshot.data![position] != 'end') {
+                      return dishDesc(snapshot.data![position]);
+                    } else {
+                      return Text('End of results');
+                    }
+                  },
+                );
+              }
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
             }
@@ -315,9 +319,11 @@ class _DishesState extends State<Dishes> {
               ),
               width: 50),
           FutureBuilder<List>(
-            future: _dishes,
+            future:
+                getDishes(page, widget.zipCode, widget.search, widget.query),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                debugPrint('${snapshot}');
                 return ElevatedButton(
                     onPressed: snapshot.data!.length < 7
                         ? null

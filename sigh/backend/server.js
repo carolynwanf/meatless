@@ -115,20 +115,44 @@ app.post("/get-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
     const offset = req.body.offset
     const zipCode = req.body.zipCode
+    const search = req.body.search
+    const query = req.body.query
+
+   
+
 
     try {
         const db = client.db('data');
+        // db.collection('items').createIndex( { name: "text", description: "text" } )
+        
+        if (search) {
+            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}, {$text: {$search: query}}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
-        const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
+            console.log(dishes.length)
+    
+            if (dishes.length > 0) {
+                res.json({dishes: dishes})
+            } else {
+                res.json({dishes: ['no results']})
+            }
+    
 
-        console.log(dishes.length)
-
-        if (dishes.length > 0) {
-            res.json({dishes: dishes})
         } else {
-            res.json({dishes: 'no results'})
-        }
+            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
+            console.log(dishes.length)
+    
+            if (dishes.length > 0) {
+                res.json({dishes: dishes})
+            } else {
+                res.json({dishes: ['no results']})
+            }
+    
+
+        }
+        
+
+       
         
     } finally {
         console.log('dishes successfully taken!')

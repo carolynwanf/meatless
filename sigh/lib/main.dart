@@ -13,7 +13,14 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Test App', home: HomePage());
+    return MaterialApp(
+      title: 'Test App',
+      theme: ThemeData(
+          primaryColor: Colors.teal[400],
+          accentColor: Colors.orange[800],
+          visualDensity: VisualDensity.adaptivePlatformDensity),
+      home: HomePage(),
+    );
   }
 }
 
@@ -36,70 +43,73 @@ class _HomePageState extends State<HomePage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-      children: [
-        Text("Find meatless meals near you",
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: MediaQuery.of(context).size.height / 30)),
-        Container(
-            height: MediaQuery.of(context).size.height / 10,
-            child: Row(
-              children: [
-                Expanded(
-                    child: SizedBox(
-                        height: MediaQuery.of(context).size.height / 10,
-                        child: Form(
-                          key: _formKey,
-                          child: TextFormField(
-                              decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  hintText: 'Enter 5-digit zip code'),
-                              validator: (value) {
-                                RegExp validate = RegExp(r'^[0-9]{5}$');
-                                var isValid;
-                                if (value is String) {
-                                  var temp = validate.stringMatch(value);
-                                  if (temp == null) {
-                                    isValid = false;
-                                  } else {
-                                    isValid = true;
+      body: Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Find meatless meals near you",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: MediaQuery.of(context).size.height / 30)),
+          Container(
+              height: MediaQuery.of(context).size.height / 10,
+              child: Row(
+                children: [
+                  Expanded(
+                      child: SizedBox(
+                          height: MediaQuery.of(context).size.height / 10,
+                          child: Form(
+                            key: _formKey,
+                            child: TextFormField(
+                                decoration: InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                    hintText: 'Enter 5-digit zip code'),
+                                validator: (value) {
+                                  RegExp validate = RegExp(r'^[0-9]{5}$');
+                                  var isValid;
+                                  if (value is String) {
+                                    var temp = validate.stringMatch(value);
+                                    if (temp == null) {
+                                      isValid = false;
+                                    } else {
+                                      isValid = true;
+                                    }
                                   }
-                                }
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter a zip code';
-                                } else if (!isValid) {
-                                  return 'Please enter a valid zip code';
-                                }
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a zip code';
+                                  } else if (!isValid) {
+                                    return 'Please enter a valid zip code';
+                                  }
 
-                                // regex
-                              },
-                              onSaved: (value) {
-                                if (value is String) {
-                                  zipCode = value;
-                                }
-                              }),
-                        ))),
-                ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
+                                  // regex
+                                },
+                                onSaved: (value) {
+                                  if (value is String) {
+                                    zipCode = value;
+                                  }
+                                }),
+                          ))),
+                  ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
 
-                        var body = zipCode;
-                        debugPrint(zipCode);
+                          var body = zipCode;
+                          debugPrint(zipCode);
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => Mainpage(zipCode: zipCode)),
-                        );
-                      }
-                    },
-                    child: Text('Search'))
-              ],
-            ))
-      ],
-    ));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => Mainpage(zipCode: zipCode)),
+                          );
+                        }
+                      },
+                      child: Text('Search'))
+                ],
+              ))
+        ],
+      )),
+    );
   }
 }
 
