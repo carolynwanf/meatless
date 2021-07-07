@@ -5,13 +5,14 @@ import 'package:http/http.dart' as http;
 import 'restaurantPage.dart';
 
 class Restaurants extends StatefulWidget {
+  var notifyParent;
   var pins;
   var zipCode;
   var sort = 'friendliness';
   var search = false;
   var query = '';
 
-  Restaurants({this.pins, this.zipCode});
+  Restaurants({this.pins, this.zipCode, this.notifyParent});
   @override
   _RestaurantsState createState() => _RestaurantsState();
 }
@@ -41,7 +42,6 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
 }
 
 class _RestaurantsState extends State<Restaurants> {
-  late Future<List> _restaurants;
   var page = 1;
   final _formKey = GlobalKey<FormState>();
   var formVal;
@@ -55,23 +55,13 @@ class _RestaurantsState extends State<Restaurants> {
     fieldText.clear();
   }
 
-  void initState() {
-    var zipCode = widget.zipCode;
-    super.initState();
-    debugPrint('debug printing');
-    _restaurants =
-        getRestaurants(page, zipCode, widget.sort, widget.search, widget.query);
-
-    // debugPrint('$_restaurants');
-  }
-
   Widget restaurantDesc(name, type, friendliness, id) {
     final _iconSize = const TextStyle(fontSize: 30);
 
     var info = {'name': name, 'id': id};
 
     return new ListTile(
-      leading: Text('${friendliness}', style: _iconSize),
+      leading: Text('$friendliness', style: _iconSize),
       title: Text(name),
       subtitle: Text(type),
       onTap: () => {
@@ -79,7 +69,7 @@ class _RestaurantsState extends State<Restaurants> {
           context,
           MaterialPageRoute(
               builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
-        )
+        ).then((val) => {setState(() {}), widget.notifyParent()})
       },
       // trailing: Icon(Icons.star)
       // Star(pinned: alreadyPinned)
@@ -155,8 +145,6 @@ class _RestaurantsState extends State<Restaurants> {
                             widget.search = false;
                             widget.query = '';
                             page = 1;
-                            _restaurants = getRestaurants(
-                                1, zipCode, widget.sort, false, '');
 
                             // _displayRestaurants = !_displayRestaurants;
                           });
@@ -170,8 +158,6 @@ class _RestaurantsState extends State<Restaurants> {
                             setState(() {
                               widget.search = false;
                               page = 1;
-                              _restaurants = getRestaurants(
-                                  1, zipCode, widget.sort, false, widget.query);
 
                               // _displayRestaurants = !_displayRestaurants;
                             });
@@ -180,8 +166,6 @@ class _RestaurantsState extends State<Restaurants> {
                               widget.search = true;
                               widget.query = formVal;
                               page = 1;
-                              _restaurants = getRestaurants(
-                                  1, zipCode, widget.sort, true, formVal);
 
                               // _displayRestaurants = !_displayRestaurants;
                             });
