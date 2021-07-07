@@ -112,6 +112,22 @@ class _HomePageState extends State<HomePage> {
                                       if (value is String) {
                                         zipCode = value;
                                       }
+                                    },
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        _formKey.currentState!.save();
+
+                                        debugPrint(zipCode);
+                                        zipCodeController.clear();
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => Mainpage(
+                                                  zipCode: zipCode,
+                                                  pins: widget.pins)),
+                                        );
+                                      }
                                     }),
                               )),
                         ],
@@ -178,21 +194,23 @@ class _MainpageState extends State<Mainpage> {
             color: AppColors.medGrey, //change your color here
           ),
           title: Container(
-              padding: EdgeInsets.only(bottom: height / 150),
-              child: width < 1000
+              padding: EdgeInsets.only(bottom: height / 150, top: height / 150),
+              child: width < 500
                   ? Text("M",
                       style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: height / 30))
-                  : Text('Meatless',
+                  : Text('MEATLESS',
                       style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
-                          fontSize: height / 30))),
+                          fontSize: height / 50))),
           actions: [
             Container(
-                padding: EdgeInsets.only(bottom: height / 150),
+                padding: width < 500
+                    ? EdgeInsets.only(bottom: height / 150, top: height / 150)
+                    : EdgeInsets.only(bottom: height / 100, top: height / 100),
                 height: height / 12,
                 width: height / 5,
                 child: Form(
@@ -208,8 +226,12 @@ class _MainpageState extends State<Mainpage> {
                                 color: AppColors.darkGrey, width: 1.5),
                           ),
                           enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
+                            ),
                             borderSide: BorderSide(
-                                color: AppColors.medGrey, width: 1.0),
+                                color: AppColors.medGrey, width: 1.5),
                           ),
                           hintText: '${widget.zipCode}'),
                       validator: (value) {
@@ -235,18 +257,35 @@ class _MainpageState extends State<Mainpage> {
                         if (value is String) {
                           formVal = value;
                         }
+                      },
+                      onFieldSubmitted: (value) {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+
+                          setState(() {
+                            debugPrint('setting zipCode $formVal');
+                            widget.zipCode = formVal;
+
+                            // _displayRestaurants = !_displayRestaurants;
+                          });
+                        }
                       }),
                 )),
             Container(
-              padding: EdgeInsets.only(bottom: height / 150),
+              padding: width < 500
+                  ? EdgeInsets.only(bottom: height / 150, top: height / 150)
+                  : EdgeInsets.only(
+                      bottom: height / 100,
+                      top: height / 100,
+                      right: height / 30),
               height: MediaQuery.of(context).size.height / 10,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       side: BorderSide(width: 2, color: AppColors.primaryDark),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(15),
-                            bottomRight: Radius.circular(15)),
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12)),
                       ),
                       // padding: EdgeInsets.only(bottom: height / 90),
                       primary: AppColors.primary,
@@ -258,15 +297,16 @@ class _MainpageState extends State<Mainpage> {
                       setState(() {
                         debugPrint('setting zipCode $formVal');
                         widget.zipCode = formVal;
-
-                        // _displayRestaurants = !_displayRestaurants;
                       });
                     }
                   },
                   child: Icon(Icons.search)),
             ),
             Container(
-                padding: EdgeInsets.only(bottom: height / 150),
+                padding: EdgeInsets.only(
+                    bottom: height / 150,
+                    top: height / 150,
+                    right: height / 50),
                 child: IconButton(
                     onPressed: () {
                       Navigator.push(
@@ -284,7 +324,9 @@ class _MainpageState extends State<Mainpage> {
         body: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(height / 70),
+              padding: width < 500
+                  ? EdgeInsets.all(height / 70)
+                  : EdgeInsets.only(top: height / 30, left: height / 50),
               child: Row(
                 children: [
                   ElevatedButton(
@@ -296,11 +338,13 @@ class _MainpageState extends State<Mainpage> {
                               bottomLeft: Radius.circular(7)),
                         ),
                         // padding: EdgeInsets.only(bottom: height / 90),
-                        primary: AppColors.primary,
+                        primary: Colors.white,
                         minimumSize: Size(height / 15, height / 20)),
                     child: Text('Restaurants',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: _displayRestaurants
+                                ? AppColors.darkText
+                                : AppColors.primaryDark,
                             fontWeight: FontWeight.normal,
                             fontSize: height / 45)),
                     onPressed: !_displayRestaurants
@@ -320,11 +364,13 @@ class _MainpageState extends State<Mainpage> {
                               bottomRight: Radius.circular(7)),
                         ),
                         // padding: EdgeInsets.only(bottom: height / 90),
-                        primary: AppColors.primary,
+                        primary: Colors.white,
                         minimumSize: Size(height / 15, height / 20)),
                     child: Text('Dishes',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: _displayRestaurants
+                                ? AppColors.primaryDark
+                                : AppColors.darkText,
                             fontWeight: FontWeight.normal,
                             fontSize: height / 45)),
                     onPressed: _displayRestaurants

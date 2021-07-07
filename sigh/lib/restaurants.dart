@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sigh/appColors.dart';
 import 'restaurantPage.dart';
+import 'appColors.dart';
 
 class Restaurants extends StatefulWidget {
   var notifyParent;
@@ -78,6 +80,8 @@ class _RestaurantsState extends State<Restaurants> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     var zipCode = widget.zipCode;
     debugPrint('$page');
     isDisabled() {
@@ -94,84 +98,126 @@ class _RestaurantsState extends State<Restaurants> {
           height: MediaQuery.of(context).size.height / 10,
           child: Row(
             children: [
-              DropdownButton(
-                value: widget.sort,
-                icon: const Icon(Icons.arrow_downward),
-                iconSize: 24,
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
-                ),
-                onChanged: (String? value) {
-                  setState(() {
-                    debugPrint('changed $value');
-                    widget.sort = value!;
-                    page = 1;
-                  });
-                },
-                items: [
-                  DropdownMenuItem<String>(
-                      value: 'friendliness', child: Text('friendliness')),
-                  DropdownMenuItem<String>(
-                      value: '# of meatless dishes',
-                      child: Text('# of meatless dishes'))
+              Row(
+                children: [
+                  Container(
+                      padding: EdgeInsets.only(
+                          left: height / 40, right: height / 100),
+                      child: Text("Sort by:")),
+                  Container(
+                      padding: EdgeInsets.only(right: height / 40),
+                      child: DropdownButton(
+                        value: widget.sort,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        iconSize: 20,
+                        elevation: 16,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (String? value) {
+                          setState(() {
+                            debugPrint('changed $value');
+                            widget.sort = value!;
+                            page = 1;
+                          });
+                        },
+                        items: [
+                          DropdownMenuItem<String>(
+                              value: 'friendliness',
+                              child: Text('friendliness')),
+                          DropdownMenuItem<String>(
+                              value: '# of meatless dishes',
+                              child: Text('meatless dishes'))
+                        ],
+                      ))
                 ],
               ),
-              SizedBox(
-                  height: MediaQuery.of(context).size.height / 10,
-                  width: MediaQuery.of(context).size.width / 4,
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  height: MediaQuery.of(context).size.height / 15,
+                  width: MediaQuery.of(context).size.width / 7,
                   child: Form(
                     key: _formKey,
                     child: TextFormField(
                         controller: searchResultsController,
                         decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            hintText: widget.search
-                                ? '${widget.query}'
-                                : 'search within results'),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.medGrey, width: 1.5),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.lightGrey, width: 1),
+                            ),
+                            hintStyle: TextStyle(fontSize: 13),
+                            hintText:
+                                widget.search ? '${widget.query}' : 'search'),
                         onSaved: (value) {
                           if (value is String) {
                             formVal = value;
                           }
                         }),
                   )),
-              ElevatedButton(
-                  onPressed: widget.search
-                      ? () {
-                          searchResultsController.clear();
-                          setState(() {
-                            widget.search = false;
-                            widget.query = '';
-                            page = 1;
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          side: BorderSide(
+                              width: 2, color: AppColors.primaryDark),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(12),
+                                bottomRight: Radius.circular(12)),
+                          ),
+                          // padding: EdgeInsets.only(bottom: height / 90),
+                          primary: AppColors.primary,
+                          minimumSize: Size(height / 40, height / 18.5)),
+                      onPressed: widget.search
+                          ? () {
+                              searchResultsController.clear();
+                              setState(() {
+                                widget.search = false;
+                                widget.query = '';
+                                page = 1;
 
-                            // _displayRestaurants = !_displayRestaurants;
-                          });
-                        }
-                      : () {
-                          _formKey.currentState!.save();
-                          if (formVal == null ||
-                              formVal.isEmpty ||
-                              formVal == ' ' ||
-                              formVal == '') {
-                            setState(() {
-                              widget.search = false;
-                              page = 1;
+                                // _displayRestaurants = !_displayRestaurants;
+                              });
+                            }
+                          : () {
+                              _formKey.currentState!.save();
+                              if (formVal == null ||
+                                  formVal.isEmpty ||
+                                  formVal == ' ' ||
+                                  formVal == '') {
+                                setState(() {
+                                  widget.search = false;
+                                  page = 1;
 
-                              // _displayRestaurants = !_displayRestaurants;
-                            });
-                          } else {
-                            setState(() {
-                              widget.search = true;
-                              widget.query = formVal;
-                              page = 1;
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
+                              } else {
+                                setState(() {
+                                  widget.search = true;
+                                  widget.query = formVal;
+                                  page = 1;
 
-                              // _displayRestaurants = !_displayRestaurants;
-                            });
-                          }
-                        },
-                  child: widget.search ? Text('Clear') : Text('Search'))
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
+                              }
+                            },
+                      child: widget.search
+                          ? Text("x", style: TextStyle(fontSize: 24))
+                          : Icon(Icons.search, size: 24)))
             ],
           )),
       SizedBox(
@@ -223,72 +269,91 @@ class _RestaurantsState extends State<Restaurants> {
 
             // By default, show a loading spinner.
             return SizedBox(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
               height: 50.0,
               width: 50.0,
             );
           },
         )),
       ),
-      Row(
-        children: [
-          ElevatedButton(
-              onPressed: isDisabled()
-                  ? null
-                  : () => {
+      Container(
+          padding: EdgeInsets.only(top: height / 30),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!isDisabled())
+                IconButton(
+                    hoverColor: Colors.white.withOpacity(0),
+                    onPressed: () => {
+                          setState(() {
+                            page = page - 1;
+                          })
+                        },
+                    icon: Icon(Icons.arrow_back_ios,
+                        size: 20, color: AppColors.darkGrey)),
+              Container(
+                  width: height / 15,
+                  height: height / 25,
+                  child: TextField(
+                    controller: fieldText,
+                    onSubmitted: (value) {
+                      var number = int.tryParse(value);
+                      if (number != null && 0 < number && number < 118) {
                         setState(() {
-                          page = page - 1;
-                        })
-                      },
-              child: Text('Prev')),
-          Container(
-              child: TextField(
-                controller: fieldText,
-                onSubmitted: (value) {
-                  var number = int.tryParse(value);
-                  if (number != null && 0 < number && number < 118) {
-                    setState(() {
-                      page = number;
-                    });
+                          page = number;
+                        });
 
-                    clearText();
+                        clearText();
+                      }
+                    },
+                    decoration: InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: AppColors.medGrey, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: AppColors.lightGrey, width: 1),
+                        ),
+                        hintText: '$page',
+                        hintStyle: TextStyle(fontSize: 13)),
+                  )),
+              FutureBuilder<List>(
+                future: getRestaurants(
+                    page, zipCode, widget.sort, widget.search, widget.query),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    debugPrint(
+                        'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
+                    var end = true;
+                    if (snapshot.data![0] != 'no results') {
+                      if (snapshot.data!.length == 8) {
+                        end = false;
+                      }
+                    }
+
+                    if (end) {
+                      return Text('');
+                    } else {
+                      return IconButton(
+                          hoverColor: Colors.white.withOpacity(0),
+                          onPressed: () => {
+                                setState(() {
+                                  page = page + 1;
+                                })
+                              },
+                          icon: Icon(Icons.arrow_forward_ios,
+                              size: 20, color: AppColors.darkGrey));
+                    }
+                  } else {
+                    return Text('');
                   }
                 },
-                decoration: InputDecoration(
-                    border: UnderlineInputBorder(), hintText: '  $page'),
               ),
-              width: 50),
-          FutureBuilder<List>(
-            future: getRestaurants(
-                page, zipCode, widget.sort, widget.search, widget.query),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                debugPrint(
-                    'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
-                var end = true;
-                if (snapshot.data![0] != 'no results') {
-                  if (snapshot.data!.length == 8) {
-                    end = false;
-                  }
-                }
-                return ElevatedButton(
-                    onPressed: end
-                        ? null
-                        : () => {
-                              setState(() {
-                                page = page + 1;
-                              })
-                            },
-                    child: Text('Next'));
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              } else {
-                return Text('');
-              }
-            },
-          ),
-        ],
-      )
+            ],
+          ))
     ]));
   }
 }
