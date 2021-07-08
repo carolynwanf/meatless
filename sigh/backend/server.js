@@ -34,6 +34,8 @@ app.post("/get-restaurants", async (req,res) => {
     const sort = req.body.sort;
     const search = req.body.search;
 
+    const number = 15
+
     console.log(sort, search)
 
     console.log(zipCode)
@@ -48,7 +50,7 @@ app.post("/get-restaurants", async (req,res) => {
                 console.log('search, friendliness')
                 
 
-                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({friendliness: -1,_id: -1}).skip((offset-1) *8).limit(8).toArray();
+                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({friendliness: -1,_id: -1}).skip((offset-1) *number).limit(number).toArray();
 
                 // console.log(restaurants.length)
 
@@ -58,7 +60,7 @@ app.post("/get-restaurants", async (req,res) => {
                     res.json({restaurants: ['no results']})
                 }
             } else if (sort == "# of meatless dishes") {
-                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({totalVegItems: -1,_id: -1}).skip((offset-1) *8).limit(8).toArray();
+                const restaurants = await db.collection('restaurants').find({$and: [{zipCode: zipCode}, {$text: {$search: query}}]}).sort({totalVegItems: -1,_id: -1}).skip((offset-1) *number).limit(number).toArray();
 
                 // console.log(restaurants.length)
 
@@ -75,7 +77,7 @@ app.post("/get-restaurants", async (req,res) => {
 
                 console.log('no search, friendliness')
     
-                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({friendliness: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({friendliness: -1, _id: -1}).skip((offset-1) *number).limit(number).toArray();
     
                 // console.log(restaurants.length)
     
@@ -88,7 +90,7 @@ app.post("/get-restaurants", async (req,res) => {
 
                 console.log("no search, number of veg")
 
-                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({totalVegItems: -1, _id: -1}).skip((offset-1) *8).limit(8).toArray();
+                const restaurants = await db.collection('restaurants').find({zipCode: zipCode}).sort({totalVegItems: -1, _id: -1}).skip((offset-1) *number).limit(number).toArray();
     
                 // console.log(restaurants.length)
     

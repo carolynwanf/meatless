@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'itemDialog.dart';
+import 'appColors.dart';
 
 class Dishes extends StatefulWidget {
   var pins;
@@ -156,6 +157,7 @@ class _DishesState extends State<Dishes> {
   }
 
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
     debugPrint('$page');
     isDisabled() {
       if (page == 1) {
@@ -166,76 +168,113 @@ class _DishesState extends State<Dishes> {
     }
 
     calculateCount(size) {
-      if (size.width < 480) {
+      if (size.width < 550) {
         return 2;
       } else if (size.width < 767) {
         return 3;
-      } else if (size.width < 991) {
+      } else if (size.width < 950) {
         return 4;
-      } else {
+      } else if (size.width < 1200) {
         return 5;
+      } else {
+        return 6;
       }
     }
 
     return Scaffold(
         body: Column(children: [
-      Row(
-        children: [
-          SizedBox(
-              height: MediaQuery.of(context).size.height / 10,
-              width: MediaQuery.of(context).size.width / 4,
-              child: Form(
-                key: _formKey,
-                child: TextFormField(
-                    controller: searchResultsController,
-                    decoration: InputDecoration(
-                        border: UnderlineInputBorder(),
-                        hintText: widget.search
-                            ? '${widget.query}'
-                            : 'search within results'),
-                    onSaved: (value) {
-                      if (value is String) {
-                        formVal = value;
-                      }
-                    }),
-              )),
-          ElevatedButton(
-              onPressed: widget.search
-                  ? () {
-                      searchResultsController.clear();
-                      setState(() {
-                        widget.search = false;
-                        widget.query = '';
-                        page = 1;
+      Container(
+          padding: EdgeInsets.only(left: height / 40),
+          child: Row(
+            children: [
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  height: MediaQuery.of(context).size.height / 15,
+                  width: MediaQuery.of(context).size.width / 7,
+                  child: Form(
+                    key: _formKey,
+                    child: TextFormField(
+                        controller: searchResultsController,
+                        decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.medGrey, width: 1.5),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.lightGrey, width: 1),
+                            ),
+                            hintStyle: TextStyle(fontSize: 13),
+                            hintText:
+                                widget.search ? '${widget.query}' : 'search'),
+                        onSaved: (value) {
+                          if (value is String) {
+                            formVal = value;
+                          }
+                        }),
+                  )),
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          side: BorderSide(
+                              width: 2, color: AppColors.primaryDark),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(12),
+                                bottomRight: Radius.circular(12)),
+                          ),
+                          // padding: EdgeInsets.only(bottom: height / 90),
+                          primary: AppColors.primary,
+                          minimumSize: Size(height / 40, height / 18.5)),
+                      onPressed: widget.search
+                          ? () {
+                              searchResultsController.clear();
+                              setState(() {
+                                widget.search = false;
+                                widget.query = '';
+                                page = 1;
 
-                        // _displayRestaurants = !_displayRestaurants;
-                      });
-                    }
-                  : () {
-                      _formKey.currentState!.save();
-                      if (formVal == null ||
-                          formVal.isEmpty ||
-                          formVal == ' ' ||
-                          formVal == '') {
-                        setState(() {
-                          widget.search = false;
-                          page = 1;
+                                // _displayRestaurants = !_displayRestaurants;
+                              });
+                            }
+                          : () {
+                              _formKey.currentState!.save();
+                              if (formVal == null ||
+                                  formVal.isEmpty ||
+                                  formVal == ' ' ||
+                                  formVal == '') {
+                                setState(() {
+                                  widget.search = false;
+                                  page = 1;
 
-                          // _displayRestaurants = !_displayRestaurants;
-                        });
-                      } else {
-                        setState(() {
-                          widget.search = true;
-                          widget.query = formVal;
-                          page = 1;
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
+                              } else {
+                                setState(() {
+                                  widget.search = true;
+                                  widget.query = formVal;
+                                  page = 1;
 
-                          // _displayRestaurants = !_displayRestaurants;
-                        });
-                      }
-                    },
-              child: widget.search ? Text('Clear') : Text('Search'))
-        ],
-      ),
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
+                              }
+                            },
+                      child: widget.search
+                          ? Text("x", style: TextStyle(fontSize: 24))
+                          : Icon(Icons.search, size: 24)))
+            ],
+          )),
       SizedBox(
         height: (MediaQuery.of(context).size.height) * (3 / 5),
         child: Center(

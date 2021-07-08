@@ -57,25 +57,69 @@ class _RestaurantsState extends State<Restaurants> {
     fieldText.clear();
   }
 
-  Widget restaurantDesc(name, type, friendliness, id) {
+  Widget restaurantDesc(name, type, friendliness, id, mains) {
+    var height = MediaQuery.of(context).size.height;
     final _iconSize = const TextStyle(fontSize: 30);
-
     var info = {'name': name, 'id': id};
 
-    return new ListTile(
-      leading: Text('$friendliness', style: _iconSize),
-      title: Text(name),
-      subtitle: Text(type),
-      onTap: () => {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
-        ).then((val) => {setState(() {}), widget.notifyParent()})
-      },
-      // trailing: Icon(Icons.star)
-      // Star(pinned: alreadyPinned)
-    );
+    if (MediaQuery.of(context).size.width < 500) {
+      return new ListTile(
+        leading: Text('$friendliness', style: _iconSize),
+        title: Text(name),
+        subtitle: Text(type),
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
+          ).then((val) => {setState(() {}), widget.notifyParent()})
+        },
+        // trailing: Icon(Icons.star)
+        // Star(pinned: alreadyPinned)
+      );
+    } else {
+      return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      RestaurantPage(info: info, pins: widget.pins)),
+            ).then((val) => {setState(() {}), widget.notifyParent()});
+          },
+          child: Container(
+              padding: EdgeInsets.all(height / 50),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('$friendliness', style: _iconSize),
+                  Text(
+                    name,
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontWeight: FontWeight.bold,
+                        fontSize: height / 55),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (name != type) Text(type, textAlign: TextAlign.center),
+                ],
+              )));
+
+      // new ListTile(
+      //   leading: Text('$friendliness', style: _iconSize),
+      //   title: Text(name),
+      //   subtitle: Text(type),
+      //   onTap: () => {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //           builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
+      //     ).then((val) => {setState(() {}), widget.notifyParent()})
+      //   },
+      //   // trailing: Icon(Icons.star)
+      //   // Star(pinned: alreadyPinned)
+      // );
+    }
   }
 
   @override
@@ -89,6 +133,20 @@ class _RestaurantsState extends State<Restaurants> {
         return true;
       } else {
         return false;
+      }
+    }
+
+    calculateCount(size) {
+      if (size.width < 550) {
+        return 2;
+      } else if (size.width < 767) {
+        return 3;
+      } else if (size.width < 950) {
+        return 4;
+      } else if (size.width < 1200) {
+        return 5;
+      } else {
+        return 6;
       }
     }
 
@@ -220,8 +278,9 @@ class _RestaurantsState extends State<Restaurants> {
                           : Icon(Icons.search, size: 24)))
             ],
           )),
-      SizedBox(
+      Container(
         height: (MediaQuery.of(context).size.height) * (3 / 5),
+        padding: EdgeInsets.fromLTRB(height / 50, 0, height / 50, 0),
         child: Center(
             child: FutureBuilder<List>(
           future: getRestaurants(
@@ -238,30 +297,65 @@ class _RestaurantsState extends State<Restaurants> {
                   snapshot.data!.add(end);
                 }
 
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (_, int position) {
-                    if (snapshot.data![position]["end"] == true) {
-                      return Text('End of results');
-                    } else {
-                      debugPrint(
-                          'type ${snapshot.data![position]["friendliness"]}');
-                      if (snapshot.data![position]["friendliness"] != null &&
-                          snapshot.data![position]["friendliness"] != 'N/A') {
-                        snapshot.data![position]["friendliness"] =
-                            snapshot.data![position]["friendliness"].round();
+                if (width < 500) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (_, int position) {
+                      if (snapshot.data![position]["end"] == true) {
+                        return Text('End of results');
                       } else {
-                        snapshot.data![position]["friendliness"] = "N/A";
+                        debugPrint(
+                            'type ${snapshot.data![position]["friendliness"]}');
+                        if (snapshot.data![position]["friendliness"] != null &&
+                            snapshot.data![position]["friendliness"] != 'N/A') {
+                          snapshot.data![position]["friendliness"] =
+                              snapshot.data![position]["friendliness"].round();
+                        } else {
+                          snapshot.data![position]["friendliness"] = "N/A";
+                        }
+                        return restaurantDesc(
+                            snapshot.data![position]["name"],
+                            snapshot.data![position]["type"],
+                            snapshot.data![position]["friendliness"],
+                            snapshot.data![position]["_id"],
+                            snapshot.data![position]["totalVegItems"]);
                       }
-                      return Card(
-                          child: restaurantDesc(
-                              snapshot.data![position]["name"],
-                              snapshot.data![position]["type"],
-                              snapshot.data![position]["friendliness"],
-                              snapshot.data![position]["_id"]));
-                    }
-                  },
-                );
+                    },
+                  );
+                } else {
+                  return GridView.builder(
+                    itemCount: snapshot.data!.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount:
+                          calculateCount(MediaQuery.of(context).size),
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: (1.3 / 1.5),
+                    ),
+                    itemBuilder: (_, int position) {
+                      if (snapshot.data![position]["end"] == true) {
+                        return Text('End of results');
+                      } else {
+                        debugPrint(
+                            'type ${snapshot.data![position]["friendliness"]}');
+                        if (snapshot.data![position]["friendliness"] != null &&
+                            snapshot.data![position]["friendliness"] != 'N/A') {
+                          snapshot.data![position]["friendliness"] =
+                              snapshot.data![position]["friendliness"].round();
+                        } else {
+                          snapshot.data![position]["friendliness"] = "N/A";
+                        }
+                        return Card(
+                            child: restaurantDesc(
+                                snapshot.data![position]["name"],
+                                snapshot.data![position]["type"],
+                                snapshot.data![position]["friendliness"],
+                                snapshot.data![position]["_id"],
+                                snapshot.data![position]["totalVegItems"]));
+                      }
+                    },
+                  );
+                }
               }
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
@@ -329,7 +423,7 @@ class _RestaurantsState extends State<Restaurants> {
                         'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
                     var end = true;
                     if (snapshot.data![0] != 'no results') {
-                      if (snapshot.data!.length == 8) {
+                      if (snapshot.data!.length == 15) {
                         end = false;
                       }
                     }
