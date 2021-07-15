@@ -134,50 +134,47 @@ class _DishesState extends State<Dishes> {
               child: Column(children: [
                 Container(
                     padding: EdgeInsets.only(top: 5, bottom: 15),
+                    // contents of card
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // text
                         Container(
                             padding: EdgeInsets.only(left: 5),
-                            child: Column(
-                                // mainAxisAlignment: MainAxisAlignment.start,
-                                // mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Container(
-                                      width: width / 2 - 10,
-                                      child: Text(
-                                        name,
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600),
+                            child: Column(children: [
+                              // dish name
+                              Container(
+                                  width: width / 2 - 10,
+                                  child: Text(
+                                    name,
+                                    style: AppStyles.header,
+                                    textAlign: TextAlign.left,
+                                  )),
+                              // dish description if it exists
+                              if (description != 'none')
+                                Container(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    width: width / 2 - 10,
+                                    child: Text(
+                                      description,
+                                      textAlign: TextAlign.left,
+                                      style: AppStyles.subtitle,
+                                    )),
+                              // dish price and restaurant
+                              Container(
+                                  width: width / 2 - 10,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '$price • $restaurant',
                                         textAlign: TextAlign.left,
-                                      )),
-                                  if (description != 'none')
-                                    Container(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 5),
-                                        width: width / 2 - 10,
-                                        child: Text(
-                                          description,
-                                          textAlign: TextAlign.left,
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.darkGrey),
-                                        )),
-                                  Container(
-                                      width: width / 2 - 10,
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            '$price • $restaurant',
-                                            textAlign: TextAlign.left,
-                                            style: TextStyle(
-                                                color: AppColors.accent),
-                                          )
-                                        ],
-                                      ))
-                                ])),
+                                        style:
+                                            TextStyle(color: AppColors.accent),
+                                      )
+                                    ],
+                                  ))
+                            ])),
+                        // image if it exists
                         if (image != 'none')
                           Container(
                               height: height / 6 + 8,
@@ -199,6 +196,7 @@ class _DishesState extends State<Dishes> {
                                   ],
                                 ),
                               )),
+                        // placeholder image if image does not exist
                         if (image == 'none')
                           Container(
                               decoration: BoxDecoration(
@@ -212,19 +210,14 @@ class _DishesState extends State<Dishes> {
                                       style: TextStyle(color: Colors.white))))
                       ],
                     )),
+                // divider
                 Container(
-                    width: width - 5, height: 1, color: AppColors.lightGrey)
+                    width: width - 10, height: 1, color: AppColors.lightGrey)
               ])));
     } else {
       return InkWell(
           hoverColor: AppColors.noHover,
-          onTap: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ItemDialog(pins: widget.pins, item: item);
-                }).then((val) => setState(() {}));
-          },
+          onTap: showItemDesc,
           child: Container(
               padding: EdgeInsets.only(
                   left: width / 200,
