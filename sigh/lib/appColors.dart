@@ -8,4 +8,6 @@ class AppColors {
   static var medGrey = Colors.grey.shade400;
   static var darkGrey = Colors.grey.shade600;
   static var accent = Colors.orange.shade800;
+  static var star = Colors.yellow.shade700;
+  static var noHover = Colors.white.withOpacity(0);
 }

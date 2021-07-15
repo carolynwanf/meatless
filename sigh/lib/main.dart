@@ -179,9 +179,10 @@ class _MainpageState extends State<Mainpage> {
 
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           bottom: PreferredSize(
               child: Container(
@@ -212,11 +213,12 @@ class _MainpageState extends State<Mainpage> {
                     ? EdgeInsets.only(bottom: height / 150, top: height / 150)
                     : EdgeInsets.only(bottom: height / 100, top: height / 100),
                 height: height / 12,
-                width: height / 5,
+                width: height / 6,
                 child: Form(
                   key: _formKey,
                   child: TextFormField(
                       decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(bottom: 1, left: 15),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(10),
@@ -234,25 +236,6 @@ class _MainpageState extends State<Mainpage> {
                                 color: AppColors.medGrey, width: 1.5),
                           ),
                           hintText: '${widget.zipCode}'),
-                      validator: (value) {
-                        RegExp validate = RegExp(r'^[0-9]{5}$');
-                        var isValid;
-                        if (value is String) {
-                          var temp = validate.stringMatch(value);
-                          if (temp == null) {
-                            isValid = false;
-                          } else {
-                            isValid = true;
-                          }
-                        }
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a zip code';
-                        } else if (!isValid) {
-                          return 'Please enter a valid zip code';
-                        }
-
-                        // regex
-                      },
                       onSaved: (value) {
                         if (value is String) {
                           formVal = value;
@@ -307,25 +290,29 @@ class _MainpageState extends State<Mainpage> {
                     bottom: height / 150,
                     top: height / 150,
                     right: height / 50),
-                child: IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => PinnedItems(pins: widget.pins)),
-                      ).then((val) => setState(() {}));
-                    },
-                    icon: Icon(Icons.star,
-                        color: widget.pins["items"].length > 0
-                            ? AppColors.primary
-                            : AppColors.medGrey)))
+                child: Stack(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => PinnedItems(pins: widget.pins)),
+                          ).then((val) => setState(() {}));
+                        },
+                        icon: Icon(Icons.star,
+                            color: widget.pins["items"].length > 0
+                                ? AppColors.star
+                                : AppColors.medGrey))
+                  ],
+                ))
           ],
         ),
         body: Column(
           children: [
             Container(
               padding: width < 500
-                  ? EdgeInsets.all(height / 70)
+                  ? EdgeInsets.only(top: height / 70, left: height / 70)
                   : EdgeInsets.only(top: height / 30, left: height / 50),
               child: Row(
                 children: [
@@ -345,7 +332,7 @@ class _MainpageState extends State<Mainpage> {
                             color: _displayRestaurants
                                 ? AppColors.darkText
                                 : AppColors.primaryDark,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w600,
                             fontSize: height / 45)),
                     onPressed: !_displayRestaurants
                         ? () {
@@ -363,7 +350,6 @@ class _MainpageState extends State<Mainpage> {
                               topRight: Radius.circular(7),
                               bottomRight: Radius.circular(7)),
                         ),
-                        // padding: EdgeInsets.only(bottom: height / 90),
                         primary: Colors.white,
                         minimumSize: Size(height / 15, height / 20)),
                     child: Text('Dishes',
@@ -371,7 +357,7 @@ class _MainpageState extends State<Mainpage> {
                             color: _displayRestaurants
                                 ? AppColors.primaryDark
                                 : AppColors.darkText,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.w600,
                             fontSize: height / 45)),
                     onPressed: _displayRestaurants
                         ? () {
@@ -391,7 +377,10 @@ class _MainpageState extends State<Mainpage> {
                       zipCode: widget.zipCode,
                       notifyParent: refresh,
                     )
-                  : Dishes(pins: widget.pins, zipCode: widget.zipCode),
+                  : Dishes(
+                      pins: widget.pins,
+                      zipCode: widget.zipCode,
+                      notifyParent: refresh),
             )
           ],
         ));

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:sigh/appColors.dart';
 import 'restaurantPage.dart';
@@ -30,7 +31,7 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
     "query": query
   });
   final response =
-      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -44,6 +45,7 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
 }
 
 class _RestaurantsState extends State<Restaurants> {
+  final ScrollController _scrollController = ScrollController();
   var page = 1;
   final _formKey = GlobalKey<FormState>();
   var formVal;
@@ -58,6 +60,7 @@ class _RestaurantsState extends State<Restaurants> {
   }
 
   Widget restaurantDesc(name, type, friendliness, id, mains) {
+    // name = name.to
     var height = MediaQuery.of(context).size.height;
     final _iconSize = const TextStyle(fontSize: 30);
     var info = {'name': name, 'id': id};
@@ -79,6 +82,7 @@ class _RestaurantsState extends State<Restaurants> {
       );
     } else {
       return InkWell(
+          hoverColor: AppColors.noHover,
           onTap: () {
             Navigator.push(
               context,
@@ -98,27 +102,18 @@ class _RestaurantsState extends State<Restaurants> {
                     style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.bold,
-                        fontSize: height / 55),
+                        fontSize: 18),
                     textAlign: TextAlign.center,
                   ),
-                  if (name != type) Text(type, textAlign: TextAlign.center),
+                  if (name != type)
+                    Text(type,
+                        style: TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.normal,
+                            fontSize: 14),
+                        textAlign: TextAlign.center),
                 ],
               )));
-
-      // new ListTile(
-      //   leading: Text('$friendliness', style: _iconSize),
-      //   title: Text(name),
-      //   subtitle: Text(type),
-      //   onTap: () => {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //           builder: (_) => RestaurantPage(info: info, pins: widget.pins)),
-      //     ).then((val) => {setState(() {}), widget.notifyParent()})
-      //   },
-      //   // trailing: Icon(Icons.star)
-      //   // Star(pinned: alreadyPinned)
-      // );
     }
   }
 
@@ -126,6 +121,7 @@ class _RestaurantsState extends State<Restaurants> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+    var mobile = width < 500 ? true : false;
     var zipCode = widget.zipCode;
     debugPrint('$page');
     isDisabled() {
@@ -153,7 +149,7 @@ class _RestaurantsState extends State<Restaurants> {
     return Scaffold(
         body: Column(children: [
       Container(
-          height: MediaQuery.of(context).size.height / 10,
+          height: height / 10,
           child: Row(
             children: [
               Row(
@@ -182,10 +178,12 @@ class _RestaurantsState extends State<Restaurants> {
                         items: [
                           DropdownMenuItem<String>(
                               value: 'friendliness',
-                              child: Text('friendliness')),
+                              child: Text('friendliness',
+                                  style: TextStyle(color: AppColors.darkGrey))),
                           DropdownMenuItem<String>(
                               value: '# of meatless dishes',
-                              child: Text('meatless dishes'))
+                              child: Text('meatless dishes',
+                                  style: TextStyle(color: AppColors.darkGrey)))
                         ],
                       ))
                 ],
@@ -193,30 +191,34 @@ class _RestaurantsState extends State<Restaurants> {
               Container(
                   padding:
                       EdgeInsets.only(bottom: height / 80, top: height / 100),
-                  height: MediaQuery.of(context).size.height / 15,
-                  width: MediaQuery.of(context).size.width / 7,
+                  height: mobile ? height / 16 : height / 17,
+                  width: mobile ? width / 4 : width / 5,
                   child: Form(
                     key: _formKey,
                     child: TextFormField(
                         controller: searchResultsController,
                         decoration: InputDecoration(
+                            fillColor: Colors.white,
+                            filled: true,
+                            contentPadding:
+                                EdgeInsets.only(bottom: 1, left: 10),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                bottomLeft: Radius.circular(10),
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
                               ),
                               borderSide: BorderSide(
                                   color: AppColors.medGrey, width: 1.5),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                bottomLeft: Radius.circular(10),
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
                               ),
                               borderSide: BorderSide(
                                   color: AppColors.lightGrey, width: 1),
                             ),
-                            hintStyle: TextStyle(fontSize: 13),
+                            hintStyle: TextStyle(fontSize: 12),
                             hintText:
                                 widget.search ? '${widget.query}' : 'search'),
                         onSaved: (value) {
@@ -231,15 +233,20 @@ class _RestaurantsState extends State<Restaurants> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           side: BorderSide(
-                              width: 2, color: AppColors.primaryDark),
+                              width: mobile ? 1 : 2,
+                              color: mobile
+                                  ? AppColors.medGrey
+                                  : AppColors.primaryDark),
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(12),
-                                bottomRight: Radius.circular(12)),
+                                topRight: Radius.circular(7),
+                                bottomRight: Radius.circular(7)),
                           ),
                           // padding: EdgeInsets.only(bottom: height / 90),
-                          primary: AppColors.primary,
-                          minimumSize: Size(height / 40, height / 18.5)),
+                          primary: mobile ? Colors.white : AppColors.primary,
+                          minimumSize: mobile
+                              ? Size(height / 40, height / 25)
+                              : Size(height / 40, height / 21.5)),
                       onPressed: widget.search
                           ? () {
                               searchResultsController.clear();
@@ -274,12 +281,21 @@ class _RestaurantsState extends State<Restaurants> {
                               }
                             },
                       child: widget.search
-                          ? Text("x", style: TextStyle(fontSize: 24))
-                          : Icon(Icons.search, size: 24)))
+                          ? Container(
+                              height: 17,
+                              width: 17,
+                              child: Text("x",
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      color:
+                                          mobile ? AppColors.darkGrey : null)))
+                          : Icon(Icons.search,
+                              size: 17,
+                              color: mobile ? AppColors.darkGrey : null)))
             ],
           )),
       Container(
-        height: (MediaQuery.of(context).size.height) * (3 / 5),
+        height: height * (3 / 5),
         padding: EdgeInsets.fromLTRB(height / 50, 0, height / 50, 0),
         child: Center(
             child: FutureBuilder<List>(
@@ -291,39 +307,31 @@ class _RestaurantsState extends State<Restaurants> {
               if (snapshot.data![0] == 'no results') {
                 return Text('no results');
               } else {
-                if (snapshot.data!.length < 8 &&
-                    snapshot.data![snapshot.data!.length - 1]["end"] != true) {
-                  const end = {"end": true};
-                  snapshot.data!.add(end);
-                }
-
                 if (width < 500) {
                   return ListView.builder(
+                    controller: _scrollController,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (_, int position) {
-                      if (snapshot.data![position]["end"] == true) {
-                        return Text('End of results');
+                      debugPrint(
+                          'type ${snapshot.data![position]["friendliness"]}');
+                      if (snapshot.data![position]["friendliness"] != null &&
+                          snapshot.data![position]["friendliness"] != 'N/A') {
+                        snapshot.data![position]["friendliness"] =
+                            snapshot.data![position]["friendliness"].round();
                       } else {
-                        debugPrint(
-                            'type ${snapshot.data![position]["friendliness"]}');
-                        if (snapshot.data![position]["friendliness"] != null &&
-                            snapshot.data![position]["friendliness"] != 'N/A') {
-                          snapshot.data![position]["friendliness"] =
-                              snapshot.data![position]["friendliness"].round();
-                        } else {
-                          snapshot.data![position]["friendliness"] = "N/A";
-                        }
-                        return restaurantDesc(
-                            snapshot.data![position]["name"],
-                            snapshot.data![position]["type"],
-                            snapshot.data![position]["friendliness"],
-                            snapshot.data![position]["_id"],
-                            snapshot.data![position]["totalVegItems"]);
+                        snapshot.data![position]["friendliness"] = "N/A";
                       }
+                      return restaurantDesc(
+                          snapshot.data![position]["name"],
+                          snapshot.data![position]["type"],
+                          snapshot.data![position]["friendliness"],
+                          snapshot.data![position]["_id"],
+                          snapshot.data![position]["totalVegItems"]);
                     },
                   );
                 } else {
                   return GridView.builder(
+                    controller: _scrollController,
                     itemCount: snapshot.data!.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount:
@@ -379,12 +387,20 @@ class _RestaurantsState extends State<Restaurants> {
             children: [
               if (!isDisabled())
                 IconButton(
-                    hoverColor: Colors.white.withOpacity(0),
-                    onPressed: () => {
-                          setState(() {
-                            page = page - 1;
-                          })
-                        },
+                    hoverColor: AppColors.noHover,
+                    onPressed: () async {
+                      setState(() {
+                        page = page - 1;
+                      });
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      SchedulerBinding.instance
+                          ?.addPostFrameCallback((timeStamp) {
+                        _scrollController.animateTo(
+                            _scrollController.position.minScrollExtent,
+                            duration: const Duration(milliseconds: 10),
+                            curve: Curves.fastOutSlowIn);
+                      });
+                    },
                     icon: Icon(Icons.arrow_back_ios,
                         size: 20, color: AppColors.darkGrey)),
               Container(
@@ -412,7 +428,7 @@ class _RestaurantsState extends State<Restaurants> {
                               BorderSide(color: AppColors.lightGrey, width: 1),
                         ),
                         hintText: '$page',
-                        hintStyle: TextStyle(fontSize: 13)),
+                        hintStyle: TextStyle(fontSize: 12)),
                   )),
               FutureBuilder<List>(
                 future: getRestaurants(
@@ -433,11 +449,20 @@ class _RestaurantsState extends State<Restaurants> {
                     } else {
                       return IconButton(
                           hoverColor: Colors.white.withOpacity(0),
-                          onPressed: () => {
-                                setState(() {
-                                  page = page + 1;
-                                })
-                              },
+                          onPressed: () async {
+                            setState(() {
+                              page = page + 1;
+                            });
+                            await Future.delayed(
+                                const Duration(milliseconds: 200));
+                            SchedulerBinding.instance
+                                ?.addPostFrameCallback((timeStamp) {
+                              _scrollController.animateTo(
+                                  _scrollController.position.minScrollExtent,
+                                  duration: const Duration(milliseconds: 10),
+                                  curve: Curves.fastOutSlowIn);
+                            });
+                          },
                           icon: Icon(Icons.arrow_forward_ios,
                               size: 20, color: AppColors.darkGrey));
                     }

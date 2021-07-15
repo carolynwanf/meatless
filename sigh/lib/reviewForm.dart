@@ -53,8 +53,9 @@ class _ReviewFormState extends State<ReviewForm> {
             initialValue: numberOfStars,
             builder: (FormFieldState<int> state) {
               return Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  InkWell(
+                  GestureDetector(
                       onTap: () {
                         state.didChange(1);
                         setState(() {
@@ -64,7 +65,7 @@ class _ReviewFormState extends State<ReviewForm> {
                       child: numberOfStars > 0
                           ? Icon(Icons.star)
                           : Icon(Icons.star_border)),
-                  InkWell(
+                  GestureDetector(
                       onTap: () {
                         state.didChange(2);
                         setState(() {
@@ -74,7 +75,7 @@ class _ReviewFormState extends State<ReviewForm> {
                       child: numberOfStars > 1
                           ? Icon(Icons.star)
                           : Icon(Icons.star_border)),
-                  InkWell(
+                  GestureDetector(
                       onTap: () {
                         state.didChange(3);
                         setState(() {
@@ -84,7 +85,7 @@ class _ReviewFormState extends State<ReviewForm> {
                       child: numberOfStars > 2
                           ? Icon(Icons.star)
                           : Icon(Icons.star_border)),
-                  InkWell(
+                  GestureDetector(
                       onTap: () {
                         state.didChange(4);
                         setState(() {
@@ -94,7 +95,7 @@ class _ReviewFormState extends State<ReviewForm> {
                       child: numberOfStars > 3
                           ? Icon(Icons.star)
                           : Icon(Icons.star_border)),
-                  InkWell(
+                  GestureDetector(
                       onTap: () {
                         state.didChange(5);
                         setState(() {
