@@ -297,22 +297,37 @@ class _MainpageState extends State<Mainpage> {
                     bottom: height / 150,
                     top: height / 150,
                     right: height / 50),
-                child: Stack(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => PinnedItems(pins: widget.pins)),
-                          ).then((val) => setState(() {}));
-                        },
-                        icon: Icon(Icons.star,
-                            color: widget.pins["items"].length > 0
-                                ? AppColors.star
-                                : AppColors.medGrey))
-                  ],
-                ))
+                child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => PinnedItems(pins: widget.pins)),
+                      ).then((val) => setState(() {}));
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                            height: 60,
+                            width: 50,
+                            child: Icon(Icons.star,
+                                color: widget.pins["items"].length > 0
+                                    ? AppColors.star
+                                    : AppColors.medGrey,
+                                size: 30),
+                            alignment: Alignment.center),
+                        Container(
+                            // decoration: BoxDecoration(
+                            //     shape: BoxShape.circle, color: Colors.black),
+                            height: 60,
+                            width: 50,
+                            child: Text('${widget.pins['items'].length}',
+                                style: TextStyle(
+                                    color: AppColors.darkText,
+                                    fontWeight: FontWeight.w700)),
+                            alignment: Alignment.center)
+                      ],
+                    )))
           ],
         ),
         body: Column(

@@ -130,8 +130,8 @@ class _PinnedItemsState extends State<PinnedItems> {
                             id = itemList[index]['_id'],
                             price = itemList[index]['price'];
 
-                        if (description.length > 60) {
-                          description = description.substring(0, 60);
+                        if (description.length > 50) {
+                          description = description.substring(0, 50);
                           description = description + "...";
                         }
 
@@ -156,157 +156,144 @@ class _PinnedItemsState extends State<PinnedItems> {
                                   }).then((val) => setState(() {}));
                             },
                             child: Container(
-                                height: height / 5 + 5,
+                                // height: height / 5 + 5,
                                 child: Column(children: [
-                                  Container(
-                                      padding: EdgeInsets.only(
-                                          top: 5, bottom: 15, left: 10),
-                                      // contents of card
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            // text
-                                            Container(
-                                                padding:
-                                                    EdgeInsets.only(left: 5),
+                              Container(
+                                  padding: EdgeInsets.only(
+                                      top: 10, bottom: 10, left: 10),
+                                  // contents of card
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        // text
+                                        Container(
+                                            padding: EdgeInsets.only(left: 5),
+                                            child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  // dish name
+                                                  Container(
+                                                      width: width < 500
+                                                          ? width * (2 / 5)
+                                                          : width * (2 / 3),
+                                                      child: Text(
+                                                        name,
+                                                        style: AppStyles.header,
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      )),
+                                                  // dish description if it exists
+                                                  if (description != 'none')
+                                                    Container(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                vertical: 8),
+                                                        width: width < 500
+                                                            ? width * (2 / 5)
+                                                            : width * (2 / 3),
+                                                        child: Text(
+                                                          description,
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                          style: AppStyles
+                                                              .subtitle,
+                                                        )),
+                                                  // dish price
+                                                  Container(
+                                                      width: width < 500
+                                                          ? width * (2 / 5)
+                                                          : width * (2 / 3),
+                                                      child: Text(
+                                                        '$price',
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        style: TextStyle(
+                                                            color: AppColors
+                                                                .accent),
+                                                      ))
+                                                ])),
+                                        // image if it exists
+                                        if (image != 'none')
+                                          Container(
+                                              height: height / 6 + 8,
+                                              width: width < 500
+                                                  ? height / 4.75 - 10
+                                                  : height / 3 - 10,
+                                              child: Card(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5.0)),
+                                                clipBehavior: Clip.antiAlias,
                                                 child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      // dish name
-                                                      Container(
-                                                          width: width < 500
-                                                              ? width * (2 / 5)
-                                                              : width * (2 / 3),
-                                                          child: Text(
-                                                            name,
-                                                            style: AppStyles
-                                                                .header,
-                                                            textAlign:
-                                                                TextAlign.left,
-                                                          )),
-                                                      // dish description if it exists
-                                                      if (description != 'none')
-                                                        Container(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    vertical:
-                                                                        8),
-                                                            width: width < 500
-                                                                ? width *
-                                                                    (2 / 5)
-                                                                : width *
-                                                                    (2 / 3),
-                                                            child: Text(
-                                                              description,
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .left,
-                                                              style: AppStyles
-                                                                  .subtitle,
-                                                            )),
-                                                      // dish price
-                                                      Container(
-                                                          width: width < 500
-                                                              ? width * (2 / 5)
-                                                              : width * (2 / 3),
-                                                          child: Text(
-                                                            '$price',
-                                                            textAlign:
-                                                                TextAlign.left,
-                                                            style: TextStyle(
-                                                                color: AppColors
-                                                                    .accent),
-                                                          ))
-                                                    ])),
-                                            // image if it exists
-                                            if (image != 'none')
-                                              Container(
-                                                  height: height / 6 + 8,
-                                                  width: width < 500
-                                                      ? height / 4.75 - 10
-                                                      : height / 3 - 10,
-                                                  child: Card(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        5.0)),
-                                                    clipBehavior:
-                                                        Clip.antiAlias,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: <Widget>[
-                                                        Image.network(
-                                                          image,
-                                                          alignment: Alignment
-                                                              .topCenter,
-                                                          fit: BoxFit.cover,
-                                                          width: width < 500
-                                                              ? height / 4.75
-                                                              : height / 3,
-                                                          height: height / 6,
-                                                        ),
-                                                      ],
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: <Widget>[
+                                                    Image.network(
+                                                      image,
+                                                      alignment:
+                                                          Alignment.topCenter,
+                                                      fit: BoxFit.cover,
+                                                      width: width < 500
+                                                          ? height / 4.75
+                                                          : height / 3,
+                                                      height: height / 6,
                                                     ),
-                                                  )),
-                                            // placeholder image if image does not exist
-                                            if (image == 'none')
-                                              Container(
-                                                  decoration: BoxDecoration(
-                                                      color: AppColors.medGrey,
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  5))),
-                                                  height: height / 6 - 5,
-                                                  width: height / 3 - 10,
-                                                  child: Center(
-                                                      child: Text('no image',
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .white)))),
-                                            Container(
-                                                padding: EdgeInsets.only(
-                                                    left: width < 500 ? 0 : 10),
-                                                child: IconButton(
-                                                    onPressed: () {
-                                                      var temp = widget.pins;
-                                                      debugPrint('$temp');
-                                                      temp['ids'].remove(id);
-                                                      for (var i = 0;
-                                                          i <
-                                                              temp['items']
-                                                                  .length;
-                                                          i++) {
-                                                        if (temp['items'][i]
-                                                                ['_id'] ==
-                                                            id) {
-                                                          temp['items']
-                                                              .removeAt(i);
-                                                          break;
-                                                        }
-                                                      }
-                                                      setState(() {
-                                                        debugPrint(
-                                                            'setting state');
-                                                        widget.pins = temp;
-                                                      });
-                                                    },
-                                                    icon: Icon(Icons.cancel,
-                                                        color: AppColors
-                                                            .darkGrey))),
-                                          ])),
-                                  // divider
-                                  Container(
-                                      width: width - 10,
-                                      height: 1,
-                                      color: AppColors.lightGrey)
-                                ])));
+                                                  ],
+                                                ),
+                                              )),
+                                        // placeholder image if image does not exist
+                                        if (image == 'none')
+                                          Container(
+                                              decoration: BoxDecoration(
+                                                  color: AppColors.medGrey,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(5))),
+                                              height: height / 6 - 5,
+                                              width: width < 500
+                                                  ? height / 4.75 - 10
+                                                  : height / 3 - 10,
+                                              child: Center(
+                                                  child: Text('no image',
+                                                      style: TextStyle(
+                                                          color:
+                                                              Colors.white)))),
+                                        Container(
+                                            padding: EdgeInsets.only(
+                                                left: width < 500 ? 0 : 10),
+                                            child: IconButton(
+                                                onPressed: () {
+                                                  var temp = widget.pins;
+                                                  debugPrint('$temp');
+                                                  temp['ids'].remove(id);
+                                                  for (var i = 0;
+                                                      i < temp['items'].length;
+                                                      i++) {
+                                                    if (temp['items'][i]
+                                                            ['_id'] ==
+                                                        id) {
+                                                      temp['items'].removeAt(i);
+                                                      break;
+                                                    }
+                                                  }
+                                                  setState(() {
+                                                    debugPrint('setting state');
+                                                    widget.pins = temp;
+                                                  });
+                                                },
+                                                icon: Icon(Icons.cancel,
+                                                    color:
+                                                        AppColors.darkGrey))),
+                                      ])),
+                              // divider
+                              Container(
+                                  width: width - 10,
+                                  height: 1,
+                                  color: AppColors.lightGrey)
+                            ])));
                       }
                     }, childCount: itemList.length),
                     // itemExtent: MediaQuery.of(context).size.height / 10
