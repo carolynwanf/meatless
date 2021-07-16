@@ -281,9 +281,7 @@ class _DishesState extends State<Dishes> {
                         textAlign: TextAlign.center)),
                 if (description != 'none')
                   Text(description,
-                      style: TextStyle(
-                          color: Colors.grey[800], fontSize: height / 60),
-                      textAlign: TextAlign.center),
+                      style: AppStyles.subtitle, textAlign: TextAlign.center),
                 Text(
                   '$price • $restaurant',
                   textAlign: TextAlign.left,
@@ -367,11 +365,11 @@ class _DishesState extends State<Dishes> {
         return 2;
       } else if (size.width < 950) {
         return 3;
-      } else if (size.width < 1150) {
+      } else if (size.width < 1200) {
         return 4;
       } else if (size.width < 1350) {
         return 5;
-      } else if (size.width < 1600) {
+      } else if (size.width < 1900) {
         return 6;
       } else {
         return 7;

@@ -18,6 +18,7 @@ class AppStyles {
   static var subtitle = TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w500,
-      color: AppColors.darkGrey,
-      height: 1.2);
+      color: Colors.grey.shade600,
+      height: 1.2,
+      letterSpacing: 0.3);
 }

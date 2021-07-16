@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
+import 'appColors.dart';
 
 import 'dart:convert';
 
@@ -63,7 +64,7 @@ class _ReviewFormState extends State<ReviewForm> {
                         });
                       },
                       child: numberOfStars > 0
-                          ? Icon(Icons.star)
+                          ? Icon(Icons.star, color: AppColors.star)
                           : Icon(Icons.star_border)),
                   GestureDetector(
                       onTap: () {
@@ -73,7 +74,7 @@ class _ReviewFormState extends State<ReviewForm> {
                         });
                       },
                       child: numberOfStars > 1
-                          ? Icon(Icons.star)
+                          ? Icon(Icons.star, color: AppColors.star)
                           : Icon(Icons.star_border)),
                   GestureDetector(
                       onTap: () {
@@ -83,7 +84,7 @@ class _ReviewFormState extends State<ReviewForm> {
                         });
                       },
                       child: numberOfStars > 2
-                          ? Icon(Icons.star)
+                          ? Icon(Icons.star, color: AppColors.star)
                           : Icon(Icons.star_border)),
                   GestureDetector(
                       onTap: () {
@@ -93,7 +94,7 @@ class _ReviewFormState extends State<ReviewForm> {
                         });
                       },
                       child: numberOfStars > 3
-                          ? Icon(Icons.star)
+                          ? Icon(Icons.star, color: AppColors.star)
                           : Icon(Icons.star_border)),
                   GestureDetector(
                       onTap: () {
@@ -103,13 +104,15 @@ class _ReviewFormState extends State<ReviewForm> {
                         });
                       },
                       child: numberOfStars > 4
-                          ? Icon(Icons.star)
+                          ? Icon(Icons.star, color: AppColors.star)
                           : Icon(Icons.star_border)),
+                  Text("*")
                 ],
               );
             },
             validator: (value) {
-              if (value == null) {
+              debugPrint('$value fsldkj');
+              if (value == null || value == 0) {
                 debugPrint('stars $value');
                 return "Please rate this dish";
               }
@@ -119,8 +122,9 @@ class _ReviewFormState extends State<ReviewForm> {
             },
           ),
           TextFormField(
+              maxLines: 5,
               decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'review'),
+                  border: UnderlineInputBorder(), hintText: 'Review'),
               onSaved: (value) {
                 if (value == '') {
                   review['review'] = null;
@@ -135,7 +139,7 @@ class _ReviewFormState extends State<ReviewForm> {
                 }
               },
               decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'Name'),
+                  border: UnderlineInputBorder(), hintText: 'Name*'),
               onSaved: (value) {
                 review['name'] = value;
               }),
@@ -160,13 +164,14 @@ class _ReviewFormState extends State<ReviewForm> {
                 }
               },
               decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'Email'),
+                  border: UnderlineInputBorder(), hintText: 'Email*'),
               onSaved: (value) {
                 review['email'] = value;
               }),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: AppColors.primary),
               onPressed: () async {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
@@ -186,10 +191,8 @@ class _ReviewFormState extends State<ReviewForm> {
                       },
                       body: jsonEncode(body));
 
-                  debugPrint('${response}');
+                  debugPrint('$response');
 
-                  // If the form is valid, display a snackbar. In the real world,
-                  // you'd often call a server or save the information in a database.
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text('Submitting')));
                 }
