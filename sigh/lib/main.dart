@@ -78,6 +78,8 @@ class _HomePageState extends State<HomePage> {
                                 child: TextFormField(
                                     controller: zipCodeController,
                                     decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.only(
+                                            bottom: 1, left: 10),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: AppColors.darkGrey,
@@ -264,14 +266,18 @@ class _MainpageState extends State<Mainpage> {
               height: MediaQuery.of(context).size.height / 10,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      side: BorderSide(width: 2, color: AppColors.medGrey),
+                      side: BorderSide(
+                          width: 2,
+                          color: width < 500
+                              ? AppColors.medGrey
+                              : AppColors.primaryDark),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
                             bottomRight: Radius.circular(12)),
                       ),
                       // padding: EdgeInsets.only(bottom: height / 90),
-                      primary: Colors.white,
+                      primary: width < 500 ? Colors.white : AppColors.primary,
                       minimumSize: Size(height / 40, height / 30)),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
@@ -283,7 +289,8 @@ class _MainpageState extends State<Mainpage> {
                       });
                     }
                   },
-                  child: Icon(Icons.search, color: AppColors.darkGrey)),
+                  child: Icon(Icons.search,
+                      color: width < 500 ? AppColors.darkGrey : null)),
             ),
             Container(
                 padding: EdgeInsets.only(

@@ -17,7 +17,16 @@ class RestaurantPage extends StatefulWidget {
 Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
+      // for local android dev
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',

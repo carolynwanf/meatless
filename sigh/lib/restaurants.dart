@@ -32,15 +32,22 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
     "query": query
   });
   final response =
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+
+      // for local android dev
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // debugPrint('response');
-  // debugPrint('${jsonDecode(response.body)['restaurants'][0]}');
 
   return jsonDecode(response.body)['restaurants'];
 }
@@ -83,6 +90,24 @@ class _RestaurantsState extends State<Restaurants> {
       "notVeggie": unfriendliness.toDouble(),
     };
 
+    Widget friendlinessChart() {
+      return PieChart(
+        dataMap: dataMap,
+        chartLegendSpacing: 32,
+        chartRadius: height / 15,
+        colorList: [AppColors.primary, Color(0xFFEC873B)],
+        initialAngleInDegree: 270,
+        chartType: ChartType.ring,
+        ringStrokeWidth: 27,
+        legendOptions: LegendOptions(
+          showLegends: false,
+        ),
+        chartValuesOptions: ChartValuesOptions(
+          showChartValues: false,
+        ),
+      );
+    }
+
     if (width < 500) {
       // restaurant tile
       return InkWell(
@@ -123,39 +148,23 @@ class _RestaurantsState extends State<Restaurants> {
                               Container(
                                   padding: EdgeInsets.only(bottom: 5),
                                   width: width * (7 / 12),
+                                  child: Text('$mains mains',
+                                      textAlign: TextAlign.left,
+                                      style:
+                                          TextStyle(color: AppColors.accent))),
+                              Container(
+                                  width: width * (7 / 12),
                                   child: Text('$friendliness',
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: AppColors.primary))),
-                              Container(
-                                  width: width * (7 / 12),
-                                  child: Text('$mains mains',
-                                      textAlign: TextAlign.left,
-                                      style:
-                                          TextStyle(color: AppColors.accent)))
+                                          color: AppColors.primary)))
 
                               // kinds of items
                             ])),
                         // friendliness chart
-                        Container(
-                            child: PieChart(
-                          dataMap: dataMap,
-                          animationDuration: Duration(milliseconds: 800),
-                          chartLegendSpacing: 32,
-                          chartRadius: width / 6,
-                          colorList: [AppColors.primary, Color(0xFFEC873B)],
-                          initialAngleInDegree: 0,
-                          chartType: ChartType.ring,
-                          ringStrokeWidth: 32,
-                          legendOptions: LegendOptions(
-                            showLegends: false,
-                          ),
-                          chartValuesOptions: ChartValuesOptions(
-                            showChartValues: false,
-                          ),
-                        ))
+                        Container(child: friendlinessChart())
                       ])),
               Container(
                   width: width - 10, height: 1, color: AppColors.lightGrey)
@@ -175,24 +184,31 @@ class _RestaurantsState extends State<Restaurants> {
           child: Container(
               padding: EdgeInsets.all(height / 50),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('$friendliness', style: _iconSize),
+                  Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, width / 70),
+                      child: friendlinessChart()),
                   Text(
                     name,
-                    style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18),
+                    style: AppStyles.header,
                     textAlign: TextAlign.center,
                   ),
                   if (name != type)
                     Text(type,
-                        style: TextStyle(
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.normal,
-                            fontSize: 14),
-                        textAlign: TextAlign.center),
+                        style: AppStyles.subtitle, textAlign: TextAlign.center),
+                  Container(
+                      padding: EdgeInsets.only(bottom: 5),
+                      child: Text('$mains mains',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(color: AppColors.accent))),
+                  Container(
+                      child: Text('$friendliness',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary)))
                 ],
               )));
     }
@@ -214,16 +230,18 @@ class _RestaurantsState extends State<Restaurants> {
     }
 
     calculateCount(size) {
-      if (size.width < 550) {
+      if (size.width < 650) {
         return 2;
-      } else if (size.width < 767) {
+      } else if (size.width < 900) {
         return 3;
-      } else if (size.width < 950) {
+      } else if (size.width < 1150) {
         return 4;
-      } else if (size.width < 1200) {
+      } else if (size.width < 1400) {
         return 5;
-      } else {
+      } else if (size.width < 1600) {
         return 6;
+      } else {
+        return 7;
       }
     }
 
@@ -388,7 +406,7 @@ class _RestaurantsState extends State<Restaurants> {
                 ],
               )),
           // divider
-          Container(height: 1, color: AppColors.medGrey),
+          if (mobile) Container(height: 1, color: AppColors.medGrey),
 
           // restaurants
           Container(
@@ -433,7 +451,7 @@ class _RestaurantsState extends State<Restaurants> {
                               calculateCount(MediaQuery.of(context).size),
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: (1.3 / 1.5),
+                          childAspectRatio: (1.3 / 1.7),
                         ),
                         itemBuilder: (_, int position) {
                           if (snapshot.data![position]["end"] == true) {
@@ -514,6 +532,8 @@ class _RestaurantsState extends State<Restaurants> {
                           }
                         },
                         decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.only(bottom: 1, left: 10),
                             focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: AppColors.medGrey, width: 1.5),

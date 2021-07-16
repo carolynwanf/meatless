@@ -21,7 +21,17 @@ Future<List> getDishes(offset, zipCode, search, query) async {
   final String body = jsonEncode(
       {"offset": offset, 'zipCode': zipCode, 'search': search, 'query': query});
   final response =
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes/'),
+
+      // for local android dev
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -163,15 +173,10 @@ class _DishesState extends State<Dishes> {
                               // dish price and restaurant
                               Container(
                                   width: width / 2 - 10,
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        '$price • $restaurant',
-                                        textAlign: TextAlign.left,
-                                        style:
-                                            TextStyle(color: AppColors.accent),
-                                      )
-                                    ],
+                                  child: Text(
+                                    '$price • $restaurant',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(color: AppColors.accent),
                                   ))
                             ])),
                         // image if it exists
@@ -224,71 +229,104 @@ class _DishesState extends State<Dishes> {
                   right: width / 200,
                   top: width / 200,
                   bottom: width / 200),
-              child: Column(
-                  mainAxisAlignment: image != 'none'
-                      ? MainAxisAlignment.start
-                      : MainAxisAlignment.center,
-                  children: [
-                    if (image != 'none')
-                      Container(
-                        padding: EdgeInsets.only(
-                          bottom: width / 100,
-                        ),
-                        child: Image.network(image),
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                //image
+                if (image != 'none')
+                  Container(
+                    padding: EdgeInsets.only(
+                      bottom: width / 100,
+                    ),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0)),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Image.network(
+                            image,
+                            alignment: Alignment.topCenter,
+                            fit: BoxFit.cover,
+                            width: double.maxFinite,
+                            height: height / 6,
+                          ),
+                        ],
                       ),
-                    Container(
-                        padding: EdgeInsets.only(
-                          bottom: width / 400,
-                        ),
-                        child: Text(name,
-                            style: TextStyle(
-                                color: Colors.grey[800],
-                                fontWeight: FontWeight.bold,
-                                fontSize: height / 55),
-                            textAlign: TextAlign.center)),
-                    if (description != 'none')
-                      Text(description,
-                          style: TextStyle(
-                              color: Colors.grey[800], fontSize: height / 60),
-                          textAlign: TextAlign.center),
-                    IconButton(
-                        hoverColor: AppColors.noHover,
-                        onPressed: !pinned
-                            ? () {
-                                debugPrint('pressed');
-                                var temp = widget.pins;
+                    ),
+                  ),
 
-                                temp['ids'].add(id);
-                                temp['items'].add(item);
-                                debugPrint('$temp');
+                if (image == 'none')
+                  Container(
+                      padding: EdgeInsets.fromLTRB(3, 3, 3, width / 100),
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: AppColors.medGrey,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5))),
+                          height: height / 6,
+                          width: double.maxFinite,
+                          child: Center(
+                              child: Text('no image',
+                                  style: TextStyle(color: Colors.white))))),
+                Container(
+                    padding: EdgeInsets.only(
+                      bottom: width / 400,
+                    ),
+                    child: Text(name,
+                        style: TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: height / 55),
+                        textAlign: TextAlign.center)),
+                if (description != 'none')
+                  Text(description,
+                      style: TextStyle(
+                          color: Colors.grey[800], fontSize: height / 60),
+                      textAlign: TextAlign.center),
+                Text(
+                  '$price • $restaurant',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(color: AppColors.accent),
+                ),
+                IconButton(
+                    hoverColor: AppColors.noHover,
+                    onPressed: !pinned
+                        ? () {
+                            debugPrint('pressed');
+                            var temp = widget.pins;
 
-                                setState(() {
-                                  widget.pins = temp;
-                                });
+                            temp['ids'].add(id);
+                            temp['items'].add(item);
+                            debugPrint('$temp');
 
-                                widget.notifyParent();
+                            setState(() {
+                              widget.pins = temp;
+                            });
+
+                            widget.notifyParent();
+                          }
+                        : () {
+                            debugPrint('pressed');
+                            var temp = widget.pins;
+                            debugPrint('$temp');
+                            temp['ids'].remove(id);
+                            for (var i = 0; i < temp['items'].length; i++) {
+                              if (temp['items'][i]['_id'] == id) {
+                                temp['items'].removeAt(i);
+                                break;
                               }
-                            : () {
-                                debugPrint('pressed');
-                                var temp = widget.pins;
-                                debugPrint('$temp');
-                                temp['ids'].remove(id);
-                                for (var i = 0; i < temp['items'].length; i++) {
-                                  if (temp['items'][i]['_id'] == id) {
-                                    temp['items'].removeAt(i);
-                                    break;
-                                  }
-                                }
-                                setState(() {
-                                  debugPrint('setting state');
-                                  widget.pins = temp;
-                                });
-                                widget.notifyParent();
-                              },
-                        icon: pinned
-                            ? Icon(Icons.star, color: AppColors.star)
-                            : Icon(Icons.star_border, color: AppColors.medGrey))
-                  ])));
+                            }
+                            setState(() {
+                              debugPrint('setting state');
+                              widget.pins = temp;
+                            });
+                            widget.notifyParent();
+                          },
+                    icon: pinned
+                        ? Icon(Icons.star, color: AppColors.star)
+                        : Icon(Icons.star_border, color: AppColors.medGrey))
+              ])));
     }
 
     // USE FOR MOBILE INTERFACE LATER ON
@@ -325,16 +363,18 @@ class _DishesState extends State<Dishes> {
     }
 
     calculateCount(size) {
-      if (size.width < 600) {
+      if (size.width < 650) {
         return 2;
-      } else if (size.width < 800) {
+      } else if (size.width < 950) {
         return 3;
-      } else if (size.width < 1000) {
+      } else if (size.width < 1150) {
         return 4;
-      } else if (size.width < 1300) {
+      } else if (size.width < 1350) {
         return 5;
-      } else {
+      } else if (size.width < 1600) {
         return 6;
+      } else {
+        return 7;
       }
     }
 
@@ -457,7 +497,7 @@ class _DishesState extends State<Dishes> {
           ),
 
           // divider
-          Container(height: 1, color: AppColors.medGrey),
+          if (mobile) Container(height: 1, color: AppColors.medGrey),
           // dishes
           Container(
             height: mobile ? height * (3 / 5) : (height) * (13 / 20),
@@ -565,6 +605,8 @@ class _DishesState extends State<Dishes> {
                           }
                         },
                         decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.only(bottom: 1, left: 10),
                             focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: AppColors.medGrey, width: 1.5),
