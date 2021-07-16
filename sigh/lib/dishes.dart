@@ -370,7 +370,7 @@ class _DishesState extends State<Dishes> {
                                   bottomLeft: Radius.circular(5),
                                 ),
                                 borderSide: BorderSide(
-                                    color: AppColors.medGrey, width: 1.5),
+                                    color: AppColors.darkGrey, width: 1.5),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.only(
@@ -378,7 +378,7 @@ class _DishesState extends State<Dishes> {
                                   bottomLeft: Radius.circular(5),
                                 ),
                                 borderSide: BorderSide(
-                                    color: AppColors.lightGrey, width: 1),
+                                    color: AppColors.medGrey, width: 1),
                               ),
                               hintStyle: TextStyle(fontSize: 12),
                               hintText:

@@ -264,14 +264,14 @@ class _MainpageState extends State<Mainpage> {
               height: MediaQuery.of(context).size.height / 10,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      side: BorderSide(width: 2, color: AppColors.primaryDark),
+                      side: BorderSide(width: 2, color: AppColors.medGrey),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
                             bottomRight: Radius.circular(12)),
                       ),
                       // padding: EdgeInsets.only(bottom: height / 90),
-                      primary: AppColors.primary,
+                      primary: Colors.white,
                       minimumSize: Size(height / 40, height / 30)),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
@@ -283,7 +283,7 @@ class _MainpageState extends State<Mainpage> {
                       });
                     }
                   },
-                  child: Icon(Icons.search)),
+                  child: Icon(Icons.search, color: AppColors.darkGrey)),
             ),
             Container(
                 padding: EdgeInsets.only(

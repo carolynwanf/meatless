@@ -60,13 +60,23 @@ class _RestaurantsState extends State<Restaurants> {
     fieldText.clear();
   }
 
-  Widget restaurantDesc(name, type, friendliness, id, mains) {
+  Widget restaurantDesc(restaurant) {
+    var name = restaurant['name'],
+        type = restaurant['type'],
+        friendliness = restaurant['friendliness'],
+        id = restaurant['_id'],
+        mains = restaurant['totalVegItems'];
     // name = name.to
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     final _iconSize = const TextStyle(fontSize: 30);
     var info = {'name': name, 'id': id};
     var unfriendliness = 100 - friendliness;
+
+    if (type.length > 30) {
+      type = type.substring(0, 30);
+      type = type + "...";
+    }
 
     Map<String, double> dataMap = {
       "veggie": friendliness.toDouble(),
@@ -96,14 +106,37 @@ class _RestaurantsState extends State<Restaurants> {
                         Container(
                             padding: EdgeInsets.only(top: 14),
                             child: Column(children: [
+                              // restaurant name
                               Container(
                                   width: width * (7 / 12),
                                   child: Text(name,
                                       style: AppStyles.header,
                                       textAlign: TextAlign.left)),
+                              //restaurant type
                               Container(
                                   width: width * (7 / 12),
-                                  child: Text(type, textAlign: TextAlign.left))
+                                  padding: EdgeInsets.symmetric(vertical: 5),
+                                  child: Text(type,
+                                      style: AppStyles.subtitle,
+                                      textAlign: TextAlign.left)),
+                              // friendliness
+                              Container(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  width: width * (7 / 12),
+                                  child: Text('$friendliness',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primary))),
+                              Container(
+                                  width: width * (7 / 12),
+                                  child: Text('$mains mains',
+                                      textAlign: TextAlign.left,
+                                      style:
+                                          TextStyle(color: AppColors.accent)))
+
+                              // kinds of items
                             ])),
                         // friendliness chart
                         Container(
@@ -120,11 +153,7 @@ class _RestaurantsState extends State<Restaurants> {
                             showLegends: false,
                           ),
                           chartValuesOptions: ChartValuesOptions(
-                            showChartValueBackground: false,
                             showChartValues: false,
-                            showChartValuesInPercentage: false,
-                            showChartValuesOutside: false,
-                            decimalPlaces: 1,
                           ),
                         ))
                       ])),
@@ -268,7 +297,7 @@ class _RestaurantsState extends State<Restaurants> {
                                     bottomLeft: Radius.circular(5),
                                   ),
                                   borderSide: BorderSide(
-                                      color: AppColors.medGrey, width: 1.5),
+                                      color: AppColors.darkGrey, width: 1.5),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.only(
@@ -276,7 +305,7 @@ class _RestaurantsState extends State<Restaurants> {
                                     bottomLeft: Radius.circular(5),
                                   ),
                                   borderSide: BorderSide(
-                                      color: AppColors.lightGrey, width: 1),
+                                      color: AppColors.medGrey, width: 1),
                                 ),
                                 hintStyle: TextStyle(fontSize: 12),
                                 hintText: widget.search
@@ -390,14 +419,9 @@ class _RestaurantsState extends State<Restaurants> {
                                 .data![position]["friendliness"]
                                 .round();
                           } else {
-                            snapshot.data![position]["friendliness"] = "N/A";
+                            snapshot.data![position]["friendliness"] = 0;
                           }
-                          return restaurantDesc(
-                              snapshot.data![position]["name"],
-                              snapshot.data![position]["type"],
-                              snapshot.data![position]["friendliness"],
-                              snapshot.data![position]["_id"],
-                              snapshot.data![position]["totalVegItems"]);
+                          return restaurantDesc(snapshot.data![position]);
                         },
                       );
                     } else {
@@ -425,15 +449,11 @@ class _RestaurantsState extends State<Restaurants> {
                                   snapshot.data![position]["friendliness"]
                                       .round();
                             } else {
-                              snapshot.data![position]["friendliness"] = "N/A";
+                              snapshot.data![position]["friendliness"] = 0;
                             }
                             return Card(
-                                child: restaurantDesc(
-                                    snapshot.data![position]["name"],
-                                    snapshot.data![position]["type"],
-                                    snapshot.data![position]["friendliness"],
-                                    snapshot.data![position]["_id"],
-                                    snapshot.data![position]["totalVegItems"]));
+                                child:
+                                    restaurantDesc(snapshot.data![position]));
                           }
                         },
                       );
