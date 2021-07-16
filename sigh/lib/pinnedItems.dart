@@ -130,6 +130,11 @@ class _PinnedItemsState extends State<PinnedItems> {
                             id = itemList[index]['_id'],
                             price = itemList[index]['price'];
 
+                        if (description.length > 60) {
+                          description = description.substring(0, 60);
+                          description = description + "...";
+                        }
+
                         if (image != 'none') {
                           image = image.split(" 1920w,");
                           image = image[0];
@@ -151,7 +156,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                                   }).then((val) => setState(() {}));
                             },
                             child: Container(
-                                height: height / 5 + 2.5,
+                                height: height / 5 + 5,
                                 child: Column(children: [
                                   Container(
                                       padding: EdgeInsets.only(
@@ -171,8 +176,9 @@ class _PinnedItemsState extends State<PinnedItems> {
                                                     children: [
                                                       // dish name
                                                       Container(
-                                                          width:
-                                                              width * (2 / 3),
+                                                          width: width < 500
+                                                              ? width * (2 / 5)
+                                                              : width * (2 / 3),
                                                           child: Text(
                                                             name,
                                                             style: AppStyles
@@ -187,8 +193,11 @@ class _PinnedItemsState extends State<PinnedItems> {
                                                                 .symmetric(
                                                                     vertical:
                                                                         8),
-                                                            width:
-                                                                width * (2 / 3),
+                                                            width: width < 500
+                                                                ? width *
+                                                                    (2 / 5)
+                                                                : width *
+                                                                    (2 / 3),
                                                             child: Text(
                                                               description,
                                                               textAlign:
@@ -197,10 +206,11 @@ class _PinnedItemsState extends State<PinnedItems> {
                                                               style: AppStyles
                                                                   .subtitle,
                                                             )),
-                                                      // dish price and restaurant
+                                                      // dish price
                                                       Container(
-                                                          width:
-                                                              width * (2 / 3),
+                                                          width: width < 500
+                                                              ? width * (2 / 5)
+                                                              : width * (2 / 3),
                                                           child: Text(
                                                             '$price',
                                                             textAlign:
@@ -214,7 +224,9 @@ class _PinnedItemsState extends State<PinnedItems> {
                                             if (image != 'none')
                                               Container(
                                                   height: height / 6 + 8,
-                                                  width: height / 3 - 10,
+                                                  width: width < 500
+                                                      ? height / 4.75 - 10
+                                                      : height / 3 - 10,
                                                   child: Card(
                                                     shape:
                                                         RoundedRectangleBorder(
@@ -233,8 +245,10 @@ class _PinnedItemsState extends State<PinnedItems> {
                                                           image,
                                                           alignment: Alignment
                                                               .topCenter,
-                                                          fit: BoxFit.fitWidth,
-                                                          width: height / 3,
+                                                          fit: BoxFit.cover,
+                                                          width: width < 500
+                                                              ? height / 4.75
+                                                              : height / 3,
                                                           height: height / 6,
                                                         ),
                                                       ],
@@ -257,8 +271,8 @@ class _PinnedItemsState extends State<PinnedItems> {
                                                               color: Colors
                                                                   .white)))),
                                             Container(
-                                                padding:
-                                                    EdgeInsets.only(left: 10),
+                                                padding: EdgeInsets.only(
+                                                    left: width < 500 ? 0 : 10),
                                                 child: IconButton(
                                                     onPressed: () {
                                                       var temp = widget.pins;

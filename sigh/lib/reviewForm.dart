@@ -46,7 +46,7 @@ class _ReviewFormState extends State<ReviewForm> {
           Container(
             child: Text(
               "Leave a rating/review",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
             alignment: Alignment.bottomLeft,
           ),
