@@ -23,20 +23,20 @@ Future<List> getDishes(offset, zipCode, search, query) async {
   final response =
 
       // for local android dev
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // for local ios + browser dev
-  // await http.post(Uri.parse('http://localhost:4000/get-dishes'),
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: body);
 
   // if (response.body.length > 100) {
   return jsonDecode(response.body)['dishes'];
@@ -92,7 +92,7 @@ class _DishesState extends State<Dishes> {
           context: context,
           builder: (BuildContext context) {
             return ItemDialog(pins: widget.pins, item: item);
-          }).then((val) => setState(() {}));
+          }).then((val) => {setState(() {}), widget.notifyParent()});
     }
 
     if (width < 500) {
