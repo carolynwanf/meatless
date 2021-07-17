@@ -316,16 +316,17 @@ class _MainpageState extends State<Mainpage> {
                                     : AppColors.medGrey,
                                 size: 30),
                             alignment: Alignment.center),
-                        Container(
-                            // decoration: BoxDecoration(
-                            //     shape: BoxShape.circle, color: Colors.black),
-                            height: 60,
-                            width: 50,
-                            child: Text('${widget.pins['items'].length}',
-                                style: TextStyle(
-                                    color: AppColors.darkText,
-                                    fontWeight: FontWeight.w700)),
-                            alignment: Alignment.center)
+                        if (widget.pins['items'].length > 0)
+                          Container(
+                              // decoration: BoxDecoration(
+                              //     shape: BoxShape.circle, color: Colors.black),
+                              height: 60,
+                              width: 50,
+                              child: Text('${widget.pins['items'].length}',
+                                  style: TextStyle(
+                                      color: AppColors.darkText,
+                                      fontWeight: FontWeight.w700)),
+                              alignment: Alignment.center)
                       ],
                     )))
           ],

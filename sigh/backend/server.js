@@ -128,7 +128,7 @@ app.post("/get-dishes", async (req,res) => {
         // db.collection('items').createIndex( { name: "text", description: "text" } )
         
         if (search) {
-            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}, {$text: {$search: query}}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
+            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}, {drink:false},{$text: {$search: query}}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
             console.log(dishes.length)
     
@@ -140,7 +140,7 @@ app.post("/get-dishes", async (req,res) => {
     
 
         } else {
-            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
+            const dishes = await db.collection('items').find({$and: [{zipCode: zipCode}, {vegetarian:true}, {side:false}, {dessert: false},{drink:false}]}).sort({_id: -1}).skip((offset-1) *15).limit(15).toArray();
 
             console.log(dishes.length)
     

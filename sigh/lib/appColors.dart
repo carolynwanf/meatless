@@ -21,4 +21,10 @@ class AppStyles {
       color: Colors.grey.shade600,
       height: 1.2,
       letterSpacing: 0.3);
+  static var title = TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+      height: 1.2,
+      letterSpacing: 0.3);
 }

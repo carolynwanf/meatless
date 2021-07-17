@@ -6,6 +6,7 @@ import 'package:sigh/appColors.dart';
 import 'reviewForm.dart';
 
 import 'restaurantPage.dart';
+import 'containsMeat.dart';
 
 class ItemDialog extends StatefulWidget {
   var pins;
@@ -176,9 +177,36 @@ class _ItemDialogState extends State<ItemDialog> {
                               ))),
                     SliverToBoxAdapter(
                         child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            child: ReviewForm(id: id)))
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: ReviewForm(id: id))),
+                    SliverToBoxAdapter(
+                        child: InkWell(
+                            onTap: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return ContainsMeat(
+                                        pins: widget.pins, item: item);
+                                  });
+                            },
+                            hoverColor: AppColors.noHover,
+                            child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 10),
+                                child: Column(children: [
+                                  Container(
+                                      width: dialogWidth - 40,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                          'Does this dish contain meat?',
+                                          style: AppStyles.header)),
+                                  Container(
+                                      padding: EdgeInsets.only(bottom: 20),
+                                      width: dialogWidth - 40,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('Click here to report',
+                                          style: AppStyles.subtitle))
+                                ]))))
                   ],
                 ))));
   }
