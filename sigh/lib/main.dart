@@ -393,6 +393,8 @@ class _MainpageState extends State<Mainpage> {
                 ],
               ),
             ),
+
+            // TODO: refactor restaurants and dishes to collapse reusable components
             Expanded(
               child: _displayRestaurants
                   ? Restaurants(

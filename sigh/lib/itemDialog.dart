@@ -27,7 +27,22 @@ class _ItemDialogState extends State<ItemDialog> {
         description = item['description'],
         price = item['price'],
         restaurant = item['restuarant_name'],
-        restaurantId = item['restaurant_id'];
+        restaurantId = item['restaurant_id'],
+        requirements = item['requirements'];
+
+    var display = '';
+
+    if (description != 'none') {
+      if (description[description.length - 1] == '.') {
+        display = '$description';
+      } else {
+        display = '$description.';
+      }
+    }
+
+    if (requirements != 'none') {
+      display = '$display $requirements';
+    }
 
     var info = {
       'name': restaurant,
@@ -138,12 +153,12 @@ class _ItemDialogState extends State<ItemDialog> {
                                       textAlign: TextAlign.left,
                                     )),
                                 // description of dish, if it exists
-                                if (description != 'none')
+                                if (display != '')
                                   Container(
                                       width: dialogWidth,
                                       padding:
                                           EdgeInsets.symmetric(vertical: 10),
-                                      child: Text('$description',
+                                      child: Text('$display',
                                           textAlign: TextAlign.left,
                                           style: AppStyles.subtitle)),
                                 // price + restaurant of dish
@@ -177,7 +192,7 @@ class _ItemDialogState extends State<ItemDialog> {
                               ))),
                     SliverToBoxAdapter(
                         child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
                             child: ReviewForm(id: id))),
                     SliverToBoxAdapter(
                         child: InkWell(

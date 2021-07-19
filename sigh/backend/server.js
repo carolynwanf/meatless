@@ -202,6 +202,46 @@ app.post("/review-or-rating", async (req,res) => {
 
 
 })
+app.post("/report", async (req,res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    
+    const report = req.body.report;
+    const id = req.body.id
+    console.log(id)
+
+
+
+    try {
+        const db = client.db('data');
+
+        const item = await db.collection('items').findOne(ObjectId(id))
+
+        if (item.reports == undefined) {
+            item.reports = []
+        }
+
+
+        item.reports.push(report)
+
+        console.log(item.reports)
+
+        await db.collection('items').updateOne({'_id': ObjectId(id)}, {
+            $set: {reports: item.reports}
+        })
+
+        
+
+
+        
+    } finally {
+        res.sendStatus(200)
+        console.log("review written");
+        
+    }
+
+
+
+})
 
 app.post("/get-page-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
