@@ -4,6 +4,7 @@ class AppColors {
   static var primary = Colors.teal.shade400;
   static var primaryDark = Colors.teal.shade500;
   static var darkText = Colors.teal.shade900;
+  static var lightestGrey = Colors.grey.shade200;
   static var lightGrey = Colors.grey.shade300;
   static var medGrey = Colors.grey.shade400;
   static var darkGrey = Colors.grey.shade600;
@@ -14,9 +15,9 @@ class AppColors {
 }
 
 class AppStyles {
-  static var header = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+  static var header = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
   static var subtitle = TextStyle(
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: FontWeight.w500,
       color: Colors.grey.shade600,
       height: 1.2,

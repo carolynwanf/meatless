@@ -380,7 +380,8 @@ class _DishesState extends State<Dishes> {
           Container(
             padding: mobile
                 ? EdgeInsets.only(left: height / 50)
-                : EdgeInsets.only(left: height / 50, top: height / 50),
+                : EdgeInsets.only(
+                    left: height / 50, top: height / 50, bottom: 15),
 
             // search bar
             child: Row(
@@ -434,16 +435,14 @@ class _DishesState extends State<Dishes> {
                         style: ElevatedButton.styleFrom(
                             side: BorderSide(
                                 width: mobile ? 1 : 2,
-                                color: mobile
-                                    ? AppColors.medGrey
-                                    : AppColors.primaryDark),
+                                color: AppColors.medGrey),
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(7),
                                   bottomRight: Radius.circular(7)),
                             ),
                             // padding: EdgeInsets.only(bottom: height / 90),
-                            primary: mobile ? Colors.white : AppColors.primary,
+                            primary: Colors.white,
                             minimumSize: mobile
                                 ? Size(height / 40, height / 25)
                                 : Size(height / 40, height / 21.5)),
@@ -483,11 +482,9 @@ class _DishesState extends State<Dishes> {
                         child: widget.search
                             ? Text("x",
                                 style: TextStyle(
-                                    fontSize: 17,
-                                    color: mobile ? AppColors.darkGrey : null))
+                                    fontSize: 17, color: AppColors.darkGrey))
                             : Icon(Icons.search,
-                                size: 17,
-                                color: mobile ? AppColors.darkGrey : null)))
+                                size: 17, color: AppColors.darkGrey)))
               ],
             ),
           ),
@@ -497,6 +494,7 @@ class _DishesState extends State<Dishes> {
           // dishes
           Container(
             height: mobile ? height * (3 / 5) : (height) * (13 / 20),
+            color: mobile ? null : AppColors.lightestGrey,
             child: Center(
                 child: FutureBuilder<List>(
               future:
@@ -517,21 +515,24 @@ class _DishesState extends State<Dishes> {
                       }
                     }
                     if (!mobile) {
-                      return GridView.builder(
-                        itemCount: snapshot.data!.length,
-                        controller: _scrollController,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              calculateCount(MediaQuery.of(context).size),
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: (1.3 / 1.8),
-                        ),
-                        itemBuilder: (_, int position) {
-                          return Card(
-                              child: dishDesc(snapshot.data![position]));
-                        },
-                      );
+                      return Padding(
+                          padding: EdgeInsets.all(10),
+                          child: GridView.builder(
+                            itemCount: snapshot.data!.length,
+                            controller: _scrollController,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  calculateCount(MediaQuery.of(context).size),
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: (1.3 / 1.8),
+                            ),
+                            itemBuilder: (_, int position) {
+                              return Card(
+                                  child: dishDesc(snapshot.data![position]));
+                            },
+                          ));
                     } else {
                       return ListView.builder(
                           controller: _scrollController,

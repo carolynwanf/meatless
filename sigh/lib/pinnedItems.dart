@@ -1,4 +1,6 @@
 // import 'dart:convert';
+import 'dart:html';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // import 'package:http/http.dart' as http;
@@ -9,8 +11,9 @@ import 'appColors.dart';
 
 class PinnedItems extends StatefulWidget {
   var pins;
+  var notifyMain;
 
-  PinnedItems({this.pins});
+  PinnedItems({this.pins, this.notifyMain});
 
   _PinnedItemsState createState() => _PinnedItemsState();
 }
@@ -45,33 +48,172 @@ class _PinnedItemsState extends State<PinnedItems> {
     return sorted;
   }
 
+  Widget starredDish(item) {
+    var image = item['images'],
+        name = item['name'],
+        description = item['description'],
+        id = item['_id'],
+        price = item['price'];
+
+    if (description.length > 50) {
+      description = description.substring(0, 50);
+      description = description + "...";
+    }
+
+    if (image != 'none') {
+      image = image.split(" 1920w,");
+      image = image[0];
+
+      image = image.split(
+          'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
+
+      image = image[1];
+    }
+    return InkWell(
+        hoverColor: AppColors.noHover,
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ItemDialog(pins: widget.pins, item: item);
+              }).then((val) => setState(() {}));
+        },
+        child: Container(
+            child: Column(children: [
+          Container(
+              padding: EdgeInsets.only(top: 10, bottom: 10, left: 10),
+              // contents of card
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                // text
+                Expanded(
+                    flex: 6,
+                    child: Container(
+                        padding: EdgeInsets.only(left: 5),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // dish name
+                              Text(
+                                name,
+                                style: AppStyles.header,
+                                textAlign: TextAlign.left,
+                              ),
+                              // dish description if it exists
+                              if (description != 'none')
+                                Container(
+                                    // height: 60,
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      description,
+                                      textAlign: TextAlign.left,
+                                      style: AppStyles.subtitle,
+                                    )),
+                              // dish price
+                              Text(
+                                '$price',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(color: AppColors.accent),
+                              )
+                            ]))),
+                // image if it exists
+                if (image != 'none' && MediaQuery.of(context).size.width < 500)
+                  Expanded(
+                      flex: 2,
+                      child: Container(
+                          height: 100,
+                          width: 100,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0)),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Image.network(
+                                  image,
+                                  alignment: Alignment.topCenter,
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
+                                ),
+                              ],
+                            ),
+                          ))),
+                // placeholder image if image does not exist
+                // if (image == 'none')
+                //   Container(
+                //       decoration: BoxDecoration(
+                //           color: AppColors.medGrey,
+                //           borderRadius:
+                //               BorderRadius.all(
+                //                   Radius.circular(5))),
+                //       height: 100,
+                //       width: 100,
+                //       child: Center(
+                //           child: Text('no image',
+                //               style: TextStyle(
+                //                   color:
+                //                       Colors.white)))),
+                Expanded(
+                    flex: 1,
+                    child: Container(
+                        padding: EdgeInsets.only(left: 0),
+                        child: IconButton(
+                            onPressed: () {
+                              var temp = widget.pins;
+                              debugPrint('$temp');
+                              temp['ids'].remove(id);
+                              for (var i = 0; i < temp['items'].length; i++) {
+                                if (temp['items'][i]['_id'] == id) {
+                                  temp['items'].removeAt(i);
+                                  break;
+                                }
+                              }
+                              setState(() {
+                                debugPrint('setting state');
+                                widget.pins = temp;
+                              });
+
+                              widget.notifyMain();
+                            },
+                            icon: Icon(Icons.cancel,
+                                color: AppColors.darkGrey)))),
+              ])),
+          // divider
+          Container(
+              width: MediaQuery.of(context).size.width - 10,
+              height: 1,
+              color: AppColors.lightGrey)
+        ])));
+  }
+
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width,
+    var width = MediaQuery.of(context).size.width > 500
+            ? MediaQuery.of(context).size.width * (9 / 40)
+            : MediaQuery.of(context).size.width,
         height = MediaQuery.of(context).size.height;
     var items = sortByRestaurant(widget.pins['items']);
 
     return Scaffold(
         backgroundColor: Colors.white,
         // app bar
-        appBar: AppBar(
-          // bottom: PreferredSize(
-          //     child: Container(
-          //       color: AppColors.lightGrey,
-          //       height: 1.0,
-          //     ),
-          //     preferredSize: Size.fromHeight(1.0)),
-          elevation: 0,
-          iconTheme: IconThemeData(
-            color: AppColors.medGrey, //change your color here
-          ),
-          title: Container(
-              padding: EdgeInsets.only(bottom: height / 150, top: height / 150),
-              child: Text('Starred Dishes',
-                  style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: width < 500 ? 20 : height / 40))),
-        ),
+        appBar: MediaQuery.of(context).size.width > 1000
+            ? null
+            : AppBar(
+                elevation: 0,
+                iconTheme: IconThemeData(
+                  color: AppColors.medGrey, //change your color here
+                ),
+                title: Container(
+                    padding: EdgeInsets.only(
+                        bottom: height / 150, top: height / 150),
+                    child: Text('Starred Dishes',
+                        style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20))),
+              ),
         // starred dishes display
         body: Container(
             padding: EdgeInsets.all(10),
@@ -88,7 +230,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                             style: TextStyle(
                                 color: AppColors.darkGrey,
                                 fontWeight: FontWeight.w600,
-                                fontSize: width < 500 ? 18 : height / 60),
+                                fontSize: 15),
                             textAlign: TextAlign.center,
                           ))),
                 for (var itemList in items)
@@ -106,9 +248,9 @@ class _PinnedItemsState extends State<PinnedItems> {
                                   child: InkWell(
                                       child: Text('${itemList[index]['name']}',
                                           style: TextStyle(
-                                              color: Colors.grey[800],
+                                              color: AppColors.primary,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 20)),
+                                              fontSize: 18)),
                                       onTap: () {
                                         Navigator.push(
                                           context,
@@ -119,181 +261,14 @@ class _PinnedItemsState extends State<PinnedItems> {
                                         );
                                       })),
                               Container(
-                                  width: width - 10,
+                                  width: MediaQuery.of(context).size.width -
+                                      10 -
+                                      10,
                                   height: 1,
                                   color: AppColors.lightGrey)
                             ]);
                       } else {
-                        var image = itemList[index]['images'],
-                            name = itemList[index]['name'],
-                            description = itemList[index]['description'],
-                            id = itemList[index]['_id'],
-                            price = itemList[index]['price'];
-
-                        if (description.length > 50) {
-                          description = description.substring(0, 50);
-                          description = description + "...";
-                        }
-
-                        if (image != 'none') {
-                          image = image.split(" 1920w,");
-                          image = image[0];
-
-                          image = image.split(
-                              'https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1920,format=auto,quality=50/');
-
-                          image = image[1];
-                        }
-                        return InkWell(
-                            hoverColor: AppColors.noHover,
-                            onTap: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return ItemDialog(
-                                        pins: widget.pins,
-                                        item: itemList[index]);
-                                  }).then((val) => setState(() {}));
-                            },
-                            child: Container(
-                                // height: height / 5 + 5,
-                                child: Column(children: [
-                              Container(
-                                  padding: EdgeInsets.only(
-                                      top: 10, bottom: 10, left: 10),
-                                  // contents of card
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        // text
-                                        Container(
-                                            padding: EdgeInsets.only(left: 5),
-                                            child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  // dish name
-                                                  Container(
-                                                      width: width < 500
-                                                          ? width * (2 / 5)
-                                                          : width * (2 / 3),
-                                                      child: Text(
-                                                        name,
-                                                        style: AppStyles.header,
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      )),
-                                                  // dish description if it exists
-                                                  if (description != 'none')
-                                                    Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical: 8),
-                                                        width: width < 500
-                                                            ? width * (2 / 5)
-                                                            : width * (2 / 3),
-                                                        child: Text(
-                                                          description,
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                          style: AppStyles
-                                                              .subtitle,
-                                                        )),
-                                                  // dish price
-                                                  Container(
-                                                      width: width < 500
-                                                          ? width * (2 / 5)
-                                                          : width * (2 / 3),
-                                                      child: Text(
-                                                        '$price',
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                        style: TextStyle(
-                                                            color: AppColors
-                                                                .accent),
-                                                      ))
-                                                ])),
-                                        // image if it exists
-                                        if (image != 'none')
-                                          Container(
-                                              height: height / 6 + 8,
-                                              width: width < 500
-                                                  ? height / 4.75 - 10
-                                                  : height / 3 - 10,
-                                              child: Card(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5.0)),
-                                                clipBehavior: Clip.antiAlias,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Image.network(
-                                                      image,
-                                                      alignment:
-                                                          Alignment.topCenter,
-                                                      fit: BoxFit.cover,
-                                                      width: width < 500
-                                                          ? height / 4.75
-                                                          : height / 3,
-                                                      height: height / 6,
-                                                    ),
-                                                  ],
-                                                ),
-                                              )),
-                                        // placeholder image if image does not exist
-                                        if (image == 'none')
-                                          Container(
-                                              decoration: BoxDecoration(
-                                                  color: AppColors.medGrey,
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(5))),
-                                              height: height / 6 - 5,
-                                              width: width < 500
-                                                  ? height / 4.75 - 10
-                                                  : height / 3 - 10,
-                                              child: Center(
-                                                  child: Text('no image',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.white)))),
-                                        Container(
-                                            padding: EdgeInsets.only(
-                                                left: width < 500 ? 0 : 10),
-                                            child: IconButton(
-                                                onPressed: () {
-                                                  var temp = widget.pins;
-                                                  debugPrint('$temp');
-                                                  temp['ids'].remove(id);
-                                                  for (var i = 0;
-                                                      i < temp['items'].length;
-                                                      i++) {
-                                                    if (temp['items'][i]
-                                                            ['_id'] ==
-                                                        id) {
-                                                      temp['items'].removeAt(i);
-                                                      break;
-                                                    }
-                                                  }
-                                                  setState(() {
-                                                    debugPrint('setting state');
-                                                    widget.pins = temp;
-                                                  });
-                                                },
-                                                icon: Icon(Icons.cancel,
-                                                    color:
-                                                        AppColors.darkGrey))),
-                                      ])),
-                              // divider
-                              Container(
-                                  width: width - 10,
-                                  height: 1,
-                                  color: AppColors.lightGrey)
-                            ])));
+                        return starredDish(itemList[index]);
                       }
                     }, childCount: itemList.length),
                     // itemExtent: MediaQuery.of(context).size.height / 10

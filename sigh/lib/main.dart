@@ -1,4 +1,6 @@
 // import 'package:flutter/foundation.dart';
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 
 import 'dishes.dart';
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
     'ids': <String>{},
     'items': [],
   };
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -165,6 +168,7 @@ class _HomePageState extends State<HomePage> {
 class Mainpage extends StatefulWidget {
   var zipCode;
   var pins;
+  var pinsOnDisplay = true;
 
   Mainpage({this.zipCode, this.pins});
   _MainpageState createState() => _MainpageState();
@@ -299,11 +303,20 @@ class _MainpageState extends State<Mainpage> {
                     right: height / 50),
                 child: InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => PinnedItems(pins: widget.pins)),
-                      ).then((val) => setState(() {}));
+                      var toSet = !widget.pinsOnDisplay;
+                      setState(() {
+                        widget.pinsOnDisplay = toSet;
+                      });
+                      if (width < 1000) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => PinnedItems(
+                                    pins: widget.pins,
+                                    notifyMain: refresh,
+                                  )),
+                        ).then((val) => setState(() {}));
+                      }
                     },
                     child: Stack(
                       children: [
@@ -312,7 +325,7 @@ class _MainpageState extends State<Mainpage> {
                             width: 50,
                             child: Icon(Icons.star,
                                 color: widget.pins["items"].length > 0
-                                    ? AppColors.star
+                                    ? AppColors.accent
                                     : AppColors.medGrey,
                                 size: 30),
                             alignment: Alignment.center),
@@ -324,89 +337,106 @@ class _MainpageState extends State<Mainpage> {
                               width: 50,
                               child: Text('${widget.pins['items'].length}',
                                   style: TextStyle(
-                                      color: AppColors.darkText,
-                                      fontWeight: FontWeight.w700)),
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500)),
                               alignment: Alignment.center)
                       ],
                     )))
           ],
         ),
-        body: Column(
+        body: Row(
           children: [
-            Container(
-              padding: width < 500
-                  ? EdgeInsets.only(top: height / 70, left: height / 70)
-                  : EdgeInsets.only(top: height / 30, left: height / 50),
-              child: Row(
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        side: BorderSide(width: 1, color: AppColors.medGrey),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(7),
-                              bottomLeft: Radius.circular(7)),
-                        ),
-                        // padding: EdgeInsets.only(bottom: height / 90),
-                        primary: Colors.white,
-                        minimumSize: Size(height / 15, height / 20)),
-                    child: Text('Restaurants',
-                        style: TextStyle(
-                            color: _displayRestaurants
-                                ? AppColors.darkText
-                                : AppColors.primaryDark,
-                            fontWeight: FontWeight.w600,
-                            fontSize: height / 45)),
-                    onPressed: !_displayRestaurants
-                        ? () {
-                            setState(() {
-                              _displayRestaurants = true;
-                            });
-                          }
-                        : null,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        side: BorderSide(width: 1, color: AppColors.medGrey),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(7),
-                              bottomRight: Radius.circular(7)),
-                        ),
-                        primary: Colors.white,
-                        minimumSize: Size(height / 15, height / 20)),
-                    child: Text('Dishes',
-                        style: TextStyle(
-                            color: _displayRestaurants
-                                ? AppColors.primaryDark
-                                : AppColors.darkText,
-                            fontWeight: FontWeight.w600,
-                            fontSize: height / 45)),
-                    onPressed: _displayRestaurants
-                        ? () {
-                            setState(() {
-                              _displayRestaurants = false;
-                            });
-                          }
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-
-            // TODO: refactor restaurants and dishes to collapse reusable components
             Expanded(
-              child: _displayRestaurants
-                  ? Restaurants(
-                      pins: widget.pins,
-                      zipCode: widget.zipCode,
-                      notifyParent: refresh,
+                flex: 31,
+                child: Column(
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.only(top: height / 70, left: height / 70),
+                      child: Row(
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                side: BorderSide(
+                                    width: 1, color: AppColors.medGrey),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(7),
+                                      bottomLeft: Radius.circular(7)),
+                                ),
+                                // padding: EdgeInsets.only(bottom: height / 90),
+                                primary: Colors.white,
+                                minimumSize: Size(height / 15, height / 20)),
+                            child: Text('Restaurants',
+                                style: TextStyle(
+                                    color: _displayRestaurants
+                                        ? AppColors.darkText
+                                        : AppColors.primaryDark,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: height / 45)),
+                            onPressed: !_displayRestaurants
+                                ? () {
+                                    setState(() {
+                                      _displayRestaurants = true;
+                                    });
+                                  }
+                                : null,
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                side: BorderSide(
+                                    width: 1, color: AppColors.medGrey),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(7),
+                                      bottomRight: Radius.circular(7)),
+                                ),
+                                primary: Colors.white,
+                                minimumSize: Size(height / 15, height / 20)),
+                            child: Text('Dishes',
+                                style: TextStyle(
+                                    color: _displayRestaurants
+                                        ? AppColors.primaryDark
+                                        : AppColors.darkText,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: height / 45)),
+                            onPressed: _displayRestaurants
+                                ? () {
+                                    setState(() {
+                                      _displayRestaurants = false;
+                                    });
+                                  }
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // TODO: refactor restaurants and dishes to collapse reusable components
+                    Expanded(
+                      child: _displayRestaurants
+                          ? Restaurants(
+                              pins: widget.pins,
+                              zipCode: widget.zipCode,
+                              notifyParent: refresh,
+                            )
+                          : Dishes(
+                              pins: widget.pins,
+                              zipCode: widget.zipCode,
+                              notifyParent: refresh),
                     )
-                  : Dishes(
-                      pins: widget.pins,
-                      zipCode: widget.zipCode,
-                      notifyParent: refresh),
-            )
+                  ],
+                )),
+            if (widget.pinsOnDisplay && width > 1000)
+              VerticalDivider(width: 1, color: AppColors.medGrey),
+            if (widget.pinsOnDisplay && width > 1000)
+              Expanded(
+                  flex: 9,
+                  child: PinnedItems(
+                    pins: widget.pins,
+                    notifyMain: refresh,
+                  ))
           ],
         ));
   }

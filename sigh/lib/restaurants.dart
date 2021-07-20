@@ -245,205 +245,188 @@ class _RestaurantsState extends State<Restaurants> {
       }
     }
 
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: Column(children: [
-          // search/sort
-          Container(
-              height: height / 10,
-              child: Row(
+    return Column(children: [
+      // search/sort
+      Container(
+          height: height / 10,
+          child: Row(
+            children: [
+              // sort
+              Row(
                 children: [
-                  // sort
-                  Row(
-                    children: [
-                      Container(
-                          padding: EdgeInsets.only(
-                              left: height / 40, right: height / 100),
-                          child: Text("Sort by:")),
-                      Container(
-                          padding: EdgeInsets.only(right: height / 40),
-                          child: DropdownButton(
-                            value: widget.sort,
-                            icon: const Icon(Icons.arrow_drop_down),
-                            iconSize: 20,
-                            elevation: 16,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                  Container(
+                      padding: EdgeInsets.only(
+                          left: height / 40, right: height / 100),
+                      child: Text("Sort by:")),
+                  Container(
+                      padding: EdgeInsets.only(right: height / 40),
+                      child: DropdownButton(
+                        value: widget.sort,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        iconSize: 20,
+                        elevation: 16,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (String? value) {
+                          setState(() {
+                            debugPrint('changed $value');
+                            widget.sort = value!;
+                            page = 1;
+                          });
+                        },
+                        items: [
+                          DropdownMenuItem<String>(
+                              value: 'friendliness',
+                              child: Text('friendliness',
+                                  style: TextStyle(color: AppColors.darkGrey))),
+                          DropdownMenuItem<String>(
+                              value: '# of meatless dishes',
+                              child: Text('meatless dishes',
+                                  style: TextStyle(color: AppColors.darkGrey)))
+                        ],
+                      ))
+                ],
+              ),
+
+              // search
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  height: mobile ? height / 16 : height / 17,
+                  width: mobile ? width / 4 : width / 5,
+                  // search form
+                  child: Form(
+                    key: _formKey,
+                    child: TextFormField(
+                        controller: searchResultsController,
+                        decoration: InputDecoration(
+                            fillColor: Colors.white,
+                            filled: true,
+                            contentPadding:
+                                EdgeInsets.only(bottom: 1, left: 10),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.darkGrey, width: 1.5),
                             ),
-                            onChanged: (String? value) {
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                              ),
+                              borderSide: BorderSide(
+                                  color: AppColors.medGrey, width: 1),
+                            ),
+                            hintStyle: TextStyle(fontSize: 12),
+                            hintText:
+                                widget.search ? '${widget.query}' : 'search'),
+                        onSaved: (value) {
+                          if (value is String) {
+                            formVal = value;
+                          }
+                        }),
+                  )),
+              // search button
+              Container(
+                  padding:
+                      EdgeInsets.only(bottom: height / 80, top: height / 100),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          side: BorderSide(
+                              width: mobile ? 1 : 2, color: AppColors.medGrey),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(7),
+                                bottomRight: Radius.circular(7)),
+                          ),
+                          primary: Colors.white,
+                          minimumSize: mobile
+                              ? Size(height / 40, height / 25)
+                              : Size(height / 40, height / 21.5)),
+                      onPressed: widget.search
+                          ? () {
+                              searchResultsController.clear();
                               setState(() {
-                                debugPrint('changed $value');
-                                widget.sort = value!;
+                                widget.search = false;
+                                widget.query = '';
                                 page = 1;
                               });
-                            },
-                            items: [
-                              DropdownMenuItem<String>(
-                                  value: 'friendliness',
-                                  child: Text('friendliness',
-                                      style: TextStyle(
-                                          color: AppColors.darkGrey))),
-                              DropdownMenuItem<String>(
-                                  value: '# of meatless dishes',
-                                  child: Text('meatless dishes',
-                                      style:
-                                          TextStyle(color: AppColors.darkGrey)))
-                            ],
-                          ))
-                    ],
-                  ),
+                            }
+                          : () {
+                              _formKey.currentState!.save();
+                              if (formVal == null ||
+                                  formVal.isEmpty ||
+                                  formVal == ' ' ||
+                                  formVal == '') {
+                                setState(() {
+                                  widget.search = false;
+                                  page = 1;
 
-                  // search
-                  Container(
-                      padding: EdgeInsets.only(
-                          bottom: height / 80, top: height / 100),
-                      height: mobile ? height / 16 : height / 17,
-                      width: mobile ? width / 4 : width / 5,
-                      // search form
-                      child: Form(
-                        key: _formKey,
-                        child: TextFormField(
-                            controller: searchResultsController,
-                            decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                filled: true,
-                                contentPadding:
-                                    EdgeInsets.only(bottom: 1, left: 10),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5),
-                                  ),
-                                  borderSide: BorderSide(
-                                      color: AppColors.darkGrey, width: 1.5),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5),
-                                  ),
-                                  borderSide: BorderSide(
-                                      color: AppColors.medGrey, width: 1),
-                                ),
-                                hintStyle: TextStyle(fontSize: 12),
-                                hintText: widget.search
-                                    ? '${widget.query}'
-                                    : 'search'),
-                            onSaved: (value) {
-                              if (value is String) {
-                                formVal = value;
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
+                              } else {
+                                setState(() {
+                                  widget.search = true;
+                                  widget.query = formVal;
+                                  page = 1;
+
+                                  // _displayRestaurants = !_displayRestaurants;
+                                });
                               }
-                            }),
-                      )),
-                  // search button
-                  Container(
-                      padding: EdgeInsets.only(
-                          bottom: height / 80, top: height / 100),
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              side: BorderSide(
-                                  width: mobile ? 1 : 2,
-                                  color: mobile
-                                      ? AppColors.medGrey
-                                      : AppColors.primaryDark),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(7),
-                                    bottomRight: Radius.circular(7)),
-                              ),
-                              // padding: EdgeInsets.only(bottom: height / 90),
-                              primary:
-                                  mobile ? Colors.white : AppColors.primary,
-                              minimumSize: mobile
-                                  ? Size(height / 40, height / 25)
-                                  : Size(height / 40, height / 21.5)),
-                          onPressed: widget.search
-                              ? () {
-                                  searchResultsController.clear();
-                                  setState(() {
-                                    widget.search = false;
-                                    widget.query = '';
-                                    page = 1;
+                            },
+                      child: widget.search
+                          ? Container(
+                              height: 17,
+                              width: 17,
+                              child: Text("x",
+                                  style: TextStyle(
+                                      fontSize: 17, color: AppColors.darkGrey)))
+                          : Icon(Icons.search,
+                              size: 17, color: AppColors.darkGrey)))
+            ],
+          )),
+      // divider
+      if (mobile) Container(height: 1, color: AppColors.medGrey),
 
-                                    // _displayRestaurants = !_displayRestaurants;
-                                  });
-                                }
-                              : () {
-                                  _formKey.currentState!.save();
-                                  if (formVal == null ||
-                                      formVal.isEmpty ||
-                                      formVal == ' ' ||
-                                      formVal == '') {
-                                    setState(() {
-                                      widget.search = false;
-                                      page = 1;
-
-                                      // _displayRestaurants = !_displayRestaurants;
-                                    });
-                                  } else {
-                                    setState(() {
-                                      widget.search = true;
-                                      widget.query = formVal;
-                                      page = 1;
-
-                                      // _displayRestaurants = !_displayRestaurants;
-                                    });
-                                  }
-                                },
-                          child: widget.search
-                              ? Container(
-                                  height: 17,
-                                  width: 17,
-                                  child: Text("x",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          color: mobile
-                                              ? AppColors.darkGrey
-                                              : null)))
-                              : Icon(Icons.search,
-                                  size: 17,
-                                  color: mobile ? AppColors.darkGrey : null)))
-                ],
-              )),
-          // divider
-          if (mobile) Container(height: 1, color: AppColors.medGrey),
-
-          // restaurants
-          Container(
-            height: height * (3 / 5),
-            padding: EdgeInsets.fromLTRB(height / 50, 0, height / 50, 0),
-            child: Center(
-                child: FutureBuilder<List>(
-              future: getRestaurants(
-                  page, zipCode, widget.sort, widget.search, widget.query),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  debugPrint('${snapshot.data}');
-                  if (snapshot.data![0] == 'no results') {
-                    return Text('no results');
-                  } else {
-                    if (width < 500) {
-                      return ListView.builder(
-                        controller: _scrollController,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (_, int position) {
-                          debugPrint(
-                              'type ${snapshot.data![position]["friendliness"]}');
-                          if (snapshot.data![position]["friendliness"] !=
-                                  null &&
-                              snapshot.data![position]["friendliness"] !=
-                                  'N/A') {
-                            snapshot.data![position]["friendliness"] = snapshot
-                                .data![position]["friendliness"]
-                                .round();
-                          } else {
-                            snapshot.data![position]["friendliness"] = 0;
-                          }
-                          return restaurantDesc(snapshot.data![position]);
-                        },
-                      );
-                    } else {
-                      return GridView.builder(
+      // restaurants
+      Container(
+        height: mobile ? height * (3 / 5) : (height) * (13 / 20),
+        color: mobile ? null : AppColors.lightestGrey,
+        child: Center(
+            child: FutureBuilder<List>(
+          future: getRestaurants(
+              page, zipCode, widget.sort, widget.search, widget.query),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              debugPrint('${snapshot.data}');
+              if (snapshot.data![0] == 'no results') {
+                return Text('no results');
+              } else {
+                if (width < 500) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (_, int position) {
+                      debugPrint(
+                          'type ${snapshot.data![position]["friendliness"]}');
+                      if (snapshot.data![position]["friendliness"] != null &&
+                          snapshot.data![position]["friendliness"] != 'N/A') {
+                        snapshot.data![position]["friendliness"] =
+                            snapshot.data![position]["friendliness"].round();
+                      } else {
+                        snapshot.data![position]["friendliness"] = 0;
+                      }
+                      return restaurantDesc(snapshot.data![position]);
+                    },
+                  );
+                } else {
+                  return Padding(
+                      padding: EdgeInsets.all(10),
+                      child: GridView.builder(
                         controller: _scrollController,
                         itemCount: snapshot.data!.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -474,122 +457,118 @@ class _RestaurantsState extends State<Restaurants> {
                                     restaurantDesc(snapshot.data![position]));
                           }
                         },
-                      );
-                    }
-                  }
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
+                      ));
                 }
+              }
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
 
-                // By default, show a loading spinner.
-                return SizedBox(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primary,
-                  ),
-                  height: 50.0,
-                  width: 50.0,
-                );
-              },
-            )),
-          ),
-          Container(
-              padding: EdgeInsets.only(top: height / 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (!isDisabled())
-                    IconButton(
-                        hoverColor: AppColors.noHover,
-                        onPressed: () async {
-                          setState(() {
-                            page = page - 1;
-                          });
-                          await Future.delayed(
-                              const Duration(milliseconds: 200));
-                          SchedulerBinding.instance
-                              ?.addPostFrameCallback((timeStamp) {
-                            _scrollController.animateTo(
-                                _scrollController.position.minScrollExtent,
-                                duration: const Duration(milliseconds: 10),
-                                curve: Curves.fastOutSlowIn);
-                          });
-                        },
-                        icon: Icon(Icons.arrow_back_ios,
-                            size: 20, color: AppColors.darkGrey)),
-                  Container(
-                      width: height / 15,
-                      height: height / 25,
-                      child: TextField(
-                        controller: fieldText,
-                        onSubmitted: (value) {
-                          var number = int.tryParse(value);
-                          if (number != null && 0 < number && number < 118) {
-                            setState(() {
-                              page = number;
-                            });
+            // By default, show a loading spinner.
+            return SizedBox(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+              height: 50.0,
+              width: 50.0,
+            );
+          },
+        )),
+      ),
+      Container(
+          padding: EdgeInsets.only(top: height / 30),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!isDisabled())
+                IconButton(
+                    hoverColor: AppColors.noHover,
+                    onPressed: () async {
+                      setState(() {
+                        page = page - 1;
+                      });
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      SchedulerBinding.instance
+                          ?.addPostFrameCallback((timeStamp) {
+                        _scrollController.animateTo(
+                            _scrollController.position.minScrollExtent,
+                            duration: const Duration(milliseconds: 10),
+                            curve: Curves.fastOutSlowIn);
+                      });
+                    },
+                    icon: Icon(Icons.arrow_back_ios,
+                        size: 20, color: AppColors.darkGrey)),
+              Container(
+                  width: height / 15,
+                  height: height / 25,
+                  child: TextField(
+                    controller: fieldText,
+                    onSubmitted: (value) {
+                      var number = int.tryParse(value);
+                      if (number != null && 0 < number && number < 118) {
+                        setState(() {
+                          page = number;
+                        });
 
-                            clearText();
-                          }
-                        },
-                        decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.only(bottom: 1, left: 10),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AppColors.medGrey, width: 1.5),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AppColors.lightGrey, width: 1),
-                            ),
-                            hintText: '$page',
-                            hintStyle: TextStyle(fontSize: 12)),
-                      )),
-                  FutureBuilder<List>(
-                    future: getRestaurants(page, zipCode, widget.sort,
-                        widget.search, widget.query),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        debugPrint(
-                            'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
-                        var end = true;
-                        if (snapshot.data![0] != 'no results') {
-                          if (snapshot.data!.length == 15) {
-                            end = false;
-                          }
-                        }
-
-                        if (end) {
-                          return Text('');
-                        } else {
-                          return IconButton(
-                              hoverColor: Colors.white.withOpacity(0),
-                              onPressed: () async {
-                                setState(() {
-                                  page = page + 1;
-                                });
-                                await Future.delayed(
-                                    const Duration(milliseconds: 200));
-                                SchedulerBinding.instance
-                                    ?.addPostFrameCallback((timeStamp) {
-                                  _scrollController.animateTo(
-                                      _scrollController
-                                          .position.minScrollExtent,
-                                      duration:
-                                          const Duration(milliseconds: 10),
-                                      curve: Curves.fastOutSlowIn);
-                                });
-                              },
-                              icon: Icon(Icons.arrow_forward_ios,
-                                  size: 20, color: AppColors.darkGrey));
-                        }
-                      } else {
-                        return Text('');
+                        clearText();
                       }
                     },
-                  ),
-                ],
-              ))
-        ]));
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.only(bottom: 1, left: 10),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: AppColors.medGrey, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: AppColors.lightGrey, width: 1),
+                        ),
+                        hintText: '$page',
+                        hintStyle: TextStyle(fontSize: 12)),
+                  )),
+              FutureBuilder<List>(
+                future: getRestaurants(
+                    page, zipCode, widget.sort, widget.search, widget.query),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    debugPrint(
+                        'AHH ${snapshot.data!.length}, ${snapshot.data![snapshot.data!.length - 1]}');
+                    var end = true;
+                    if (snapshot.data![0] != 'no results') {
+                      if (snapshot.data!.length == 15) {
+                        end = false;
+                      }
+                    }
+
+                    if (end) {
+                      return Text('');
+                    } else {
+                      return IconButton(
+                          hoverColor: Colors.white.withOpacity(0),
+                          onPressed: () async {
+                            setState(() {
+                              page = page + 1;
+                            });
+                            await Future.delayed(
+                                const Duration(milliseconds: 200));
+                            SchedulerBinding.instance
+                                ?.addPostFrameCallback((timeStamp) {
+                              _scrollController.animateTo(
+                                  _scrollController.position.minScrollExtent,
+                                  duration: const Duration(milliseconds: 10),
+                                  curve: Curves.fastOutSlowIn);
+                            });
+                          },
+                          icon: Icon(Icons.arrow_forward_ios,
+                              size: 20, color: AppColors.darkGrey));
+                    }
+                  } else {
+                    return Text('');
+                  }
+                },
+              ),
+            ],
+          ))
+    ]);
   }
 }

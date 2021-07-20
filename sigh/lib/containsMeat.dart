@@ -133,7 +133,7 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                   padding: EdgeInsets.only(top: 10),
                                   width: dialogWidth - 20,
                                   child: Text(
-                                      'We’re so sorry that this dish contains meat! Please let us know what part of the dish tipped you off to this fact.',
+                                      'We’re so sorry that this dish contains meat! How did you know that there was meat in this dish?*',
                                       style: TextStyle(fontSize: 15),
                                       textAlign: TextAlign.left),
                                 ),
@@ -161,13 +161,16 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                                     nameProblem, 'name'),
                                                 customCheckBox(
                                                     descProblem, 'description'),
-                                                customCheckBox(
-                                                    requirementsProblem,
-                                                    'requirements'),
+                                                if (widget
+                                                        .item['requirements'] !=
+                                                    'none')
+                                                  customCheckBox(
+                                                      requirementsProblem,
+                                                      'requirements'),
                                                 customCheckBox(
                                                     imageProblem, 'image'),
                                                 customCheckBox(orderedProblem,
-                                                    'I ordered this'),
+                                                    'I ordered it'),
                                               ]));
                                     }),
                                 TextFormField(
