@@ -7,76 +7,32 @@ import 'package:sigh/appColors.dart';
 import 'restaurantPage.dart';
 import 'appColors.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class Restaurants extends StatefulWidget {
-  var notifyParent;
+class RestaurantCard extends StatefulWidget {
+  var notifyMain;
   var pins;
-  var zipCode;
-  var sort = 'friendliness';
-  var search = false;
-  var query = '';
+  var restaurant;
 
-  Restaurants({this.pins, this.zipCode, this.notifyParent});
-  @override
-  _RestaurantsState createState() => _RestaurantsState();
+  RestaurantCard(
+      {@required this.pins,
+      @required this.notifyMain,
+      @required this.restaurant});
+
+  _RestaurantCardState createState() => _RestaurantCardState();
 }
 
-Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
-  debugPrint('getting restaurants, $zipCode, $sort, $search');
+class _RestaurantCardState extends State<RestaurantCard> {
+  Widget build(BuildContext context) {
+    var restaurant = widget.restaurant;
 
-  final String body = jsonEncode({
-    "offset": offset,
-    'zipCode': zipCode,
-    'sort': sort,
-    "search": search,
-    "query": query
-  });
-  final response =
-
-      // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: body);
-
-  return jsonDecode(response.body)['restaurants'];
-}
-
-class _RestaurantsState extends State<Restaurants> {
-  final ScrollController _scrollController = ScrollController();
-  var page = 1;
-  final _formKey = GlobalKey<FormState>();
-  var formVal;
-
-  // final _biggerFont = const TextStyle(fontSize: 18);
-
-  final fieldText = TextEditingController();
-  final searchResultsController = TextEditingController();
-
-  void clearText() {
-    fieldText.clear();
-  }
-
-  Widget restaurantDesc(restaurant) {
     var name = restaurant['name'],
         type = restaurant['type'],
         friendliness = restaurant['friendliness'],
         id = restaurant['_id'],
         mains = restaurant['totalVegItems'];
-    // name = name.to
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    final _iconSize = const TextStyle(fontSize: 30);
     var info = {'name': name, 'id': id};
     var unfriendliness = 100 - friendliness;
 
@@ -84,12 +40,10 @@ class _RestaurantsState extends State<Restaurants> {
       type = type.substring(0, 30);
       type = type + "...";
     }
-
     Map<String, double> dataMap = {
       "veggie": friendliness.toDouble(),
       "notVeggie": unfriendliness.toDouble(),
     };
-
     Widget friendlinessChart() {
       return PieChart(
         dataMap: dataMap,
@@ -117,7 +71,7 @@ class _RestaurantsState extends State<Restaurants> {
                   MaterialPageRoute(
                       builder: (_) =>
                           RestaurantPage(info: info, pins: widget.pins)),
-                ).then((val) => {setState(() {}), widget.notifyParent()})
+                ).then((val) => {setState(() {}), widget.notifyMain()})
               },
           // restaurant information
           child: Column(
@@ -179,9 +133,11 @@ class _RestaurantsState extends State<Restaurants> {
               MaterialPageRoute(
                   builder: (_) =>
                       RestaurantPage(info: info, pins: widget.pins)),
-            ).then((val) => {setState(() {}), widget.notifyParent()});
+            ).then((val) => {setState(() {}), widget.notifyMain()});
           },
           child: Container(
+              height: 250,
+              width: 200,
               padding: EdgeInsets.all(height / 50),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -212,6 +168,66 @@ class _RestaurantsState extends State<Restaurants> {
                 ],
               )));
     }
+  }
+}
+
+class Restaurants extends StatefulWidget {
+  var notifyParent;
+  var pins;
+  var zipCode;
+  var sort = 'friendliness';
+  var search = false;
+  var query = '';
+
+  Restaurants({this.pins, this.zipCode, this.notifyParent});
+  @override
+  _RestaurantsState createState() => _RestaurantsState();
+}
+
+Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
+  debugPrint('getting restaurants, $zipCode, $sort, $search');
+
+  final String body = jsonEncode({
+    "offset": offset,
+    'zipCode': zipCode,
+    'sort': sort,
+    "search": search,
+    "query": query
+  });
+  final response =
+
+      // for local android dev
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: body);
+
+  return jsonDecode(response.body)['restaurants'];
+}
+
+class _RestaurantsState extends State<Restaurants> {
+  final ScrollController _scrollController = ScrollController();
+  var page = 1;
+  final _formKey = GlobalKey<FormState>();
+  var formVal;
+
+  // final _biggerFont = const TextStyle(fontSize: 18);
+
+  final fieldText = TextEditingController();
+  final searchResultsController = TextEditingController();
+
+  void clearText() {
+    fieldText.clear();
   }
 
   @override
@@ -420,7 +436,10 @@ class _RestaurantsState extends State<Restaurants> {
                       } else {
                         snapshot.data![position]["friendliness"] = 0;
                       }
-                      return restaurantDesc(snapshot.data![position]);
+                      return RestaurantCard(
+                          pins: widget.pins,
+                          notifyMain: widget.notifyParent,
+                          restaurant: snapshot.data![position]);
                     },
                   );
                 } else {
@@ -434,7 +453,7 @@ class _RestaurantsState extends State<Restaurants> {
                               calculateCount(MediaQuery.of(context).size),
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: (1.3 / 1.7),
+                          // childAspectRatio: (1.3 / 1.7),
                         ),
                         itemBuilder: (_, int position) {
                           if (snapshot.data![position]["end"] == true) {
@@ -452,9 +471,10 @@ class _RestaurantsState extends State<Restaurants> {
                             } else {
                               snapshot.data![position]["friendliness"] = 0;
                             }
-                            return Card(
-                                child:
-                                    restaurantDesc(snapshot.data![position]));
+                            return RestaurantCard(
+                                pins: widget.pins,
+                                notifyMain: widget.notifyParent,
+                                restaurant: snapshot.data![position]);
                           }
                         },
                       ));
