@@ -48,11 +48,11 @@ class _RestaurantCardState extends State<RestaurantCard> {
       return PieChart(
         dataMap: dataMap,
         chartLegendSpacing: 32,
-        chartRadius: height / 15,
+        chartRadius: 50,
         colorList: [AppColors.primary, Color(0xFFEC873B)],
         initialAngleInDegree: 270,
         chartType: ChartType.ring,
-        ringStrokeWidth: 27,
+        ringStrokeWidth: 25,
         legendOptions: LegendOptions(
           showLegends: false,
         ),
@@ -125,48 +125,50 @@ class _RestaurantCardState extends State<RestaurantCard> {
             ],
           ));
     } else {
-      return InkWell(
-          hoverColor: AppColors.noHover,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) =>
-                      RestaurantPage(info: info, pins: widget.pins)),
-            ).then((val) => {setState(() {}), widget.notifyMain()});
-          },
-          child: Container(
-              height: 250,
-              width: 200,
-              padding: EdgeInsets.all(height / 50),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, width / 70),
-                      child: friendlinessChart()),
-                  Text(
-                    name,
-                    style: AppStyles.header,
-                    textAlign: TextAlign.center,
-                  ),
-                  if (name != type)
-                    Text(type,
-                        style: AppStyles.subtitle, textAlign: TextAlign.center),
-                  Container(
-                      padding: EdgeInsets.only(bottom: 5),
-                      child: Text('$mains mains',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(color: AppColors.accent))),
-                  Container(
-                      child: Text('$friendliness',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary)))
-                ],
-              )));
+      return Card(
+          child: InkWell(
+              hoverColor: AppColors.noHover,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) =>
+                          RestaurantPage(info: info, pins: widget.pins)),
+                ).then((val) => {setState(() {}), widget.notifyMain()});
+              },
+              child: Container(
+                  height: 250,
+                  width: 200,
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                          padding: EdgeInsets.fromLTRB(10, 10, 10, width / 70),
+                          child: friendlinessChart()),
+                      Text(
+                        name,
+                        style: AppStyles.header,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (name != type)
+                        Text(type,
+                            style: AppStyles.subtitle,
+                            textAlign: TextAlign.center),
+                      Container(
+                          padding: EdgeInsets.only(bottom: 5),
+                          child: Text('$mains mains',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(color: AppColors.accent))),
+                      Container(
+                          child: Text('$friendliness',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary)))
+                    ],
+                  ))));
     }
   }
 }
@@ -246,17 +248,23 @@ class _RestaurantsState extends State<Restaurants> {
     }
 
     calculateCount(size) {
-      if (size.width < 650) {
+      if (size.width < 600) {
+        debugPrint('2');
         return 2;
-      } else if (size.width < 900) {
+      } else if (size.width < 800) {
+        debugPrint('3');
         return 3;
       } else if (size.width < 1150) {
+        debugPrint('4');
         return 4;
       } else if (size.width < 1400) {
+        debugPrint('5');
         return 5;
       } else if (size.width < 1600) {
+        debugPrint('6');
         return 6;
       } else {
+        debugPrint('7');
         return 7;
       }
     }
@@ -444,17 +452,15 @@ class _RestaurantsState extends State<Restaurants> {
                   );
                 } else {
                   return Padding(
-                      padding: EdgeInsets.all(10),
-                      child: GridView.builder(
+                      padding: EdgeInsets.fromLTRB(10, 15, 10, 10),
+                      child: StaggeredGridView.countBuilder(
+                        crossAxisCount:
+                            calculateCount(MediaQuery.of(context).size),
                         controller: _scrollController,
                         itemCount: snapshot.data!.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              calculateCount(MediaQuery.of(context).size),
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          // childAspectRatio: (1.3 / 1.7),
-                        ),
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        staggeredTileBuilder: (_) => StaggeredTile.fit(1),
                         itemBuilder: (_, int position) {
                           if (snapshot.data![position]["end"] == true) {
                             return Text('End of results');
