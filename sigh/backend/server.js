@@ -245,16 +245,20 @@ app.post("/report", async (req,res) => {
 
 app.post("/get-page-dishes", async (req,res) => {
     res.header("Access-Control-Allow-Origin", "*");
-    const id = req.body.id
+    const id = req.body.id;
+
 
     try {
         const db = client.db('data');
         var mains = []
         var sides = []
+        var drinks = []
         var desserts = []
 
 
         const dishes = await db.collection('items').find({$and: [{restaurant_id: ObjectId(id)}, {vegetarian: true}]}).sort({_id: -1}).toArray();
+
+        const restaurant = await db.collection('restaurants').findOne({_id: ObjectId(id)})
 
        
 
@@ -263,7 +267,9 @@ app.post("/get-page-dishes", async (req,res) => {
                 desserts.push(dish)
             } else if (dish.side) {
                 sides.push(dish)
-            } else {
+            } else if (dish.drink) {
+                drinks.push(dish)
+            }else {
                 mains.push(dish)
             }
         }
@@ -274,7 +280,7 @@ app.post("/get-page-dishes", async (req,res) => {
 
 
 
-        res.json({dishes: [mains,sides,desserts]})
+        res.json({dishes: [mains,sides,desserts,drinks, restaurant]})
     } finally {
         console.log("restaurant's dishes successfully taken!");
         

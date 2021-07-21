@@ -213,7 +213,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                         style: TextStyle(
                             color: AppColors.darkGrey,
                             fontWeight: FontWeight.w600,
-                            fontSize: 18))),
+                            fontSize: 20))),
               ),
         // starred dishes display
         body: Container(

@@ -33,7 +33,10 @@ class _RestaurantCardState extends State<RestaurantCard> {
         mains = restaurant['totalVegItems'];
     // var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    var info = {'name': name, 'id': id};
+    var info = {
+      'name': name,
+      'id': id,
+    };
     var unfriendliness = 100 - friendliness;
 
     if (type.length > 30) {
