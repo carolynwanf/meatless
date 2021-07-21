@@ -7,7 +7,6 @@ import 'package:sigh/appColors.dart';
 import 'restaurantPage.dart';
 import 'appColors.dart';
 import 'package:pie_chart/pie_chart.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class RestaurantCard extends StatefulWidget {
   var notifyMain;
@@ -78,35 +77,37 @@ class _RestaurantCardState extends State<RestaurantCard> {
           child: Column(
             children: [
               Container(
-                  height: height / 6,
+                  // height: height / 6,
+                  padding: EdgeInsets.only(bottom: 10, top: 10),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // restaurant name + type
-                        Container(
-                            padding: EdgeInsets.only(top: 14),
+                        Expanded(
+                            flex: 3,
                             child: Column(children: [
                               // restaurant name
                               Container(
                                   width: width * (7 / 12),
                                   child: Text(name,
-                                      style: AppStyles.header,
+                                      style: AppStyles.headerMobile,
                                       textAlign: TextAlign.left)),
                               //restaurant type
                               Container(
                                   width: width * (7 / 12),
                                   padding: EdgeInsets.symmetric(vertical: 5),
                                   child: Text(type,
-                                      style: AppStyles.subtitle,
+                                      style: AppStyles.subtitleMobile,
                                       textAlign: TextAlign.left)),
                               // friendliness
                               Container(
                                   padding: EdgeInsets.only(bottom: 5),
                                   width: width * (7 / 12),
-                                  child: Text('$mains mains',
-                                      textAlign: TextAlign.left,
-                                      style:
-                                          TextStyle(color: AppColors.accent))),
+                                  child: Text(
+                                    '$mains mains',
+                                    textAlign: TextAlign.left,
+                                    style: AppStyles.detailMobile,
+                                  )),
                               Container(
                                   width: width * (7 / 12),
                                   child: Text('$friendliness',
@@ -119,7 +120,11 @@ class _RestaurantCardState extends State<RestaurantCard> {
                               // kinds of items
                             ])),
                         // friendliness chart
-                        Container(child: friendlinessChart())
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                                padding: EdgeInsets.only(right: 20),
+                                child: friendlinessChart()))
                       ])),
               Container(
                   width: width - 10, height: 1, color: AppColors.lightGrey)
@@ -160,7 +165,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
                           padding: EdgeInsets.only(bottom: 5),
                           child: Text('$mains mains',
                               textAlign: TextAlign.left,
-                              style: TextStyle(color: AppColors.accent))),
+                              style: AppStyles.detail)),
                       Container(
                           child: Text('$friendliness',
                               textAlign: TextAlign.left,
@@ -197,20 +202,20 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
   final response =
 
       // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
+
+  // for local ios + browser dev
+  // await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: body);
 
   return jsonDecode(response.body)['restaurants'];
 }
@@ -243,28 +248,6 @@ class _RestaurantsState extends State<Restaurants> {
         return true;
       } else {
         return false;
-      }
-    }
-
-    calculateCount(size) {
-      if (size.width < 600) {
-        debugPrint('2');
-        return 2;
-      } else if (size.width < 800) {
-        debugPrint('3');
-        return 3;
-      } else if (size.width < 1150) {
-        debugPrint('4');
-        return 4;
-      } else if (size.width < 1400) {
-        debugPrint('5');
-        return 5;
-      } else if (size.width < 1600) {
-        debugPrint('6');
-        return 6;
-      } else {
-        debugPrint('7');
-        return 7;
       }
     }
 
@@ -345,7 +328,7 @@ class _RestaurantsState extends State<Restaurants> {
                                   color: AppColors.medGrey, width: 1),
                             ),
                             hintStyle: TextStyle(fontSize: 12),
-                            hintText: search ? '${query}' : 'search'),
+                            hintText: search ? '$query' : 'search'),
                         onSaved: (value) {
                           if (value is String) {
                             formVal = value;
@@ -504,6 +487,9 @@ class _RestaurantsState extends State<Restaurants> {
           },
         )),
       ),
+      if (mobile) Container(height: 1, color: AppColors.medGrey),
+
+      // page
       Container(
           padding: EdgeInsets.only(top: height / 30),
           child: Row(

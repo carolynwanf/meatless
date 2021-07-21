@@ -18,20 +18,20 @@ Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
       // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
+
+  // for local ios + browser dev
+  // await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }

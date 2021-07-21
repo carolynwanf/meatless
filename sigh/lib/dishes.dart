@@ -22,20 +22,20 @@ Future<List> getDishes(offset, zipCode, search, query) async {
   final response =
 
       // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
+
+  // for local ios + browser dev
+  // await http.post(Uri.parse('http://localhost:4000/get-dishes'),
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -155,7 +155,7 @@ class _DishesState extends State<Dishes> {
                                   width: width / 2 - 10,
                                   child: Text(
                                     name,
-                                    style: AppStyles.header,
+                                    style: AppStyles.headerMobile,
                                     textAlign: TextAlign.left,
                                   )),
                               // dish description if it exists
@@ -166,16 +166,14 @@ class _DishesState extends State<Dishes> {
                                     child: Text(
                                       description,
                                       textAlign: TextAlign.left,
-                                      style: AppStyles.subtitle,
+                                      style: AppStyles.subtitleMobile,
                                     )),
                               // dish price and restaurant
                               Container(
                                   width: width / 2 - 10,
-                                  child: Text(
-                                    '$price • $restaurant',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(color: AppColors.accent),
-                                  ))
+                                  child: Text('$price • $restaurant',
+                                      textAlign: TextAlign.left,
+                                      style: AppStyles.detailMobile))
                             ])),
                         // image if it exists
                         if (image != 'none')
@@ -283,7 +281,7 @@ class _DishesState extends State<Dishes> {
                 Text(
                   '$price • $restaurant',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.accent),
+                  style: AppStyles.detail,
                 ),
                 IconButton(
                     hoverColor: AppColors.noHover,
@@ -355,22 +353,6 @@ class _DishesState extends State<Dishes> {
         return true;
       } else {
         return false;
-      }
-    }
-
-    calculateCount(size) {
-      if (size.width < 650) {
-        return 2;
-      } else if (size.width < 950) {
-        return 3;
-      } else if (size.width < 1200) {
-        return 4;
-      } else if (size.width < 1350) {
-        return 5;
-      } else if (size.width < 1900) {
-        return 6;
-      } else {
-        return 7;
       }
     }
 
@@ -579,6 +561,7 @@ class _DishesState extends State<Dishes> {
               },
             )),
           ),
+          if (mobile) Container(height: 1, color: AppColors.medGrey),
           // choose your page
           Container(
               padding: EdgeInsets.only(top: height / 30),
