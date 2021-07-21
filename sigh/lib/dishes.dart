@@ -521,9 +521,9 @@ class _DishesState extends State<Dishes> {
                             itemCount: snapshot.data!.length,
                             controller: _scrollController,
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  calculateCount(MediaQuery.of(context).size),
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 250,
+                              mainAxisExtent: 330,
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
                               childAspectRatio: (1.3 / 1.8),

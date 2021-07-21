@@ -459,6 +459,7 @@ class _RestaurantsState extends State<Restaurants> {
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                           maxCrossAxisExtent: 200,
+
                           // crossAxisCount:
                           //     calculateCount(MediaQuery.of(context).size),
                         ),
