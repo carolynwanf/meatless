@@ -453,14 +453,17 @@ class _RestaurantsState extends State<Restaurants> {
                 } else {
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 10),
-                      child: StaggeredGridView.countBuilder(
-                        crossAxisCount:
-                            calculateCount(MediaQuery.of(context).size),
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          mainAxisExtent: 250,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          maxCrossAxisExtent: 200,
+                          // crossAxisCount:
+                          //     calculateCount(MediaQuery.of(context).size),
+                        ),
                         controller: _scrollController,
                         itemCount: snapshot.data!.length,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        staggeredTileBuilder: (_) => StaggeredTile.fit(1),
                         itemBuilder: (_, int position) {
                           if (snapshot.data![position]["end"] == true) {
                             return Text('End of results');
