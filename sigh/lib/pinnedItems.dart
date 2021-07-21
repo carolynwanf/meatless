@@ -177,8 +177,8 @@ class _PinnedItemsState extends State<PinnedItems> {
 
                               widget.notifyMain();
                             },
-                            icon: Icon(Icons.cancel,
-                                color: AppColors.darkGrey)))),
+                            icon:
+                                Icon(Icons.cancel, color: AppColors.medGrey)))),
               ])),
           // divider
           Container(

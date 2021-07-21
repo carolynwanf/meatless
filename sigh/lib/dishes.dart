@@ -9,8 +9,7 @@ import 'appColors.dart';
 class Dishes extends StatefulWidget {
   var pins;
   var zipCode;
-  var search = false;
-  var query = '';
+
   var notifyParent;
 
   Dishes({this.pins, this.zipCode, this.notifyParent});
@@ -42,6 +41,7 @@ Future<List> getDishes(offset, zipCode, search, query) async {
 }
 
 class _DishesState extends State<Dishes> {
+  var search = false, query = '';
   final ScrollController _scrollController = ScrollController();
   var page = 1;
 
@@ -70,8 +70,8 @@ class _DishesState extends State<Dishes> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    if (description.length > 60) {
-      description = description.substring(0, 60);
+    if (description.length > 55) {
+      description = description.substring(0, 55);
       description = description + "...";
     }
 
@@ -282,7 +282,7 @@ class _DishesState extends State<Dishes> {
                       style: AppStyles.subtitle, textAlign: TextAlign.center),
                 Text(
                   '$price • $restaurant',
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.accent),
                 ),
                 IconButton(
@@ -395,36 +395,58 @@ class _DishesState extends State<Dishes> {
                     child: Form(
                       key: _formKey,
                       child: TextFormField(
-                          controller: searchResultsController,
-                          decoration: InputDecoration(
-                              fillColor: Colors.white,
-                              filled: true,
-                              contentPadding:
-                                  EdgeInsets.only(bottom: 1, left: 10),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(5),
-                                  bottomLeft: Radius.circular(5),
-                                ),
-                                borderSide: BorderSide(
-                                    color: AppColors.darkGrey, width: 1.5),
+                        controller: searchResultsController,
+                        decoration: InputDecoration(
+                            fillColor: Colors.white,
+                            filled: true,
+                            contentPadding:
+                                EdgeInsets.only(bottom: 1, left: 10),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(5),
-                                  bottomLeft: Radius.circular(5),
-                                ),
-                                borderSide: BorderSide(
-                                    color: AppColors.medGrey, width: 1),
+                              borderSide: BorderSide(
+                                  color: AppColors.darkGrey, width: 1.5),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
                               ),
-                              hintStyle: TextStyle(fontSize: 12),
-                              hintText:
-                                  widget.search ? '${widget.query}' : 'search'),
-                          onSaved: (value) {
-                            if (value is String) {
-                              formVal = value;
-                            }
-                          }),
+                              borderSide: BorderSide(
+                                  color: AppColors.medGrey, width: 1),
+                            ),
+                            hintStyle: TextStyle(fontSize: 12),
+                            hintText: search ? '$query' : 'search'),
+                        onSaved: (value) {
+                          if (value is String) {
+                            formVal = value;
+                          }
+                        },
+                        onFieldSubmitted: (value) {
+                          _formKey.currentState!.save();
+                          if (formVal == null ||
+                              formVal.isEmpty ||
+                              formVal == ' ' ||
+                              formVal == '') {
+                            setState(() {
+                              search = false;
+                              page = 1;
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          } else {
+                            setState(() {
+                              search = true;
+                              query = formVal;
+                              page = 1;
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          }
+                        },
+                      ),
                     )),
 
                 // search bar button
@@ -446,12 +468,12 @@ class _DishesState extends State<Dishes> {
                             minimumSize: mobile
                                 ? Size(height / 40, height / 25)
                                 : Size(height / 40, height / 21.5)),
-                        onPressed: widget.search
+                        onPressed: search
                             ? () {
                                 searchResultsController.clear();
                                 setState(() {
-                                  widget.search = false;
-                                  widget.query = '';
+                                  search = false;
+                                  query = '';
                                   page = 1;
 
                                   // _displayRestaurants = !_displayRestaurants;
@@ -464,22 +486,22 @@ class _DishesState extends State<Dishes> {
                                     formVal == ' ' ||
                                     formVal == '') {
                                   setState(() {
-                                    widget.search = false;
+                                    search = false;
                                     page = 1;
 
                                     // _displayRestaurants = !_displayRestaurants;
                                   });
                                 } else {
                                   setState(() {
-                                    widget.search = true;
-                                    widget.query = formVal;
+                                    search = true;
+                                    query = formVal;
                                     page = 1;
 
                                     // _displayRestaurants = !_displayRestaurants;
                                   });
                                 }
                               },
-                        child: widget.search
+                        child: search
                             ? Text("x",
                                 style: TextStyle(
                                     fontSize: 17, color: AppColors.darkGrey))
@@ -497,8 +519,7 @@ class _DishesState extends State<Dishes> {
             color: mobile ? null : AppColors.lightestGrey,
             child: Center(
                 child: FutureBuilder<List>(
-              future:
-                  getDishes(page, widget.zipCode, widget.search, widget.query),
+              future: getDishes(page, widget.zipCode, search, query),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data![0] == 'no results') {
@@ -523,7 +544,7 @@ class _DishesState extends State<Dishes> {
                             gridDelegate:
                                 SliverGridDelegateWithMaxCrossAxisExtent(
                               maxCrossAxisExtent: 250,
-                              mainAxisExtent: 330,
+                              mainAxisExtent: 340,
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
                               childAspectRatio: (1.3 / 1.8),
@@ -617,8 +638,7 @@ class _DishesState extends State<Dishes> {
                       )),
                   // next page button
                   FutureBuilder<List>(
-                    future: getDishes(
-                        page, widget.zipCode, widget.search, widget.query),
+                    future: getDishes(page, widget.zipCode, search, query),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         var end = true;

@@ -178,7 +178,9 @@ class _MainpageState extends State<Mainpage> {
   var _displayRestaurants = true;
   var formVal;
   refresh() {
-    setState(() {});
+    setState(() {
+      widget.pins = widget.pins;
+    });
   }
 
   final _formKey = GlobalKey<FormState>();

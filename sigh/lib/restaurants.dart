@@ -14,10 +14,11 @@ class RestaurantCard extends StatefulWidget {
   var pins;
   var restaurant;
 
-  RestaurantCard(
-      {@required this.pins,
-      @required this.notifyMain,
-      @required this.restaurant});
+  RestaurantCard({
+    @required this.pins,
+    @required this.notifyMain,
+    @required this.restaurant,
+  });
 
   _RestaurantCardState createState() => _RestaurantCardState();
 }
@@ -71,7 +72,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
                   MaterialPageRoute(
                       builder: (_) =>
                           RestaurantPage(info: info, pins: widget.pins)),
-                ).then((val) => {setState(() {}), widget.notifyMain()})
+                ).then((val) => {widget.notifyMain()})
               },
           // restaurant information
           child: Column(
@@ -134,7 +135,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
                   MaterialPageRoute(
                       builder: (_) =>
                           RestaurantPage(info: info, pins: widget.pins)),
-                ).then((val) => {setState(() {}), widget.notifyMain()});
+                ).then((val) => {widget.notifyMain()});
               },
               child: Container(
                   height: 250,
@@ -177,9 +178,6 @@ class Restaurants extends StatefulWidget {
   var notifyParent;
   var pins;
   var zipCode;
-  var sort = 'friendliness';
-  var search = false;
-  var query = '';
 
   Restaurants({this.pins, this.zipCode, this.notifyParent});
   @override
@@ -218,6 +216,7 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
 }
 
 class _RestaurantsState extends State<Restaurants> {
+  var query = '', sort = 'friendliness', search = false;
   final ScrollController _scrollController = ScrollController();
   var page = 1;
   final _formKey = GlobalKey<FormState>();
@@ -285,7 +284,7 @@ class _RestaurantsState extends State<Restaurants> {
                   Container(
                       padding: EdgeInsets.only(right: height / 40),
                       child: DropdownButton(
-                        value: widget.sort,
+                        value: sort,
                         icon: const Icon(Icons.arrow_drop_down),
                         iconSize: 20,
                         elevation: 16,
@@ -295,7 +294,7 @@ class _RestaurantsState extends State<Restaurants> {
                         onChanged: (String? value) {
                           setState(() {
                             debugPrint('changed $value');
-                            widget.sort = value!;
+                            sort = value!;
                             page = 1;
                           });
                         },
@@ -346,8 +345,7 @@ class _RestaurantsState extends State<Restaurants> {
                                   color: AppColors.medGrey, width: 1),
                             ),
                             hintStyle: TextStyle(fontSize: 12),
-                            hintText:
-                                widget.search ? '${widget.query}' : 'search'),
+                            hintText: search ? '${query}' : 'search'),
                         onSaved: (value) {
                           if (value is String) {
                             formVal = value;
@@ -371,12 +369,12 @@ class _RestaurantsState extends State<Restaurants> {
                           minimumSize: mobile
                               ? Size(height / 40, height / 25)
                               : Size(height / 40, height / 21.5)),
-                      onPressed: widget.search
+                      onPressed: search
                           ? () {
                               searchResultsController.clear();
                               setState(() {
-                                widget.search = false;
-                                widget.query = '';
+                                search = false;
+                                query = '';
                                 page = 1;
                               });
                             }
@@ -387,22 +385,22 @@ class _RestaurantsState extends State<Restaurants> {
                                   formVal == ' ' ||
                                   formVal == '') {
                                 setState(() {
-                                  widget.search = false;
+                                  search = false;
                                   page = 1;
 
                                   // _displayRestaurants = !_displayRestaurants;
                                 });
                               } else {
                                 setState(() {
-                                  widget.search = true;
-                                  widget.query = formVal;
+                                  search = true;
+                                  query = formVal;
                                   page = 1;
 
                                   // _displayRestaurants = !_displayRestaurants;
                                 });
                               }
                             },
-                      child: widget.search
+                      child: search
                           ? Container(
                               height: 17,
                               width: 17,
@@ -422,8 +420,7 @@ class _RestaurantsState extends State<Restaurants> {
         color: mobile ? null : AppColors.lightestGrey,
         child: Center(
             child: FutureBuilder<List>(
-          future: getRestaurants(
-              page, zipCode, widget.sort, widget.search, widget.query),
+          future: getRestaurants(page, zipCode, sort, search, query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               debugPrint('${snapshot.data}');
@@ -445,9 +442,10 @@ class _RestaurantsState extends State<Restaurants> {
                         snapshot.data![position]["friendliness"] = 0;
                       }
                       return RestaurantCard(
-                          pins: widget.pins,
-                          notifyMain: widget.notifyParent,
-                          restaurant: snapshot.data![position]);
+                        pins: widget.pins,
+                        notifyMain: widget.notifyParent,
+                        restaurant: snapshot.data![position],
+                      );
                     },
                   );
                 } else {
@@ -458,7 +456,7 @@ class _RestaurantsState extends State<Restaurants> {
                           mainAxisExtent: 250,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          maxCrossAxisExtent: 200,
+                          maxCrossAxisExtent: 220,
 
                           // crossAxisCount:
                           //     calculateCount(MediaQuery.of(context).size),
@@ -482,9 +480,10 @@ class _RestaurantsState extends State<Restaurants> {
                               snapshot.data![position]["friendliness"] = 0;
                             }
                             return RestaurantCard(
-                                pins: widget.pins,
-                                notifyMain: widget.notifyParent,
-                                restaurant: snapshot.data![position]);
+                              pins: widget.pins,
+                              notifyMain: widget.notifyParent,
+                              restaurant: snapshot.data![position],
+                            );
                           }
                         },
                       ));
@@ -557,8 +556,7 @@ class _RestaurantsState extends State<Restaurants> {
                         hintStyle: TextStyle(fontSize: 12)),
                   )),
               FutureBuilder<List>(
-                future: getRestaurants(
-                    page, zipCode, widget.sort, widget.search, widget.query),
+                future: getRestaurants(page, zipCode, sort, search, query),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     debugPrint(

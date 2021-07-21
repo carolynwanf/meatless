@@ -20,7 +20,7 @@ class _ItemDialogState extends State<ItemDialog> {
     var width = MediaQuery.of(context).size.width;
     var dialogWidth = (width < 619 ? width : 619).toDouble();
     var height = MediaQuery.of(context).size.height;
-    var dialogHeight = (height < 849 ? height : 849).toDouble();
+    var dialogHeight = (height < 800 ? height : 800).toDouble();
     var item = widget.item,
         id = item['_id'],
         image = item['images'],
@@ -59,7 +59,9 @@ class _ItemDialogState extends State<ItemDialog> {
     }
     var pinned = item['pinned'];
     return Dialog(
-        insetPadding: dialogWidth < 619 ? EdgeInsets.all(0) : null,
+        insetPadding: dialogWidth < 619
+            ? EdgeInsets.all(0)
+            : EdgeInsets.symmetric(vertical: 20),
         backgroundColor: Colors.transparent,
         // backgroundColor: Colors.transparent,
         child: Card(
