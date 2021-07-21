@@ -7,10 +7,10 @@ import 'itemDialog.dart';
 import 'appColors.dart';
 
 class Dishes extends StatefulWidget {
-  var pins;
-  var zipCode;
+  final pins;
+  final zipCode;
 
-  var notifyParent;
+  final notifyParent;
 
   Dishes({this.pins, this.zipCode, this.notifyParent});
   _DishesState createState() => _DishesState();
@@ -41,7 +41,7 @@ Future<List> getDishes(offset, zipCode, search, query) async {
 }
 
 class _DishesState extends State<Dishes> {
-  var search = false, query = '';
+  var search = false, query = '', zipCode, pins;
   final ScrollController _scrollController = ScrollController();
   var page = 1;
 
@@ -59,7 +59,7 @@ class _DishesState extends State<Dishes> {
     super.initState();
   }
 
-  Widget dishDesc(item) {
+  Widget dishDesc(item, currentPins) {
     var name = item['name'],
         description = item['description'],
         image = item['images'],
@@ -89,7 +89,7 @@ class _DishesState extends State<Dishes> {
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ItemDialog(pins: widget.pins, item: item);
+            return ItemDialog(pins: currentPins, item: item);
           }).then((val) => {setState(() {}), widget.notifyParent()});
     }
 
@@ -107,14 +107,14 @@ class _DishesState extends State<Dishes> {
                             content: Text('starred!'),
                             duration: Duration(milliseconds: 400)),
                       );
-                      var temp = widget.pins;
+                      var temp = currentPins;
 
                       temp['ids'].add(id);
                       temp['items'].add(item);
                       debugPrint('$temp');
 
                       setState(() {
-                        widget.pins = temp;
+                        pins = temp;
                       });
 
                       widget.notifyParent();
@@ -124,7 +124,7 @@ class _DishesState extends State<Dishes> {
                         content: Text('removed from starred dishes'),
                         duration: Duration(milliseconds: 400),
                       ));
-                      var temp = widget.pins;
+                      var temp = currentPins;
                       debugPrint('$temp');
                       temp['ids'].remove(id);
                       for (var i = 0; i < temp['items'].length; i++) {
@@ -135,7 +135,7 @@ class _DishesState extends State<Dishes> {
                       }
                       setState(() {
                         debugPrint('setting state');
-                        widget.pins = temp;
+                        pins = temp;
                       });
                       widget.notifyParent();
                     },
@@ -288,21 +288,21 @@ class _DishesState extends State<Dishes> {
                     onPressed: !pinned
                         ? () {
                             debugPrint('pressed');
-                            var temp = widget.pins;
+                            var temp = currentPins;
 
                             temp['ids'].add(id);
                             temp['items'].add(item);
                             debugPrint('$temp');
 
                             setState(() {
-                              widget.pins = temp;
+                              pins = temp;
                             });
 
                             widget.notifyParent();
                           }
                         : () {
                             debugPrint('pressed');
-                            var temp = widget.pins;
+                            var temp = currentPins;
                             debugPrint('$temp');
                             temp['ids'].remove(id);
                             for (var i = 0; i < temp['items'].length; i++) {
@@ -313,7 +313,7 @@ class _DishesState extends State<Dishes> {
                             }
                             setState(() {
                               debugPrint('setting state');
-                              widget.pins = temp;
+                              pins = temp;
                             });
                             widget.notifyParent();
                           },
@@ -344,6 +344,7 @@ class _DishesState extends State<Dishes> {
   }
 
   Widget build(BuildContext context) {
+    var pins = widget.pins, zipCode = widget.zipCode;
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var mobile = width > 500 ? false : true;
@@ -501,7 +502,7 @@ class _DishesState extends State<Dishes> {
             color: mobile ? null : AppColors.lightestGrey,
             child: Center(
                 child: FutureBuilder<List>(
-              future: getDishes(page, widget.zipCode, search, query),
+              future: getDishes(page, zipCode, search, query),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data![0] == 'no results') {
@@ -511,7 +512,7 @@ class _DishesState extends State<Dishes> {
                     for (var i = 0; i < snapshot.data!.length; i++) {
                       var itemId = snapshot.data![i]["_id"];
 
-                      if (widget.pins['ids'].contains(itemId)) {
+                      if (pins['ids'].contains(itemId)) {
                         snapshot.data![i]['pinned'] = true;
                       } else {
                         snapshot.data![i]['pinned'] = false;
@@ -533,7 +534,8 @@ class _DishesState extends State<Dishes> {
                             ),
                             itemBuilder: (_, int position) {
                               return Card(
-                                  child: dishDesc(snapshot.data![position]));
+                                  child:
+                                      dishDesc(snapshot.data![position], pins));
                             },
                           ));
                     } else {
@@ -542,7 +544,7 @@ class _DishesState extends State<Dishes> {
                           itemCount: snapshot.data!.length,
                           shrinkWrap: true,
                           itemBuilder: (_, int position) {
-                            return dishDesc(snapshot.data![position]);
+                            return dishDesc(snapshot.data![position], pins);
                           });
                     }
                   }
@@ -621,7 +623,7 @@ class _DishesState extends State<Dishes> {
                       )),
                   // next page button
                   FutureBuilder<List>(
-                    future: getDishes(page, widget.zipCode, search, query),
+                    future: getDishes(page, zipCode, search, query),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         var end = true;

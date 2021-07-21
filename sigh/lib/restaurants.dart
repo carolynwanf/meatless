@@ -9,9 +9,9 @@ import 'appColors.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 class RestaurantCard extends StatefulWidget {
-  var notifyMain;
-  var pins;
-  var restaurant;
+  final notifyMain;
+  final pins;
+  final restaurant;
 
   RestaurantCard({
     @required this.pins,
@@ -31,7 +31,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
         friendliness = restaurant['friendliness'],
         id = restaurant['_id'],
         mains = restaurant['totalVegItems'];
-    var height = MediaQuery.of(context).size.height;
+    // var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var info = {'name': name, 'id': id};
     var unfriendliness = 100 - friendliness;
@@ -180,9 +180,9 @@ class _RestaurantCardState extends State<RestaurantCard> {
 }
 
 class Restaurants extends StatefulWidget {
-  var notifyParent;
-  var pins;
-  var zipCode;
+  final notifyParent;
+  final pins;
+  final zipCode;
 
   Restaurants({this.pins, this.zipCode, this.notifyParent});
   @override

@@ -9,14 +9,16 @@ import 'restaurantPage.dart';
 import 'containsMeat.dart';
 
 class ItemDialog extends StatefulWidget {
-  var pins;
-  var item;
+  final pins;
+  final item;
   ItemDialog({this.pins, this.item});
   _ItemDialogState createState() => _ItemDialogState();
 }
 
 class _ItemDialogState extends State<ItemDialog> {
+  var pins;
   Widget build(BuildContext context) {
+    pins = widget.pins;
     var width = MediaQuery.of(context).size.width;
     var dialogWidth = (width < 619 ? width : 619).toDouble();
     var height = MediaQuery.of(context).size.height;
@@ -102,20 +104,20 @@ class _ItemDialogState extends State<ItemDialog> {
                                   onPressed: !pinned
                                       ? () {
                                           debugPrint('pressed');
-                                          var temp = widget.pins;
+                                          var temp = pins;
 
                                           temp['ids'].add(id);
                                           temp['items'].add(item);
                                           debugPrint('$temp');
 
                                           setState(() {
-                                            widget.pins = temp;
+                                            pins = temp;
                                             item['pinned'] = true;
                                           });
                                         }
                                       : () {
                                           debugPrint('pressed');
-                                          var temp = widget.pins;
+                                          var temp = pins;
                                           debugPrint('$temp');
                                           temp['ids'].remove(id);
                                           for (var i = 0;
@@ -128,7 +130,7 @@ class _ItemDialogState extends State<ItemDialog> {
                                           }
                                           setState(() {
                                             debugPrint('setting state');
-                                            widget.pins = temp;
+                                            pins = temp;
                                             item['pinned'] = false;
                                           });
                                         },
@@ -146,12 +148,7 @@ class _ItemDialogState extends State<ItemDialog> {
                                     width: dialogWidth,
                                     child: Text(
                                       '${widget.item['name']}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              30),
+                                      style: AppStyles.title,
                                       textAlign: TextAlign.left,
                                     )),
                                 // description of dish, if it exists
@@ -162,19 +159,23 @@ class _ItemDialogState extends State<ItemDialog> {
                                           EdgeInsets.symmetric(vertical: 10),
                                       child: Text('$display',
                                           textAlign: TextAlign.left,
-                                          style: AppStyles.subtitle)),
+                                          style: dialogWidth > 619
+                                              ? AppStyles.subtitle
+                                              : AppStyles.subtitleMobile)),
                                 // price + restaurant of dish
                                 Container(
                                     width: dialogWidth,
                                     child: InkWell(
-                                        child: Text('$price • $restaurant'),
+                                        child: Text('$price • $restaurant',
+                                            style: dialogWidth > 619
+                                                ? AppStyles.detail
+                                                : AppStyles.detailMobile),
                                         onTap: () {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                                 builder: (_) => RestaurantPage(
-                                                    info: info,
-                                                    pins: widget.pins)),
+                                                    info: info, pins: pins)),
                                           );
                                         }))
                               ],
@@ -202,8 +203,7 @@ class _ItemDialogState extends State<ItemDialog> {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return ContainsMeat(
-                                        pins: widget.pins, item: item);
+                                    return ContainsMeat(pins: pins, item: item);
                                   });
                             },
                             hoverColor: AppColors.noHover,

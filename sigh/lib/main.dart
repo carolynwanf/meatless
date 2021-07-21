@@ -10,13 +10,12 @@ import 'appColors.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
-  var pins = {
-    'ids': <String>{},
-    'items': [],
-  };
-
+class MyApp extends StatefulWidget {
   @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Test App',
@@ -24,7 +23,7 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.white,
           accentColor: AppColors.accent,
           visualDensity: VisualDensity.adaptivePlatformDensity),
-      home: HomePage(pins: pins),
+      home: HomePage(),
     );
   }
 }
@@ -39,14 +38,16 @@ class MyApp extends StatelessWidget {
 // }
 
 class HomePage extends StatefulWidget {
-  var pins;
-
-  HomePage({this.pins});
+  HomePage();
 
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  var pins = {
+    'ids': <String>{},
+    'items': [],
+  };
   var zipCode = '';
   final _formKey = GlobalKey<FormState>();
   final zipCodeController = TextEditingController();
@@ -129,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                                           MaterialPageRoute(
                                               builder: (_) => Mainpage(
                                                   zipCode: zipCode,
-                                                  pins: widget.pins)),
+                                                  pins: pins)),
                                         );
                                       }
                                     }),
@@ -152,8 +153,8 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => Mainpage(
-                                        zipCode: zipCode, pins: widget.pins)),
+                                    builder: (_) =>
+                                        Mainpage(zipCode: zipCode, pins: pins)),
                               );
                             }
                           },
@@ -165,26 +166,30 @@ class _HomePageState extends State<HomePage> {
 }
 
 class Mainpage extends StatefulWidget {
-  var zipCode;
-  var pins;
-  var pinsOnDisplay = true;
+  final zipCode;
+  final pins;
 
   Mainpage({this.zipCode, this.pins});
   _MainpageState createState() => _MainpageState();
 }
 
 class _MainpageState extends State<Mainpage> {
+  var zipCode, pins;
+
+  var pinsOnDisplay = true;
   var _displayRestaurants = true;
   var formVal;
   refresh() {
     setState(() {
-      widget.pins = widget.pins;
+      pins = pins;
     });
   }
 
   final _formKey = GlobalKey<FormState>();
 
   Widget build(BuildContext context) {
+    zipCode = widget.zipCode;
+    pins = widget.pins;
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -242,7 +247,7 @@ class _MainpageState extends State<Mainpage> {
                             borderSide: BorderSide(
                                 color: AppColors.medGrey, width: 1.5),
                           ),
-                          hintText: '${widget.zipCode}'),
+                          hintText: '$zipCode'),
                       onSaved: (value) {
                         if (value is String) {
                           formVal = value;
@@ -254,7 +259,7 @@ class _MainpageState extends State<Mainpage> {
 
                           setState(() {
                             debugPrint('setting zipCode $formVal');
-                            widget.zipCode = formVal;
+                            zipCode = formVal;
 
                             // _displayRestaurants = !_displayRestaurants;
                           });
@@ -290,7 +295,7 @@ class _MainpageState extends State<Mainpage> {
 
                       setState(() {
                         debugPrint('setting zipCode $formVal');
-                        widget.zipCode = formVal;
+                        zipCode = formVal;
                       });
                     }
                   },
@@ -304,16 +309,16 @@ class _MainpageState extends State<Mainpage> {
                     right: height / 50),
                 child: InkWell(
                     onTap: () {
-                      var toSet = !widget.pinsOnDisplay;
+                      var toSet = !pinsOnDisplay;
                       setState(() {
-                        widget.pinsOnDisplay = toSet;
+                        pinsOnDisplay = toSet;
                       });
                       if (width < 1000) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => PinnedItems(
-                                    pins: widget.pins,
+                                    pins: pins,
                                     notifyMain: refresh,
                                   )),
                         ).then((val) => setState(() {}));
@@ -325,18 +330,18 @@ class _MainpageState extends State<Mainpage> {
                             height: 60,
                             width: 50,
                             child: Icon(Icons.star,
-                                color: widget.pins["items"].length > 0
+                                color: pins["items"].length > 0
                                     ? AppColors.accent
                                     : AppColors.medGrey,
                                 size: 30),
                             alignment: Alignment.center),
-                        if (widget.pins['items'].length > 0)
+                        if (pins['items'].length > 0)
                           Container(
                               // decoration: BoxDecoration(
                               //     shape: BoxShape.circle, color: Colors.black),
                               height: 60,
                               width: 50,
-                              child: Text('${widget.pins['items'].length}',
+                              child: Text('${pins['items'].length}',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 13,
@@ -418,24 +423,24 @@ class _MainpageState extends State<Mainpage> {
                     Expanded(
                       child: _displayRestaurants
                           ? Restaurants(
-                              pins: widget.pins,
-                              zipCode: widget.zipCode,
+                              pins: pins,
+                              zipCode: zipCode,
                               notifyParent: refresh,
                             )
                           : Dishes(
-                              pins: widget.pins,
-                              zipCode: widget.zipCode,
+                              pins: pins,
+                              zipCode: zipCode,
                               notifyParent: refresh),
                     )
                   ],
                 )),
-            if (widget.pinsOnDisplay && width > 1000)
+            if (pinsOnDisplay && width > 1000)
               VerticalDivider(width: 1, color: AppColors.medGrey),
-            if (widget.pinsOnDisplay && width > 1000)
+            if (pinsOnDisplay && width > 1000)
               Expanded(
                   flex: 9,
                   child: PinnedItems(
-                    pins: widget.pins,
+                    pins: pins,
                     notifyMain: refresh,
                   ))
           ],

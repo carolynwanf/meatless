@@ -6,8 +6,8 @@ import 'itemDialog.dart';
 import 'pinnedItems.dart';
 
 class RestaurantPage extends StatefulWidget {
-  var info;
-  var pins;
+  final info;
+  final pins;
 
   RestaurantPage({Key? key, @required this.info, this.pins}) : super(key: key);
 
@@ -39,6 +39,7 @@ Future<List> getPageDishes(id) async {
 // stuff for restaurant page
 
 class _RestaurantPageState extends State<RestaurantPage> {
+  var pins;
   late Future<List> _dishes;
 
   void initState() {
@@ -48,7 +49,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
     // debugPrint('$_restaurants');
   }
 
-  Widget itemDesc(item) {
+  Widget itemDesc(item, currentPins) {
     var name = item['name'],
         description = item['description'],
         image = item['images'],
@@ -96,7 +97,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
             onPressed: !pinned
                 ? () {
                     debugPrint('pressed');
-                    var temp = widget.pins;
+                    var temp = currentPins;
 
                     temp['ids'].add(id);
                     temp['items'].add(item);
@@ -104,12 +105,12 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
                     setState(() {
                       // debugPrint('setting state');
-                      widget.pins = temp;
+                      pins = temp;
                     });
                   }
                 : () {
                     debugPrint('pressed');
-                    var temp = widget.pins;
+                    var temp = currentPins;
                     debugPrint('$temp');
                     temp['ids'].remove(id);
                     for (var i = 0; i < temp['items'].length; i++) {
@@ -120,7 +121,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     }
                     setState(() {
                       // debugPrint('setting state');
-                      widget.pins = temp;
+                      pins = temp;
                     });
                   },
             icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
@@ -129,13 +130,14 @@ class _RestaurantPageState extends State<RestaurantPage> {
         showDialog(
             context: context,
             builder: (BuildContext context) {
-              return ItemDialog(pins: widget.pins, item: item);
+              return ItemDialog(pins: currentPins, item: item);
             }).then((val) => setState(() {}));
       },
     );
   }
 
   Widget build(BuildContext context) {
+    pins = widget.pins;
     return Scaffold(
         appBar: AppBar(
           title: Text('Meatless'),
@@ -144,8 +146,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => PinnedItems(pins: widget.pins)),
+                    MaterialPageRoute(builder: (_) => PinnedItems(pins: pins)),
                   ).then((val) => setState(() {}));
                 },
                 icon: Icon(Icons.star))
@@ -177,7 +178,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   for (var j = 0; j < snapshot.data![i].length; j++) {
                     var itemId = snapshot.data![i][j]["_id"];
 
-                    if (widget.pins['ids'].contains(itemId)) {
+                    if (pins['ids'].contains(itemId)) {
                       snapshot.data![i][j]['pinned'] = true;
                     } else {
                       snapshot.data![i][j]['pinned'] = false;
@@ -194,7 +195,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                    return itemDesc(snapshot.data![0][index]);
+                    return itemDesc(snapshot.data![0][index], pins);
                   }, childCount: snapshot.data![0].length),
                 );
                 if (snapshot.data![1].length > 0) {
@@ -209,7 +210,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     ),
                     delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![1][index]);
+                      return itemDesc(snapshot.data![1][index], pins);
                     }, childCount: snapshot.data![1].length),
                   );
                 }
@@ -226,7 +227,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     ),
                     delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![2][index]);
+                      return itemDesc(snapshot.data![2][index], pins);
                     }, childCount: snapshot.data![2].length),
                   );
                 }

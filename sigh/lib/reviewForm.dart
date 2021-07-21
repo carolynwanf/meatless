@@ -11,7 +11,7 @@ import 'appColors.dart';
 import 'dart:convert';
 
 class ReviewForm extends StatefulWidget {
-  var id;
+  final id;
 
   ReviewForm({this.id});
   _ReviewFormState createState() => _ReviewFormState();

@@ -6,8 +6,8 @@ import 'appColors.dart';
 import 'package:http/http.dart' as http;
 
 class ContainsMeat extends StatefulWidget {
-  var pins;
-  var item;
+  final pins;
+  final item;
   ContainsMeat({this.pins, this.item});
   _ContainsMeatState createState() => _ContainsMeatState();
 }
@@ -222,8 +222,6 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                       // Validate returns true if the form is valid, or false otherwise.
                                       if (_formKey.currentState!.validate()) {
                                         _formKey.currentState!.save();
-
-                                        // report['id'] = widget.item['_id'];
 
                                         debugPrint('report: $report');
 

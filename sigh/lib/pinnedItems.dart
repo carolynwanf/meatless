@@ -9,8 +9,8 @@ import 'itemDialog.dart';
 import 'appColors.dart';
 
 class PinnedItems extends StatefulWidget {
-  var pins;
-  var notifyMain;
+  final pins;
+  final notifyMain;
 
   PinnedItems({this.pins, this.notifyMain});
 
@@ -18,6 +18,7 @@ class PinnedItems extends StatefulWidget {
 }
 
 class _PinnedItemsState extends State<PinnedItems> {
+  var pins;
   sortByRestaurant(items) {
     var idsSeen = <String>{};
     var preSorted = {};
@@ -74,7 +75,7 @@ class _PinnedItemsState extends State<PinnedItems> {
           showDialog(
               context: context,
               builder: (BuildContext context) {
-                return ItemDialog(pins: widget.pins, item: item);
+                return ItemDialog(pins: pins, item: item);
               }).then((val) => setState(() {}));
         },
         child: Container(
@@ -120,7 +121,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                   Expanded(
                       flex: 2,
                       child: Container(
-                          height: 100,
+                          height: 108,
                           width: 100,
                           child: Card(
                             shape: RoundedRectangleBorder(
@@ -160,7 +161,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                         padding: EdgeInsets.only(left: 0),
                         child: IconButton(
                             onPressed: () {
-                              var temp = widget.pins;
+                              var temp = pins;
                               debugPrint('$temp');
                               temp['ids'].remove(id);
                               for (var i = 0; i < temp['items'].length; i++) {
@@ -171,7 +172,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                               }
                               setState(() {
                                 debugPrint('setting state');
-                                widget.pins = temp;
+                                pins = temp;
                               });
 
                               widget.notifyMain();
@@ -188,11 +189,12 @@ class _PinnedItemsState extends State<PinnedItems> {
   }
 
   Widget build(BuildContext context) {
+    pins = widget.pins;
     var width = MediaQuery.of(context).size.width > 500
             ? MediaQuery.of(context).size.width * (9 / 40)
             : MediaQuery.of(context).size.width,
         height = MediaQuery.of(context).size.height;
-    var items = sortByRestaurant(widget.pins['items']);
+    var items = sortByRestaurant(pins['items']);
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -209,9 +211,9 @@ class _PinnedItemsState extends State<PinnedItems> {
                         bottom: height / 150, top: height / 150),
                     child: Text('Starred Dishes',
                         style: TextStyle(
-                            color: AppColors.primary,
+                            color: AppColors.darkGrey,
                             fontWeight: FontWeight.w600,
-                            fontSize: 20))),
+                            fontSize: 18))),
               ),
         // starred dishes display
         body: Container(
@@ -256,7 +258,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                                           MaterialPageRoute(
                                               builder: (_) => RestaurantPage(
                                                   info: itemList[0],
-                                                  pins: widget.pins)),
+                                                  pins: pins)),
                                         );
                                       })),
                               Container(
