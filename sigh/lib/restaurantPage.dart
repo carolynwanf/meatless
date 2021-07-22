@@ -53,7 +53,7 @@ class Header extends StatelessWidget {
           name,
           style: TextStyle(
             fontSize: Tween<double>(begin: 18, end: -70).evaluate(animation),
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -64,16 +64,18 @@ class Header extends StatelessWidget {
   Container _buildGradient(Animation<double> animation) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            Colors.black.withAlpha(0),
-            Colors.black12,
-            Colors.black87
-          ],
-        ),
-      ),
+          color: ColorTween(begin: Colors.white, end: Colors.white.withAlpha(0))
+              .evaluate(animation)
+          // gradient: LinearGradient(
+          //   begin: Alignment.topCenter,
+          //   end: Alignment.bottomCenter,
+          //   colors: <Color>[
+          //     Colors.black.withAlpha(0),
+          //     Colors.black12,
+          //     Colors.black87
+          //   ],
+          // ),
+          ),
     );
   }
 
@@ -222,7 +224,22 @@ class _RestaurantPageState extends State<RestaurantPage> {
     );
   }
 
+  Widget webGrid(list, pins) {
+    return SliverGrid(
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 250.0,
+        mainAxisExtent: 340,
+        mainAxisSpacing: 10.0,
+        crossAxisSpacing: 10.0,
+      ),
+      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        return itemDesc(list[index], pins);
+      }, childCount: list.length),
+    );
+  }
+
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
     var imageExists = false;
     var maxHeight = 250 + MediaQuery.of(context).padding.top;
 
@@ -280,69 +297,21 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 // mains
                 if (snapshot.data![0].length > 0) {
                   main = SliverToBoxAdapter(child: Text('Mains'));
-                  mains = SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 250.0,
-                      mainAxisSpacing: 10.0,
-                      crossAxisSpacing: 10.0,
-                      childAspectRatio: (1.3 / 1.5),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![0][index], pins);
-                    }, childCount: snapshot.data![0].length),
-                  );
+                  mains = webGrid(snapshot.data![0], pins);
                 }
                 if (snapshot.data![1].length > 0) {
                   side = SliverToBoxAdapter(child: Text('Sides'));
-                  sides = SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 250.0,
-                      mainAxisSpacing: 10.0,
-                      crossAxisSpacing: 10.0,
-                      childAspectRatio: (1.3 / 1.5),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![1][index], pins);
-                    }, childCount: snapshot.data![1].length),
-                  );
+                  sides = webGrid(snapshot.data![1], pins);
                 }
 
                 if (snapshot.data![2].length > 0) {
                   dessert = SliverToBoxAdapter(child: Text('Desserts'));
-                  desserts = SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 250.0,
-                      mainAxisSpacing: 10.0,
-                      crossAxisSpacing: 10.0,
-                      childAspectRatio: (1.3 / 1.5),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![2][index], pins);
-                    }, childCount: snapshot.data![2].length),
-                  );
+                  desserts = webGrid(snapshot.data![2], pins);
                 }
 
                 if (snapshot.data![3].length > 0) {
                   drink = SliverToBoxAdapter(child: Text('Drinks'));
-                  drinks = SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 250.0,
-                      mainAxisSpacing: 10.0,
-                      crossAxisSpacing: 10.0,
-                      childAspectRatio: (1.3 / 1.5),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                      return itemDesc(snapshot.data![3][index], pins);
-                    }, childCount: snapshot.data![3].length),
-                  );
+                  drinks = webGrid(snapshot.data![3], pins);
                 }
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
