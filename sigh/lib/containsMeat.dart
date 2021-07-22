@@ -82,6 +82,29 @@ class _ContainsMeatState extends State<ContainsMeat> {
 
     debugPrint('$problem');
 
+    void onContainsMeatSubmitted() async {
+      if (_formKey.currentState!.validate()) {
+        _formKey.currentState!.save();
+
+        debugPrint('report: $report');
+
+        var body = {'report': report, "id": widget.item['_id']};
+
+        final response =
+            await http.post(Uri.parse('http://localhost:4000/report'),
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                body: jsonEncode(body));
+
+        debugPrint('$response');
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Submitting')));
+      }
+    }
+
     return Dialog(
         insetPadding: dialogWidth < 619 ? EdgeInsets.all(0) : null,
         backgroundColor: Colors.transparent,
@@ -121,136 +144,133 @@ class _ContainsMeatState extends State<ContainsMeat> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           child: Form(
                               key: _formKey,
-                              child: Column(children: [
-                                Container(
-                                    width: dialogWidth - 20,
-                                    child: Text(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
                                       '$name contains meat',
                                       style: AppStyles.title,
-                                      textAlign: TextAlign.left,
-                                    )),
-                                Container(
-                                  padding: EdgeInsets.only(top: 10),
-                                  width: dialogWidth - 20,
-                                  child: Text(
-                                      'We’re so sorry that this dish contains meat! How did you know that there was meat in this dish?*',
-                                      style: TextStyle(fontSize: 15),
-                                      textAlign: TextAlign.left),
-                                ),
-                                FormField(
-                                    validator: (value) {
-                                      if (problem.length == 0) {
-                                        return 'Please check at least one box';
-                                      }
-                                    },
-                                    onSaved: (value) {
-                                      debugPrint('$value value');
-                                      report['problem'] = problem;
-                                    },
-                                    initialValue: problem,
-                                    builder: (FormFieldState<List> state) {
-                                      return Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 15),
-                                          width: dialogWidth - 20,
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                customCheckBox(
-                                                    nameProblem, 'name'),
-                                                customCheckBox(
-                                                    descProblem, 'description'),
-                                                if (widget
-                                                        .item['requirements'] !=
-                                                    'none')
-                                                  customCheckBox(
-                                                      requirementsProblem,
-                                                      'requirements'),
-                                                customCheckBox(
-                                                    imageProblem, 'image'),
-                                                customCheckBox(orderedProblem,
-                                                    'I ordered it'),
-                                              ]));
-                                    }),
-                                TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please leave a name';
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                        border: UnderlineInputBorder(),
-                                        hintText: 'Name*'),
-                                    onSaved: (value) {
-                                      report['name'] = value!;
-                                    }),
-                                TextFormField(
-                                    validator: (value) {
-                                      RegExp validate =
-                                          RegExp(r"^[^\s@]+@[^\s@]+\.[^\s@]+$");
-                                      var isValid;
-                                      if (value is String) {
-                                        var temp = validate.stringMatch(value);
-                                        if (temp == null) {
-                                          isValid = false;
-                                        } else {
-                                          isValid = true;
-                                        }
-                                      }
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.only(top: 10),
+                                      child: Text(
+                                        'We’re so sorry that this dish contains meat! How did you know that there was meat in this dish?*',
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                    FormField(
+                                        validator: (value) {
+                                          if (problem.length == 0) {
+                                            return 'Please check at least one box';
+                                          }
+                                        },
+                                        onSaved: (value) {
+                                          debugPrint('$value value');
+                                          report['problem'] = problem;
+                                        },
+                                        initialValue: problem,
+                                        builder: (FormFieldState<List> state) {
+                                          return Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 15),
+                                              child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    customCheckBox(
+                                                        nameProblem, 'name'),
+                                                    customCheckBox(descProblem,
+                                                        'description'),
+                                                    if (widget.item[
+                                                            'requirements'] !=
+                                                        'none')
+                                                      customCheckBox(
+                                                          requirementsProblem,
+                                                          'requirements'),
+                                                    customCheckBox(
+                                                        imageProblem, 'image'),
+                                                    customCheckBox(
+                                                        orderedProblem,
+                                                        'I ordered it'),
+                                                  ]));
+                                        }),
+                                    Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 10),
+                                        child: Container(
+                                            width: dialogWidth / 3,
+                                            height: 30,
+                                            child: TextFormField(
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return 'Please leave a name';
+                                                  }
+                                                },
+                                                decoration: InputDecoration(
+                                                    contentPadding:
+                                                        EdgeInsets.only(
+                                                            bottom: 1,
+                                                            left: 10),
+                                                    focusedBorder: AppStyles
+                                                        .focusedInputBorder,
+                                                    enabledBorder: AppStyles
+                                                        .enabledInputBorder,
+                                                    hintText: 'Name*'),
+                                                onSaved: (value) {
+                                                  report['name'] = value!;
+                                                }))),
+                                    Container(
+                                        width: dialogWidth / 2,
+                                        height: 30,
+                                        child: TextFormField(
+                                          validator: (value) {
+                                            RegExp validate = RegExp(
+                                                r"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+                                            var isValid;
+                                            if (value is String) {
+                                              var temp =
+                                                  validate.stringMatch(value);
+                                              if (temp == null) {
+                                                isValid = false;
+                                              } else {
+                                                isValid = true;
+                                              }
+                                            }
 
-                                      debugPrint('isValid: $isValid');
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please leave your email';
-                                      } else if (!isValid) {
-                                        return 'Please enter a valid email';
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                        border: UnderlineInputBorder(),
-                                        hintText: 'Email*'),
-                                    onSaved: (value) {
-                                      report['email'] = value!;
-                                    }),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 16.0),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        primary: AppColors.primary),
-                                    onPressed: () async {
-                                      // Validate returns true if the form is valid, or false otherwise.
-                                      if (_formKey.currentState!.validate()) {
-                                        _formKey.currentState!.save();
-
-                                        debugPrint('report: $report');
-
-                                        var body = {
-                                          'report': report,
-                                          "id": widget.item['_id']
-                                        };
-
-                                        final response = await http.post(
-                                            Uri.parse(
-                                                'http://localhost:4000/report'),
-                                            headers: {
-                                              'Accept': 'application/json',
-                                              'Content-Type':
-                                                  'application/json',
-                                            },
-                                            body: jsonEncode(body));
-
-                                        debugPrint('$response');
-
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                                content: Text('Submitting')));
-                                      }
-                                    },
-                                    child: Text('Submit'),
-                                  ),
-                                ),
-                              ]))),
+                                            debugPrint('isValid: $isValid');
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please leave your email';
+                                            } else if (!isValid) {
+                                              return 'Please enter a valid email';
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                              contentPadding: EdgeInsets.only(
+                                                  bottom: 1, left: 10),
+                                              focusedBorder:
+                                                  AppStyles.focusedInputBorder,
+                                              enabledBorder:
+                                                  AppStyles.enabledInputBorder,
+                                              hintText: 'Email*'),
+                                          onSaved: (value) {
+                                            report['email'] = value!;
+                                          },
+                                        )),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16.0),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            primary: AppColors.primary),
+                                        onPressed: () {
+                                          onContainsMeatSubmitted();
+                                        },
+                                        child: Text('Submit'),
+                                      ),
+                                    ),
+                                  ]))),
                     )
                   ],
                 ))));

@@ -42,6 +42,7 @@ class _ReviewFormState extends State<ReviewForm> {
     return Form(
       key: _formKey,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             child: Text(
@@ -50,81 +51,86 @@ class _ReviewFormState extends State<ReviewForm> {
             ),
             alignment: Alignment.bottomLeft,
           ),
-          FormField(
-            initialValue: numberOfStars,
-            builder: (FormFieldState<int> state) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                      onTap: () {
-                        state.didChange(1);
-                        setState(() {
-                          numberOfStars = 1;
-                        });
-                      },
-                      child: numberOfStars > 0
-                          ? Icon(Icons.star, color: AppColors.star)
-                          : Icon(Icons.star_border)),
-                  GestureDetector(
-                      onTap: () {
-                        state.didChange(2);
-                        setState(() {
-                          numberOfStars = 2;
-                        });
-                      },
-                      child: numberOfStars > 1
-                          ? Icon(Icons.star, color: AppColors.star)
-                          : Icon(Icons.star_border)),
-                  GestureDetector(
-                      onTap: () {
-                        state.didChange(3);
-                        setState(() {
-                          numberOfStars = 3;
-                        });
-                      },
-                      child: numberOfStars > 2
-                          ? Icon(Icons.star, color: AppColors.star)
-                          : Icon(Icons.star_border)),
-                  GestureDetector(
-                      onTap: () {
-                        state.didChange(4);
-                        setState(() {
-                          numberOfStars = 4;
-                        });
-                      },
-                      child: numberOfStars > 3
-                          ? Icon(Icons.star, color: AppColors.star)
-                          : Icon(Icons.star_border)),
-                  GestureDetector(
-                      onTap: () {
-                        state.didChange(5);
-                        setState(() {
-                          numberOfStars = 5;
-                        });
-                      },
-                      child: numberOfStars > 4
-                          ? Icon(Icons.star, color: AppColors.star)
-                          : Icon(Icons.star_border)),
-                  Text("*")
-                ],
-              );
-            },
-            validator: (value) {
-              debugPrint('$value fsldkj');
-              if (value == null || value == 0) {
-                debugPrint('stars $value');
-                return "Please rate this dish";
-              }
-            },
-            onSaved: (value) {
-              review['rating'] = value;
-            },
-          ),
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: FormField(
+                initialValue: numberOfStars,
+                builder: (FormFieldState<int> state) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            state.didChange(1);
+                            setState(() {
+                              numberOfStars = 1;
+                            });
+                          },
+                          child: numberOfStars > 0
+                              ? Icon(Icons.star, color: AppColors.star)
+                              : Icon(Icons.star_border)),
+                      GestureDetector(
+                          onTap: () {
+                            state.didChange(2);
+                            setState(() {
+                              numberOfStars = 2;
+                            });
+                          },
+                          child: numberOfStars > 1
+                              ? Icon(Icons.star, color: AppColors.star)
+                              : Icon(Icons.star_border)),
+                      GestureDetector(
+                          onTap: () {
+                            state.didChange(3);
+                            setState(() {
+                              numberOfStars = 3;
+                            });
+                          },
+                          child: numberOfStars > 2
+                              ? Icon(Icons.star, color: AppColors.star)
+                              : Icon(Icons.star_border)),
+                      GestureDetector(
+                          onTap: () {
+                            state.didChange(4);
+                            setState(() {
+                              numberOfStars = 4;
+                            });
+                          },
+                          child: numberOfStars > 3
+                              ? Icon(Icons.star, color: AppColors.star)
+                              : Icon(Icons.star_border)),
+                      GestureDetector(
+                          onTap: () {
+                            state.didChange(5);
+                            setState(() {
+                              numberOfStars = 5;
+                            });
+                          },
+                          child: numberOfStars > 4
+                              ? Icon(Icons.star, color: AppColors.star)
+                              : Icon(Icons.star_border)),
+                      Text("*")
+                    ],
+                  );
+                },
+                validator: (value) {
+                  debugPrint('$value fsldkj');
+                  if (value == null || value == 0) {
+                    debugPrint('stars $value');
+                    return "Please rate this dish";
+                  }
+                },
+                onSaved: (value) {
+                  review['rating'] = value;
+                },
+              )),
           TextFormField(
               maxLines: 5,
               decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'Review'),
+                  contentPadding: EdgeInsets.only(bottom: 1, left: 10, top: 15),
+                  focusedBorder: AppStyles.focusedInputBorder,
+                  enabledBorder: AppStyles.enabledInputBorder,
+                  hintText: 'Review'),
               onSaved: (value) {
                 if (value == '') {
                   review['review'] = null;
@@ -132,42 +138,56 @@ class _ReviewFormState extends State<ReviewForm> {
                   review['review'] = value;
                 }
               }),
-          TextFormField(
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please leave a name';
-                }
-              },
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'Name*'),
-              onSaved: (value) {
-                review['name'] = value;
-              }),
-          TextFormField(
-              validator: (value) {
-                RegExp validate = RegExp(r"^[^\s@]+@[^\s@]+\.[^\s@]+$");
-                var isValid;
-                if (value is String) {
-                  var temp = validate.stringMatch(value);
-                  if (temp == null) {
-                    isValid = false;
-                  } else {
-                    isValid = true;
-                  }
-                }
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: SizedBox(
+                  height: 30,
+                  width: 150,
+                  child: TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please leave a name';
+                        }
+                      },
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(bottom: 1, left: 10),
+                          focusedBorder: AppStyles.focusedInputBorder,
+                          enabledBorder: AppStyles.enabledInputBorder,
+                          hintText: 'Name*'),
+                      onSaved: (value) {
+                        review['name'] = value;
+                      }))),
+          SizedBox(
+              height: 30,
+              width: 200,
+              child: TextFormField(
+                  validator: (value) {
+                    RegExp validate = RegExp(r"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+                    var isValid;
+                    if (value is String) {
+                      var temp = validate.stringMatch(value);
+                      if (temp == null) {
+                        isValid = false;
+                      } else {
+                        isValid = true;
+                      }
+                    }
 
-                debugPrint('isValid: $isValid');
-                if (value == null || value.isEmpty) {
-                  return 'Please leave your email';
-                } else if (!isValid) {
-                  return 'Please enter a valid email';
-                }
-              },
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(), hintText: 'Email*'),
-              onSaved: (value) {
-                review['email'] = value;
-              }),
+                    debugPrint('isValid: $isValid');
+                    if (value == null || value.isEmpty) {
+                      return 'Please leave your email';
+                    } else if (!isValid) {
+                      return 'Please enter a valid email';
+                    }
+                  },
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(bottom: 1, left: 10),
+                      focusedBorder: AppStyles.focusedInputBorder,
+                      enabledBorder: AppStyles.enabledInputBorder,
+                      hintText: 'Email*'),
+                  onSaved: (value) {
+                    review['email'] = value;
+                  })),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
