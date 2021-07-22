@@ -100,20 +100,20 @@ Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
       // for local android dev
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // for local ios + browser dev
-  // await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -292,73 +292,116 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     width: width - 10, height: 1, color: AppColors.lightGrey)
               ])));
     } else {
+      // web dish card
       return InkWell(
-        child: Card(
-            child: Column(children: [
-          if (image != 'none')
-            Container(
-              height: width / 10,
-              child: Image.network(image),
-            ),
-          Text(name,
-              style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                  fontSize: height / 55),
-              textAlign: TextAlign.center),
-          if (description != 'none')
-            Text(description,
-                style:
-                    TextStyle(color: Colors.grey[800], fontSize: height / 60),
-                textAlign: TextAlign.center),
-          IconButton(
-              onPressed: !pinned
-                  ? () {
-                      debugPrint('pressed');
-                      var temp = currentPins;
+          hoverColor: AppColors.noHover,
+          onTap: showItemDesc,
+          child: Container(
+              padding: EdgeInsets.only(
+                  left: width / 200,
+                  right: width / 200,
+                  top: width / 200,
+                  bottom: width / 200),
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                //image
+                if (image != 'none')
+                  Container(
+                    padding: EdgeInsets.only(
+                      bottom: width / 100,
+                    ),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0)),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Image.network(
+                            image,
+                            alignment: Alignment.topCenter,
+                            fit: BoxFit.cover,
+                            width: double.maxFinite,
+                            height: height / 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                      temp['ids'].add(id);
-                      temp['items'].add(item);
-                      debugPrint('$temp');
+                if (image == 'none')
+                  Container(
+                      padding: EdgeInsets.fromLTRB(3, 3, 3, width / 100),
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: AppColors.medGrey,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5))),
+                          height: height / 6,
+                          width: double.maxFinite,
+                          child: Center(
+                              child: Text('no image',
+                                  style: TextStyle(color: Colors.white))))),
+                Container(
+                    padding: EdgeInsets.only(
+                      bottom: width / 400,
+                    ),
+                    child: Text(name,
+                        style: TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: height / 55),
+                        textAlign: TextAlign.center)),
+                if (description != 'none')
+                  Text(description,
+                      style: AppStyles.subtitle, textAlign: TextAlign.center),
+                Text(
+                  '$price',
+                  textAlign: TextAlign.center,
+                  style: AppStyles.detail,
+                ),
+                IconButton(
+                    hoverColor: AppColors.noHover,
+                    onPressed: !pinned
+                        ? () {
+                            debugPrint('pressed');
+                            var temp = currentPins;
 
-                      setState(() {
-                        // debugPrint('setting state');
-                        pins = temp;
-                      });
-                    }
-                  : () {
-                      debugPrint('pressed');
-                      var temp = currentPins;
-                      debugPrint('$temp');
-                      temp['ids'].remove(id);
-                      for (var i = 0; i < temp['items'].length; i++) {
-                        if (temp['items'][i] == id) {
-                          temp['items'].removeAt(i);
-                          break;
-                        }
-                      }
-                      setState(() {
-                        // debugPrint('setting state');
-                        pins = temp;
-                      });
-                    },
-              icon: pinned ? Icon(Icons.star) : Icon(Icons.star_border))
-        ])),
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return ItemDialog(pins: currentPins, item: item);
-              }).then((val) => setState(() {}));
-        },
-      );
+                            temp['ids'].add(id);
+                            temp['items'].add(item);
+                            debugPrint('$temp');
+
+                            setState(() {
+                              pins = temp;
+                            });
+                          }
+                        : () {
+                            debugPrint('pressed');
+                            var temp = currentPins;
+                            debugPrint('$temp');
+                            temp['ids'].remove(id);
+                            for (var i = 0; i < temp['items'].length; i++) {
+                              if (temp['items'][i]['_id'] == id) {
+                                temp['items'].removeAt(i);
+                                break;
+                              }
+                            }
+                            setState(() {
+                              debugPrint('setting state');
+                              pins = temp;
+                            });
+                          },
+                    icon: pinned
+                        ? Icon(Icons.star, color: AppColors.star)
+                        : Icon(Icons.star_border, color: AppColors.medGrey))
+              ])));
     }
   }
 
   Widget webGrid(list, pins, width) {
     if (width > 500) {
       return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          padding: EdgeInsets.only(bottom: 10, left: 20, right: 20),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 250.0,
@@ -368,7 +411,8 @@ class _RestaurantPageState extends State<RestaurantPage> {
             ),
             delegate:
                 SliverChildBuilderDelegate((BuildContext context, int index) {
-              return itemDesc(list[index], pins, width);
+              return Card(
+                  elevation: 5, child: itemDesc(list[index], pins, width));
             }, childCount: list.length),
           ));
     } else {
@@ -386,45 +430,138 @@ class _RestaurantPageState extends State<RestaurantPage> {
   Widget makeRestaurantInfo(restaurant, width) {
     var friendliness = restaurant['friendliness'].toDouble(),
         name = restaurant['name'],
-        type = restaurant['type'];
+        type = restaurant['type'],
+        url = restaurant['url'];
 
     return SliverToBoxAdapter(
         child: Padding(
-            padding: EdgeInsets.only(bottom: 10),
+            padding: EdgeInsets.only(bottom: width < 500 ? 10 : 0),
             child: Container(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(width < 500 ? 10 : 20),
                 width: width,
                 color: Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: AppStyles.bigTitle,
-                    ),
+                    Row(children: [
+                      Text(
+                        name,
+                        style: AppStyles.bigTitle,
+                      ),
+                      // Padding(
+                      //     padding: EdgeInsets.only(left: 10),
+                      //     child: OutlinedButton(
+                      //       onPressed: () {
+                      //         launch
+                      //       };
+                      //         child: Text(
+                      //       'D',
+                      //       style: TextStyle(
+                      //           color: Colors.red, fontWeight: FontWeight.w800),
+                      //     )))
+                    ]),
                     Text(
                       '$type • $friendliness% friendly',
                       style: AppStyles.subtitleMobile,
-                    )
+                    ),
                   ],
                 ))));
   }
 
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
+    var mobile = width < 500 ? true : false;
     var imageExists = false;
     var maxHeight = 250 + MediaQuery.of(context).padding.top;
 
     var minHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
     pins = widget.pins;
     return Scaffold(
-        backgroundColor: AppColors.lightestGrey,
+        appBar: mobile
+            ? null
+            : AppBar(
+                elevation: 0,
+                bottom: PreferredSize(
+                    child: Container(
+                      color: AppColors.lightGrey,
+                      height: 1.0,
+                    ),
+                    preferredSize: Size.fromHeight(1.0)),
+                iconTheme: IconThemeData(color: AppColors.medGrey),
+                actions: [
+                  Padding(
+                      padding: EdgeInsets.only(right: 10, top: 12),
+                      child: InkWell(
+                          onTap: () {
+                            // var toSet = !pinsOnDisplay;
+                            // setState(() {
+                            //   pinsOnDisplay = toSet;
+                            // });
+                            // if (width < 1000) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => PinnedItems(
+                                        pins: pins,
+                                        notifyMain: refresh,
+                                      )),
+                            ).then((val) => setState(() {}));
+                            // }
+                          },
+                          child: Container(
+                              height: 30,
+                              width: 30,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                      height: 30,
+                                      width: 30,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white),
+                                      alignment: Alignment.center),
+                                  Container(
+                                      height: 30,
+                                      width: 30,
+                                      child: Icon(Icons.star,
+                                          color: pins["items"].length > 0
+                                              ? AppColors.accent
+                                              : AppColors.medGrey,
+                                          size: 30),
+                                      alignment: Alignment.center),
+                                  if (pins['items'].length > 0)
+                                    Container(
+                                        // decoration: BoxDecoration(
+                                        //     shape: BoxShape.circle, color: Colors.black),
+                                        height: 30,
+                                        width: 30,
+                                        child: Text('${pins['items'].length}',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500)),
+                                        alignment: Alignment.center)
+                                ],
+                              ))))
+                ],
+                title: Text('MEATLESS',
+                    style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20))
+
+                // titleTextStyle: TextStyle(color: Colors.black),
+                ),
+        backgroundColor: mobile ? AppColors.lightestGrey : Colors.white,
         body: FutureBuilder<List>(
             future: _dishes,
             builder: (context, snapshot) {
               Widget placeholder = SliverToBoxAdapter(child: Container()),
                   appbar = placeholder,
                   restaurantInfo = placeholder,
+                  divider = placeholder,
                   main = placeholder,
                   side = placeholder,
                   sides = placeholder,
@@ -467,115 +604,126 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 }
 
                 // defining appbar
-                appbar = SliverAppBar(
-                  leading: Padding(
-                      padding: EdgeInsets.fromLTRB(10, 12, 0, 0),
-                      child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          hoverColor: AppColors.noHover,
-                          child: Stack(
-                            children: [
-                              Container(
-                                height: 30,
-                                width: 30,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white),
-                              ),
-                              Container(
-                                height: 30,
-                                width: 30,
-                                child:
-                                    Icon(Icons.arrow_back, color: Colors.black),
-                                alignment: Alignment.center,
-                              )
-                            ],
-                          ))),
-
-                  actions: [
-                    Padding(
-                        padding: EdgeInsets.only(right: 10, top: 12),
+                if (mobile) {
+                  appbar = SliverAppBar(
+                    leading: Padding(
+                        padding: EdgeInsets.fromLTRB(10, 12, 0, 0),
                         child: InkWell(
-                            onTap: () {
-                              // var toSet = !pinsOnDisplay;
-                              // setState(() {
-                              //   pinsOnDisplay = toSet;
-                              // });
-                              // if (width < 1000) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => PinnedItems(
-                                          pins: pins,
-                                          notifyMain: refresh,
-                                        )),
-                              ).then((val) => setState(() {}));
-                              // }
-                            },
-                            child: Container(
-                                height: 30,
-                                width: 30,
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 10, 0, 0),
-                                        height: 30,
-                                        width: 30,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.white),
-                                        alignment: Alignment.center),
-                                    Container(
-                                        height: 30,
-                                        width: 30,
-                                        child: Icon(Icons.star,
-                                            color: pins["items"].length > 0
-                                                ? AppColors.accent
-                                                : AppColors.medGrey,
-                                            size: 30),
-                                        alignment: Alignment.center),
-                                    if (pins['items'].length > 0)
+                            onTap: () => Navigator.of(context).pop(),
+                            hoverColor: AppColors.noHover,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  height: 30,
+                                  width: 30,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white),
+                                ),
+                                Container(
+                                  height: 30,
+                                  width: 30,
+                                  child: Icon(Icons.arrow_back,
+                                      color: Colors.black),
+                                  alignment: Alignment.center,
+                                )
+                              ],
+                            ))),
+
+                    actions: [
+                      Padding(
+                          padding: EdgeInsets.only(right: 10, top: 12),
+                          child: InkWell(
+                              onTap: () {
+                                // var toSet = !pinsOnDisplay;
+                                // setState(() {
+                                //   pinsOnDisplay = toSet;
+                                // });
+                                // if (width < 1000) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => PinnedItems(
+                                            pins: pins,
+                                            notifyMain: refresh,
+                                          )),
+                                ).then((val) => setState(() {}));
+                                // }
+                              },
+                              child: Container(
+                                  height: 30,
+                                  width: 30,
+                                  child: Stack(
+                                    children: [
                                       Container(
-                                          // decoration: BoxDecoration(
-                                          //     shape: BoxShape.circle, color: Colors.black),
+                                          padding:
+                                              EdgeInsets.fromLTRB(10, 10, 0, 0),
                                           height: 30,
                                           width: 30,
-                                          child: Text('${pins['items'].length}',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w500)),
-                                          alignment: Alignment.center)
-                                  ],
-                                ))))
-                  ],
-                  elevation: 3,
-                  stretch: true,
-                  pinned: true,
-                  title: imageExists ? null : Text(widget.info['name']),
-                  expandedHeight: imageExists ? 250 : null,
-                  flexibleSpace: imageExists
-                      ? Header(
-                          maxHeight: maxHeight,
-                          minHeight: minHeight,
-                          image: snapshot.data![4]['image'],
-                          name: widget.info['name'],
-                        )
-                      : null,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white),
+                                          alignment: Alignment.center),
+                                      Container(
+                                          height: 30,
+                                          width: 30,
+                                          child: Icon(Icons.star,
+                                              color: pins["items"].length > 0
+                                                  ? AppColors.accent
+                                                  : AppColors.medGrey,
+                                              size: 30),
+                                          alignment: Alignment.center),
+                                      if (pins['items'].length > 0)
+                                        Container(
+                                            // decoration: BoxDecoration(
+                                            //     shape: BoxShape.circle, color: Colors.black),
+                                            height: 30,
+                                            width: 30,
+                                            child: Text(
+                                                '${pins['items'].length}',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                        FontWeight.w500)),
+                                            alignment: Alignment.center)
+                                    ],
+                                  ))))
+                    ],
+                    elevation: 3,
+                    stretch: true,
+                    pinned: true,
+                    title: imageExists ? null : Text(widget.info['name']),
+                    expandedHeight: imageExists ? 250 : null,
+                    flexibleSpace: imageExists
+                        ? Header(
+                            maxHeight: maxHeight,
+                            minHeight: minHeight,
+                            image: snapshot.data![4]['image'],
+                            name: widget.info['name'],
+                          )
+                        : null,
 
-                  // titleTextStyle: TextStyle(color: Colors.black),
-                );
+                    // titleTextStyle: TextStyle(color: Colors.black),
+                  );
+                }
 
                 // defining restaurant info
 
                 restaurantInfo = makeRestaurantInfo(restaurant, width);
 
+                divider = SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverToBoxAdapter(
+                        child:
+                            Container(height: 1, color: AppColors.lightGrey)));
+
                 Widget header(heading) {
                   return SliverToBoxAdapter(
                       child: Container(
                           color: Colors.white,
-                          padding: EdgeInsets.only(left: 10, top: 10),
+                          padding: EdgeInsets.only(
+                              left: width < 500 ? 10 : 20, top: 10, bottom: 5),
                           child: Text(heading, style: AppStyles.title)));
                 }
 
@@ -606,6 +754,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 slivers: <Widget>[
                   appbar,
                   restaurantInfo,
+                  if (width > 500) divider,
                   main,
                   mains,
                   side,
@@ -616,9 +765,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   drinks,
                 ],
               );
-
-              // By default, show a loading spinner.
-              // return Text("AHH");
             }));
   }
 }
