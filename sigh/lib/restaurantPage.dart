@@ -560,6 +560,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
             builder: (context, snapshot) {
               Widget placeholder = SliverToBoxAdapter(child: Container()),
                   appbar = placeholder,
+                  headerImage = placeholder,
                   restaurantInfo = placeholder,
                   divider = placeholder,
                   main = placeholder,
@@ -601,6 +602,18 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 // checking if restaurant has an image
                 if (restaurant['image'] != null) {
                   imageExists = true;
+                  if (!mobile) {
+                    headerImage = SliverPadding(
+                        padding: EdgeInsets.all(20),
+                        sliver: SliverToBoxAdapter(
+                            child: SizedBox(
+                                height: 300,
+                                child: Card(
+                                    child: Image.network(
+                                  restaurant['image'],
+                                  fit: BoxFit.cover,
+                                )))));
+                  }
                 }
 
                 // defining appbar
@@ -753,6 +766,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
               return CustomScrollView(
                 slivers: <Widget>[
                   appbar,
+                  headerImage,
                   restaurantInfo,
                   if (width > 500) divider,
                   main,
