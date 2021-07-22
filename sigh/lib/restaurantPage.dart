@@ -48,11 +48,11 @@ class Header extends StatelessWidget {
               begin: Alignment.bottomCenter, end: Alignment.bottomLeft)
           .evaluate(animation),
       child: Container(
-        margin: EdgeInsets.only(bottom: 12, left: 12),
+        margin: EdgeInsets.only(bottom: 15, left: 12),
         child: Text(
           name,
           style: TextStyle(
-            fontSize: Tween<double>(begin: 18, end: 36).evaluate(animation),
+            fontSize: Tween<double>(begin: 18, end: -70).evaluate(animation),
             color: Colors.white,
             fontWeight: FontWeight.w800,
           ),
@@ -70,7 +70,7 @@ class Header extends StatelessWidget {
           colors: <Color>[
             Colors.black.withAlpha(0),
             Colors.black12,
-            Colors.black45
+            Colors.black87
           ],
         ),
       ),
@@ -119,6 +119,12 @@ Future<List> getPageDishes(id) async {
 // stuff for restaurant page
 
 class _RestaurantPageState extends State<RestaurantPage> {
+  refresh() {
+    setState(() {
+      pins = pins;
+    });
+  }
+
   var pins;
   late Future<List> _dishes;
 
@@ -217,6 +223,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   Widget build(BuildContext context) {
+    var imageExists = false;
     var maxHeight = 250 + MediaQuery.of(context).padding.top;
 
     var minHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
@@ -264,6 +271,10 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       snapshot.data![i][j]['pinned'] = false;
                     }
                   }
+                }
+
+                if (snapshot.data![4]['image'] != null) {
+                  imageExists = true;
                 }
 
                 // mains
@@ -340,13 +351,100 @@ class _RestaurantPageState extends State<RestaurantPage> {
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
+                    leading: Padding(
+                        padding: EdgeInsets.fromLTRB(10, 12, 0, 0),
+                        child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            hoverColor: AppColors.noHover,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  height: 30,
+                                  width: 30,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white),
+                                ),
+                                Container(
+                                  height: 30,
+                                  width: 30,
+                                  child: Icon(Icons.arrow_back,
+                                      color: Colors.black),
+                                  alignment: Alignment.center,
+                                )
+                              ],
+                            ))),
+
+                    // IconButton(
+                    //   icon: Icon(Icons.arrow_back, color: Colors.black),
+                    //   onPressed: () => Navigator.of(context).pop(),
+
+                    actions: [
+                      Padding(
+                          padding: EdgeInsets.only(right: 10, top: 12),
+                          child: InkWell(
+                              onTap: () {
+                                // var toSet = !pinsOnDisplay;
+                                // setState(() {
+                                //   pinsOnDisplay = toSet;
+                                // });
+                                // if (width < 1000) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => PinnedItems(
+                                            pins: pins,
+                                            notifyMain: refresh,
+                                          )),
+                                ).then((val) => setState(() {}));
+                                // }
+                              },
+                              child: Container(
+                                  height: 30,
+                                  width: 30,
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                          padding:
+                                              EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                          height: 30,
+                                          width: 30,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white),
+                                          alignment: Alignment.center),
+                                      Container(
+                                          height: 30,
+                                          width: 30,
+                                          child: Icon(Icons.star,
+                                              color: pins["items"].length > 0
+                                                  ? AppColors.accent
+                                                  : AppColors.medGrey,
+                                              size: 30),
+                                          alignment: Alignment.center),
+                                      if (pins['items'].length > 0)
+                                        Container(
+                                            // decoration: BoxDecoration(
+                                            //     shape: BoxShape.circle, color: Colors.black),
+                                            height: 30,
+                                            width: 30,
+                                            child: Text(
+                                                '${pins['items'].length}',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                        FontWeight.w500)),
+                                            alignment: Alignment.center)
+                                    ],
+                                  ))))
+                    ],
                     elevation: 3,
                     stretch: true,
                     pinned: true,
-                    snap: true,
-                    floating: true,
-                    expandedHeight: 250,
-                    flexibleSpace: snapshot.hasData
+                    title: imageExists ? null : Text(widget.info['name']),
+                    expandedHeight: imageExists ? 250 : null,
+                    flexibleSpace: imageExists
                         ? Header(
                             maxHeight: maxHeight,
                             minHeight: minHeight,
@@ -354,9 +452,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                             name: widget.info['name'],
                           )
                         : null,
-                    iconTheme: IconThemeData(
-                      color: AppColors.medGrey, //change your color here
-                    ),
+
                     // titleTextStyle: TextStyle(color: Colors.black),
                   ),
                   main,
