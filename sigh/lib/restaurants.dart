@@ -351,6 +351,28 @@ class _RestaurantsState extends State<Restaurants> {
                           if (value is String) {
                             formVal = value;
                           }
+                        },
+                        onFieldSubmitted: (val) {
+                          _formKey.currentState!.save();
+                          if (formVal == null ||
+                              formVal.isEmpty ||
+                              formVal == ' ' ||
+                              formVal == '') {
+                            setState(() {
+                              search = false;
+                              page = 1;
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          } else {
+                            setState(() {
+                              search = true;
+                              query = formVal;
+                              page = 1;
+
+                              // _displayRestaurants = !_displayRestaurants;
+                            });
+                          }
                         }),
                   )),
               // search button
@@ -402,12 +424,8 @@ class _RestaurantsState extends State<Restaurants> {
                               }
                             },
                       child: search
-                          ? Container(
-                              height: 17,
-                              width: 17,
-                              child: Text("x",
-                                  style: TextStyle(
-                                      fontSize: 17, color: AppColors.darkGrey)))
+                          ? Icon(Icons.cancel,
+                              size: 17, color: AppColors.darkGrey)
                           : Icon(Icons.search,
                               size: 17, color: AppColors.darkGrey)))
             ],

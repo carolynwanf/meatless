@@ -146,7 +146,10 @@ class _RestaurantPageState extends State<RestaurantPage> {
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ItemDialog(pins: currentPins, item: item);
+            return ItemDialog(
+                pins: currentPins,
+                item: item,
+                pinsOnDisplay: widget.pinsOnDisplay);
           }).then((val) => {setState(() {})});
     }
 

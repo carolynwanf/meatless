@@ -432,7 +432,9 @@ class _MainpageState extends State<Mainpage> {
                           : Dishes(
                               pins: pins,
                               zipCode: zipCode,
-                              notifyParent: refresh),
+                              notifyParent: refresh,
+                              pinsOnDisplay: pinsOnDisplay,
+                            ),
                     )
                   ],
                 )),

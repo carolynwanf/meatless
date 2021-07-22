@@ -45,4 +45,14 @@ class AppStyles {
   static var detail = TextStyle(fontSize: 13, height: 1.2, letterSpacing: 0.3);
   static var detailMobile =
       TextStyle(fontSize: 15, height: 1.2, letterSpacing: 0.3);
+  static var focusedInputBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(5)),
+    borderSide: BorderSide(color: AppColors.darkGrey, width: 1.5),
+  );
+  static var enabledInputBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.all(
+      Radius.circular(5),
+    ),
+    borderSide: BorderSide(color: AppColors.medGrey, width: 1),
+  );
 }

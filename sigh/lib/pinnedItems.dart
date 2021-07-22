@@ -76,7 +76,11 @@ class _PinnedItemsState extends State<PinnedItems> {
           showDialog(
               context: context,
               builder: (BuildContext context) {
-                return ItemDialog(pins: pins, item: item);
+                return ItemDialog(
+                  pins: pins,
+                  item: item,
+                  pinsOnDisplay: widget.pinsOnDisplay,
+                );
               }).then((val) => setState(() {}));
         },
         child: Container(

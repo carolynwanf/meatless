@@ -11,7 +11,8 @@ import 'containsMeat.dart';
 class ItemDialog extends StatefulWidget {
   final pins;
   final item;
-  ItemDialog({this.pins, this.item});
+  final pinsOnDisplay;
+  ItemDialog({this.pins, this.item, @required this.pinsOnDisplay});
   _ItemDialogState createState() => _ItemDialogState();
 }
 
@@ -175,7 +176,11 @@ class _ItemDialogState extends State<ItemDialog> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (_) => RestaurantPage(
-                                                    info: info, pins: pins)),
+                                                      info: info,
+                                                      pins: pins,
+                                                      pinsOnDisplay:
+                                                          widget.pinsOnDisplay,
+                                                    )),
                                           );
                                         }))
                               ],

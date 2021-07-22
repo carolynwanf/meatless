@@ -9,10 +9,15 @@ import 'appColors.dart';
 class Dishes extends StatefulWidget {
   final pins;
   final zipCode;
+  final pinsOnDisplay;
 
   final notifyParent;
 
-  Dishes({this.pins, this.zipCode, this.notifyParent});
+  Dishes(
+      {this.pins,
+      this.zipCode,
+      this.notifyParent,
+      @required this.pinsOnDisplay});
   _DishesState createState() => _DishesState();
 }
 
@@ -89,7 +94,10 @@ class _DishesState extends State<Dishes> {
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ItemDialog(pins: currentPins, item: item);
+            return ItemDialog(
+                pins: currentPins,
+                item: item,
+                pinsOnDisplay: widget.pinsOnDisplay);
           }).then((val) => {setState(() {}), widget.notifyParent()});
     }
 
@@ -466,9 +474,8 @@ class _DishesState extends State<Dishes> {
                                 }
                               },
                         child: search
-                            ? Text("x",
-                                style: TextStyle(
-                                    fontSize: 17, color: AppColors.darkGrey))
+                            ? Icon(Icons.cancel,
+                                size: 17, color: AppColors.darkGrey)
                             : Icon(Icons.search,
                                 size: 17, color: AppColors.darkGrey)))
               ],
