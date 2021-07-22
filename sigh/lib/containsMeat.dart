@@ -199,7 +199,6 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                             EdgeInsets.symmetric(vertical: 10),
                                         child: Container(
                                             width: dialogWidth / 3,
-                                            height: 30,
                                             child: TextFormField(
                                                 validator: (value) {
                                                   if (value == null ||
@@ -222,7 +221,6 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                                 }))),
                                     Container(
                                         width: dialogWidth / 2,
-                                        height: 30,
                                         child: TextFormField(
                                           validator: (value) {
                                             RegExp validate = RegExp(

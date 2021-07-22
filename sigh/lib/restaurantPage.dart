@@ -256,10 +256,9 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           Container(
                               height: height / 6 + 8,
                               width: width / 2 - 15,
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5.0)),
-                                clipBehavior: Clip.antiAlias,
+                              child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
@@ -297,103 +296,129 @@ class _RestaurantPageState extends State<RestaurantPage> {
           hoverColor: AppColors.noHover,
           onTap: showItemDesc,
           child: Container(
+              height: 300,
               padding: EdgeInsets.only(
                   left: width / 200,
                   right: width / 200,
                   top: width / 200,
                   bottom: width / 200),
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                //image
-                if (image != 'none')
-                  Container(
-                    padding: EdgeInsets.only(
-                      bottom: width / 100,
-                    ),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0)),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Image.network(
-                            image,
-                            alignment: Alignment.topCenter,
-                            fit: BoxFit.cover,
-                            width: double.maxFinite,
-                            height: height / 6,
-                          ),
-                        ],
+              child: Stack(children: [
+                Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  //image
+                  if (image != 'none')
+                    Container(
+                      padding: EdgeInsets.only(
+                        bottom: width / 100,
+                      ),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0)),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Image.network(
+                              image,
+                              alignment: Alignment.topCenter,
+                              fit: BoxFit.cover,
+                              width: double.maxFinite,
+                              height: height / 6,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
-                if (image == 'none')
+                  if (image == 'none')
+                    Container(
+                        padding: EdgeInsets.fromLTRB(3, 3, 3, width / 100),
+                        child: Container(
+                            decoration: BoxDecoration(
+                                color: AppColors.medGrey,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
+                            height: height / 6,
+                            width: double.maxFinite,
+                            child: Center(
+                                child: Text('no image',
+                                    style: TextStyle(color: Colors.white))))),
                   Container(
-                      padding: EdgeInsets.fromLTRB(3, 3, 3, width / 100),
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: AppColors.medGrey,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))),
-                          height: height / 6,
-                          width: double.maxFinite,
-                          child: Center(
-                              child: Text('no image',
-                                  style: TextStyle(color: Colors.white))))),
-                Container(
-                    padding: EdgeInsets.only(
-                      bottom: width / 400,
-                    ),
-                    child: Text(name,
-                        style: TextStyle(
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.bold,
-                            fontSize: height / 55),
-                        textAlign: TextAlign.center)),
-                if (description != 'none')
-                  Text(description,
-                      style: AppStyles.subtitle, textAlign: TextAlign.center),
-                Text(
-                  '$price',
-                  textAlign: TextAlign.center,
-                  style: AppStyles.detail,
-                ),
-                IconButton(
-                    hoverColor: AppColors.noHover,
-                    onPressed: !pinned
-                        ? () {
-                            debugPrint('pressed');
-                            var temp = currentPins;
+                      padding: EdgeInsets.only(
+                        bottom: width / 400,
+                      ),
+                      child: Text(name,
+                          style: TextStyle(
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.bold,
+                              fontSize: height / 55),
+                          textAlign: TextAlign.center)),
+                  if (description != 'none')
+                    Text(description,
+                        style: AppStyles.subtitle, textAlign: TextAlign.center),
+                  Text(
+                    '$price',
+                    textAlign: TextAlign.center,
+                    style: AppStyles.detail,
+                  ),
+                ]),
+                Positioned(
+                    bottom: 10,
+                    left: 5,
+                    child: InkWell(
+                        onTap: !pinned
+                            ? () {
+                                debugPrint('pressed');
+                                var temp = currentPins;
 
-                            temp['ids'].add(id);
-                            temp['items'].add(item);
-                            debugPrint('$temp');
+                                temp['ids'].add(id);
+                                temp['items'].add(item);
+                                debugPrint('$temp');
 
-                            setState(() {
-                              pins = temp;
-                            });
-                          }
-                        : () {
-                            debugPrint('pressed');
-                            var temp = currentPins;
-                            debugPrint('$temp');
-                            temp['ids'].remove(id);
-                            for (var i = 0; i < temp['items'].length; i++) {
-                              if (temp['items'][i]['_id'] == id) {
-                                temp['items'].removeAt(i);
-                                break;
+                                setState(() {
+                                  pins = temp;
+                                });
                               }
-                            }
-                            setState(() {
-                              debugPrint('setting state');
-                              pins = temp;
-                            });
-                          },
-                    icon: pinned
-                        ? Icon(Icons.star, color: AppColors.star)
-                        : Icon(Icons.star_border, color: AppColors.medGrey))
+                            : () {
+                                debugPrint('pressed');
+                                var temp = currentPins;
+                                debugPrint('$temp');
+                                temp['ids'].remove(id);
+                                for (var i = 0; i < temp['items'].length; i++) {
+                                  if (temp['items'][i]['_id'] == id) {
+                                    temp['items'].removeAt(i);
+                                    break;
+                                  }
+                                }
+                                setState(() {
+                                  debugPrint('setting state');
+                                  pins = temp;
+                                });
+                              },
+                        hoverColor: AppColors.noHover,
+                        child: Container(
+                            height: 30,
+                            width: 30,
+                            child: Stack(
+                              children: [
+                                Container(
+                                    padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                    height: 30,
+                                    width: 30,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white),
+                                    alignment: Alignment.center),
+                                Container(
+                                    height: 30,
+                                    width: 30,
+                                    child: pinned
+                                        ? Icon(Icons.star,
+                                            color: AppColors.star)
+                                        : Icon(Icons.star_border,
+                                            color: AppColors.medGrey),
+                                    alignment: Alignment.center),
+                              ],
+                            ))))
               ])));
     }
   }
@@ -405,7 +430,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 250.0,
-              mainAxisExtent: 340,
+              mainAxisExtent: 300,
               mainAxisSpacing: 10.0,
               crossAxisSpacing: 10.0,
             ),

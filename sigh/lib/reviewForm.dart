@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'appColors.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'dart:convert';
 
@@ -33,6 +34,55 @@ class ReviewForm extends StatefulWidget {
 // }
 
 class _ReviewFormState extends State<ReviewForm> {
+  var fToast;
+
+  @override
+  void initState() {
+    super.initState();
+    fToast = FToast();
+    fToast.init(context);
+  }
+
+  _showToast() {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: AppColors.accent,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check, color: Colors.white),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text("Submitted",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 2),
+    );
+
+    // Custom Toast Position
+    // fToast.showToast(
+    //     child: toast,
+    //     toastDuration: Duration(seconds: 2),
+    //     positionedToastBuilder: (context, child) {
+    //       return Positioned(
+    //         child: child,
+    //         top: 16.0,
+    //         left: 16.0,
+    //       );
+    //     });
+  }
+
   final _formKey = GlobalKey<FormState>();
   var numberOfStars = 0;
 
@@ -141,7 +191,6 @@ class _ReviewFormState extends State<ReviewForm> {
           Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: SizedBox(
-                  height: 30,
                   width: 150,
                   child: TextFormField(
                       validator: (value) {
@@ -158,7 +207,6 @@ class _ReviewFormState extends State<ReviewForm> {
                         review['name'] = value;
                       }))),
           SizedBox(
-              height: 30,
               width: 200,
               child: TextFormField(
                   validator: (value) {
@@ -203,18 +251,22 @@ class _ReviewFormState extends State<ReviewForm> {
                     'id': widget.id,
                   };
 
-                  final response = await http.post(
-                      Uri.parse('http://localhost:4000/review-or-rating'),
-                      headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                      },
-                      body: jsonEncode(body));
+                  debugPrint('$body');
 
-                  debugPrint('$response');
+                  // final response = await http.post(
+                  //     Uri.parse('http://localhost:4000/review-or-rating'),
+                  //     headers: {
+                  //       'Accept': 'application/json',
+                  //       'Content-Type': 'application/json',
+                  //     },
+                  //     body: jsonEncode(body));
 
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Submitting')));
+                  // debugPrint('$response');
+
+                  _showToast();
+
+                  // ScaffoldMessenger.of(context)
+                  //     .showF(SnackBar(content: Text('Submitting')));
                 }
               },
               child: Text('Submit'),
