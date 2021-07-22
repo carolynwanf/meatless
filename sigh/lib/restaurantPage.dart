@@ -412,7 +412,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
             delegate:
                 SliverChildBuilderDelegate((BuildContext context, int index) {
               return Card(
-                  elevation: 5, child: itemDesc(list[index], pins, width));
+                  elevation: 2, child: itemDesc(list[index], pins, width));
             }, childCount: list.length),
           ));
     } else {
@@ -428,7 +428,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   Widget makeRestaurantInfo(restaurant, width) {
-    var friendliness = restaurant['friendliness'].toDouble(),
+    var friendliness = restaurant['friendliness'].round(),
         name = restaurant['name'],
         type = restaurant['type'],
         url = restaurant['url'];
@@ -608,11 +608,13 @@ class _RestaurantPageState extends State<RestaurantPage> {
                         sliver: SliverToBoxAdapter(
                             child: SizedBox(
                                 height: 300,
-                                child: Card(
+                                child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
                                     child: Image.network(
-                                  restaurant['image'],
-                                  fit: BoxFit.cover,
-                                )))));
+                                      restaurant['image'],
+                                      fit: BoxFit.cover,
+                                    )))));
                   }
                 }
 
