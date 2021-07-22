@@ -322,25 +322,6 @@ class _DishesState extends State<Dishes> {
                         : Icon(Icons.star_border, color: AppColors.medGrey))
               ])));
     }
-
-    // USE FOR MOBILE INTERFACE LATER ON
-    // return new ListTile(
-    //   leading: Container(
-    //     child: Column(
-    //       children: [
-    //         if (image != 'none')
-    //           Container(
-    //             height: MediaQuery.of(context).size.height / 17,
-    //             child: Image.network(image),
-    //           )
-    //       ],
-    //     ),
-    //   ),
-    //   title: Text(name),
-    //   subtitle: description == 'none' ? null : Text(description),
-    //   // trailing: Icon(Icons.star)
-    //   // Star(pinned: alreadyPinned)
-    // );
   }
 
   Widget build(BuildContext context) {

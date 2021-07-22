@@ -36,6 +36,12 @@ class AppStyles {
       color: Colors.black,
       height: 1.2,
       letterSpacing: 0.3);
+  static var bigTitle = TextStyle(
+      fontSize: 26,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+      height: 1.2,
+      letterSpacing: 0.3);
   static var detail = TextStyle(fontSize: 13, height: 1.2, letterSpacing: 0.3);
   static var detailMobile =
       TextStyle(fontSize: 15, height: 1.2, letterSpacing: 0.3);
