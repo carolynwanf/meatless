@@ -55,4 +55,5 @@ class AppStyles {
     ),
     borderSide: BorderSide(color: AppColors.medGrey, width: 1),
   );
+  static var hintText = TextStyle(fontSize: 14);
 }

@@ -90,11 +90,8 @@ class Header extends StatelessWidget {
 class RestaurantPage extends StatefulWidget {
   final info;
   final pins;
-  final pinsOnDisplay;
 
-  RestaurantPage(
-      {Key? key, @required this.info, this.pins, @required this.pinsOnDisplay})
-      : super(key: key);
+  RestaurantPage({Key? key, @required this.info, this.pins}) : super(key: key);
 
   _RestaurantPageState createState() => _RestaurantPageState();
 }
@@ -124,7 +121,6 @@ Future<List> getPageDishes(id) async {
 // stuff for restaurant page
 
 class _RestaurantPageState extends State<RestaurantPage> {
-  var pinsOnDisplay;
   refresh() {
     setState(() {
       pins = pins;
@@ -146,10 +142,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ItemDialog(
-                pins: currentPins,
-                item: item,
-                pinsOnDisplay: widget.pinsOnDisplay);
+            return ItemDialog(pins: currentPins, item: item);
           }).then((val) => {setState(() {})});
     }
 
@@ -476,7 +469,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   Widget build(BuildContext context) {
-    pinsOnDisplay = widget.pinsOnDisplay;
     var width = MediaQuery.of(context).size.width;
     var mobile = width < 500 ? true : false;
     var imageExists = false;
@@ -500,10 +492,11 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   Padding(
                       padding: EdgeInsets.only(right: 10, top: 12),
                       child: InkWell(
+                          hoverColor: AppColors.noHover,
                           onTap: () {
-                            var toSet = !pinsOnDisplay;
+                            var toSet = !pins['display'];
                             setState(() {
-                              pinsOnDisplay = toSet;
+                              pins['display'] = toSet;
                             });
                             if (width < 1000) {
                               Navigator.push(
@@ -512,7 +505,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                     builder: (_) => PinnedItems(
                                           pins: pins,
                                           notifyMain: refresh,
-                                          pinsOnDisplay: pinsOnDisplay,
                                         )),
                               ).then((val) => setState(() {}));
                             }
@@ -659,18 +651,19 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           padding: EdgeInsets.only(right: 10, top: 12),
                           child: InkWell(
                               onTap: () {
-                                var toSet = !pinsOnDisplay;
+                                var toSet = !pins['display'];
                                 setState(() {
-                                  pinsOnDisplay = toSet;
+                                  pins['display'] = toSet;
                                 });
+
                                 if (width < 1000) {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) => PinnedItems(
-                                            pins: pins,
-                                            notifyMain: refresh,
-                                            pinsOnDisplay: pinsOnDisplay)),
+                                              pins: pins,
+                                              notifyMain: refresh,
+                                            )),
                                   ).then((val) => setState(() {}));
                                 }
                               },
@@ -794,15 +787,14 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     ],
                   ),
                 ),
-                if (pinsOnDisplay && width > 1000)
+                if (pins['display'] && width > 1000)
                   VerticalDivider(width: 1, color: AppColors.medGrey),
-                if (pinsOnDisplay && width > 1000)
+                if (pins['display'] && width > 1000)
                   Expanded(
                       flex: 9,
                       child: PinnedItems(
                         pins: pins,
                         notifyMain: refresh,
-                        pinsOnDisplay: pinsOnDisplay,
                       ))
               ]);
             }));

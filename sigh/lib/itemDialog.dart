@@ -11,8 +11,8 @@ import 'containsMeat.dart';
 class ItemDialog extends StatefulWidget {
   final pins;
   final item;
-  final pinsOnDisplay;
-  ItemDialog({this.pins, this.item, @required this.pinsOnDisplay});
+
+  ItemDialog({this.pins, this.item});
   _ItemDialogState createState() => _ItemDialogState();
 }
 
@@ -60,7 +60,7 @@ class _ItemDialogState extends State<ItemDialog> {
 
       image = image[1];
     }
-    var pinned = item['pinned'];
+    var pinned = pins['ids'].contains(id);
     return Dialog(
         insetPadding: dialogWidth < 619
             ? EdgeInsets.all(0)
@@ -178,10 +178,8 @@ class _ItemDialogState extends State<ItemDialog> {
                                                 builder: (_) => RestaurantPage(
                                                       info: info,
                                                       pins: pins,
-                                                      pinsOnDisplay:
-                                                          widget.pinsOnDisplay,
                                                     )),
-                                          );
+                                          ).then((val) => {setState(() {})});
                                         }))
                               ],
                             ))),

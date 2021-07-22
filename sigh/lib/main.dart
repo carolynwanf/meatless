@@ -44,10 +44,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var pins = {
-    'ids': <String>{},
-    'items': [],
-  };
+  var pins = {'ids': <String>{}, 'items': [], 'display': true};
   var zipCode = '';
   final _formKey = GlobalKey<FormState>();
   final zipCodeController = TextEditingController();
@@ -158,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                               );
                             }
                           },
-                          child: Text('Search')))
+                          child: const Text('Search')))
                 ],
               ))),
     );
@@ -176,13 +173,10 @@ class Mainpage extends StatefulWidget {
 class _MainpageState extends State<Mainpage> {
   var zipCode, pins;
 
-  var pinsOnDisplay = true;
   var _displayRestaurants = true;
   var formVal;
   refresh() {
-    setState(() {
-      pins = pins;
-    });
+    setState(() {});
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -282,9 +276,9 @@ class _MainpageState extends State<Mainpage> {
                               ? AppColors.medGrey
                               : AppColors.primaryDark),
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            bottomRight: Radius.circular(12)),
+                        borderRadius: const BorderRadius.only(
+                            topRight: const Radius.circular(12),
+                            bottomRight: const Radius.circular(12)),
                       ),
                       // padding: EdgeInsets.only(bottom: height / 90),
                       primary: width < 500 ? Colors.white : AppColors.primary,
@@ -309,9 +303,9 @@ class _MainpageState extends State<Mainpage> {
                     right: height / 50),
                 child: InkWell(
                     onTap: () {
-                      var toSet = !pinsOnDisplay;
+                      var toSet = !pins['display'];
                       setState(() {
-                        pinsOnDisplay = toSet;
+                        pins['display'] = toSet;
                       });
                       if (width < 1000) {
                         Navigator.push(
@@ -320,7 +314,6 @@ class _MainpageState extends State<Mainpage> {
                               builder: (_) => PinnedItems(
                                     pins: pins,
                                     notifyMain: refresh,
-                                    pinsOnDisplay: pinsOnDisplay,
                                   )),
                         ).then((val) => setState(() {}));
                       }
@@ -343,7 +336,7 @@ class _MainpageState extends State<Mainpage> {
                               height: 60,
                               width: 50,
                               child: Text('${pins['items'].length}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500)),
@@ -368,9 +361,9 @@ class _MainpageState extends State<Mainpage> {
                                 side: BorderSide(
                                     width: 1, color: AppColors.medGrey),
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(7),
-                                      bottomLeft: Radius.circular(7)),
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: const Radius.circular(7),
+                                      bottomLeft: const Radius.circular(7)),
                                 ),
                                 // padding: EdgeInsets.only(bottom: height / 90),
                                 primary: Colors.white,
@@ -427,26 +420,24 @@ class _MainpageState extends State<Mainpage> {
                               pins: pins,
                               zipCode: zipCode,
                               notifyParent: refresh,
-                              pinsOnDisplay: pinsOnDisplay,
                             )
                           : Dishes(
                               pins: pins,
                               zipCode: zipCode,
                               notifyParent: refresh,
-                              pinsOnDisplay: pinsOnDisplay,
                             ),
                     )
                   ],
                 )),
-            if (pinsOnDisplay && width > 1000)
+            if (pins['display'] && width > 1000)
               VerticalDivider(width: 1, color: AppColors.medGrey),
-            if (pinsOnDisplay && width > 1000)
+            if (pins['display'] && width > 1000)
               Expanded(
                   flex: 9,
                   child: PinnedItems(
-                      pins: pins,
-                      notifyMain: refresh,
-                      pinsOnDisplay: pinsOnDisplay))
+                    pins: pins,
+                    notifyMain: refresh,
+                  ))
           ],
         ));
   }

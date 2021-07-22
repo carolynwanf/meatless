@@ -1,6 +1,5 @@
 // import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // import 'package:http/http.dart' as http;
 
@@ -11,9 +10,8 @@ import 'appColors.dart';
 class PinnedItems extends StatefulWidget {
   final pins;
   final notifyMain;
-  final pinsOnDisplay;
 
-  PinnedItems({this.pins, this.notifyMain, @required this.pinsOnDisplay});
+  PinnedItems({this.pins, this.notifyMain});
 
   _PinnedItemsState createState() => _PinnedItemsState();
 }
@@ -24,7 +22,6 @@ class _PinnedItemsState extends State<PinnedItems> {
     var idsSeen = <String>{};
     var preSorted = {};
 
-    debugPrint('$items');
     for (var i = 0; i < items.length; i++) {
       if (idsSeen.contains(items[i]["restaurant_id"])) {
         preSorted[items[i]['restuarant_name']].add(items[i]);
@@ -32,10 +29,7 @@ class _PinnedItemsState extends State<PinnedItems> {
         idsSeen.add(items[i]["restaurant_id"]);
         preSorted[items[i]['restuarant_name']] = [items[i]];
       }
-      debugPrint('$preSorted, $idsSeen, AAHHH');
     }
-
-    debugPrint('$preSorted');
 
     var sorted = [];
 
@@ -79,21 +73,20 @@ class _PinnedItemsState extends State<PinnedItems> {
                 return ItemDialog(
                   pins: pins,
                   item: item,
-                  pinsOnDisplay: widget.pinsOnDisplay,
                 );
               }).then((val) => setState(() {}));
         },
         child: Container(
             child: Column(children: [
           Container(
-              padding: EdgeInsets.only(top: 10, bottom: 10, left: 10),
+              padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10),
               // contents of card
               child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 // text
                 Expanded(
                     flex: 6,
                     child: Container(
-                        padding: EdgeInsets.only(left: 5),
+                        padding: const EdgeInsets.only(left: 5),
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,8 +100,8 @@ class _PinnedItemsState extends State<PinnedItems> {
                               // dish description if it exists
                               if (description != 'none')
                                 Container(
-                                    // height: 60,
-                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
                                     child: Text(
                                       description,
                                       textAlign: TextAlign.left,
@@ -125,7 +118,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                 if (image != 'none' && MediaQuery.of(context).size.width < 500)
                   Expanded(
                       flex: 2,
-                      child: Container(
+                      child: SizedBox(
                           height: 108,
                           width: 100,
                           child: Card(
@@ -167,7 +160,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                         child: IconButton(
                             onPressed: () {
                               var temp = pins;
-                              debugPrint('$temp');
+
                               temp['ids'].remove(id);
                               for (var i = 0; i < temp['items'].length; i++) {
                                 if (temp['items'][i]['_id'] == id) {
@@ -176,7 +169,6 @@ class _PinnedItemsState extends State<PinnedItems> {
                                 }
                               }
                               setState(() {
-                                debugPrint('setting state');
                                 pins = temp;
                               });
 
@@ -243,8 +235,6 @@ class _PinnedItemsState extends State<PinnedItems> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
-                      debugPrint('$itemList');
-
                       if (index == 0) {
                         return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,10 +254,11 @@ class _PinnedItemsState extends State<PinnedItems> {
                                               builder: (_) => RestaurantPage(
                                                     info: itemList[0],
                                                     pins: pins,
-                                                    pinsOnDisplay:
-                                                        widget.pinsOnDisplay,
                                                   )),
-                                        );
+                                        ).then((val) => {
+                                              setState(() {}),
+                                              widget.notifyMain()
+                                            });
                                       })),
                               Container(
                                   width: MediaQuery.of(context).size.width -
