@@ -90,8 +90,11 @@ class Header extends StatelessWidget {
 class RestaurantPage extends StatefulWidget {
   final info;
   final pins;
+  final pinsOnDisplay;
 
-  RestaurantPage({Key? key, @required this.info, this.pins}) : super(key: key);
+  RestaurantPage(
+      {Key? key, @required this.info, this.pins, @required this.pinsOnDisplay})
+      : super(key: key);
 
   _RestaurantPageState createState() => _RestaurantPageState();
 }
@@ -121,6 +124,7 @@ Future<List> getPageDishes(id) async {
 // stuff for restaurant page
 
 class _RestaurantPageState extends State<RestaurantPage> {
+  var pinsOnDisplay;
   refresh() {
     setState(() {
       pins = pins;
@@ -469,6 +473,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   Widget build(BuildContext context) {
+    pinsOnDisplay = widget.pinsOnDisplay;
     var width = MediaQuery.of(context).size.width;
     var mobile = width < 500 ? true : false;
     var imageExists = false;
@@ -493,20 +498,21 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       padding: EdgeInsets.only(right: 10, top: 12),
                       child: InkWell(
                           onTap: () {
-                            // var toSet = !pinsOnDisplay;
-                            // setState(() {
-                            //   pinsOnDisplay = toSet;
-                            // });
-                            // if (width < 1000) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => PinnedItems(
-                                        pins: pins,
-                                        notifyMain: refresh,
-                                      )),
-                            ).then((val) => setState(() {}));
-                            // }
+                            var toSet = !pinsOnDisplay;
+                            setState(() {
+                              pinsOnDisplay = toSet;
+                            });
+                            if (width < 1000) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => PinnedItems(
+                                          pins: pins,
+                                          notifyMain: refresh,
+                                          pinsOnDisplay: pinsOnDisplay,
+                                        )),
+                              ).then((val) => setState(() {}));
+                            }
                           },
                           child: Container(
                               height: 30,
@@ -650,20 +656,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           padding: EdgeInsets.only(right: 10, top: 12),
                           child: InkWell(
                               onTap: () {
-                                // var toSet = !pinsOnDisplay;
-                                // setState(() {
-                                //   pinsOnDisplay = toSet;
-                                // });
-                                // if (width < 1000) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => PinnedItems(
+                                var toSet = !pinsOnDisplay;
+                                setState(() {
+                                  pinsOnDisplay = toSet;
+                                });
+                                if (width < 1000) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => PinnedItems(
                                             pins: pins,
                                             notifyMain: refresh,
-                                          )),
-                                ).then((val) => setState(() {}));
-                                // }
+                                            pinsOnDisplay: pinsOnDisplay)),
+                                  ).then((val) => setState(() {}));
+                                }
                               },
                               child: Container(
                                   height: 30,
@@ -765,22 +771,37 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 return Text("${snapshot.error}");
               }
 
-              return CustomScrollView(
-                slivers: <Widget>[
-                  appbar,
-                  headerImage,
-                  restaurantInfo,
-                  if (width > 500) divider,
-                  main,
-                  mains,
-                  side,
-                  sides,
-                  dessert,
-                  desserts,
-                  drink,
-                  drinks,
-                ],
-              );
+              return Row(children: [
+                Expanded(
+                  flex: 31,
+                  child: CustomScrollView(
+                    slivers: <Widget>[
+                      appbar,
+                      headerImage,
+                      restaurantInfo,
+                      if (width > 500) divider,
+                      main,
+                      mains,
+                      side,
+                      sides,
+                      dessert,
+                      desserts,
+                      drink,
+                      drinks,
+                    ],
+                  ),
+                ),
+                if (pinsOnDisplay && width > 1000)
+                  VerticalDivider(width: 1, color: AppColors.medGrey),
+                if (pinsOnDisplay && width > 1000)
+                  Expanded(
+                      flex: 9,
+                      child: PinnedItems(
+                        pins: pins,
+                        notifyMain: refresh,
+                        pinsOnDisplay: pinsOnDisplay,
+                      ))
+              ]);
             }));
   }
 }

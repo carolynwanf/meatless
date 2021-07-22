@@ -12,11 +12,13 @@ class RestaurantCard extends StatefulWidget {
   final notifyMain;
   final pins;
   final restaurant;
+  final pinsOnDisplay;
 
   RestaurantCard({
     @required this.pins,
     @required this.notifyMain,
     @required this.restaurant,
+    @required this.pinsOnDisplay,
   });
 
   _RestaurantCardState createState() => _RestaurantCardState();
@@ -72,8 +74,11 @@ class _RestaurantCardState extends State<RestaurantCard> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) =>
-                          RestaurantPage(info: info, pins: widget.pins)),
+                      builder: (_) => RestaurantPage(
+                            info: info,
+                            pins: widget.pins,
+                            pinsOnDisplay: widget.pinsOnDisplay,
+                          )),
                 ).then((val) => {widget.notifyMain()})
               },
           // restaurant information
@@ -141,8 +146,11 @@ class _RestaurantCardState extends State<RestaurantCard> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) =>
-                          RestaurantPage(info: info, pins: widget.pins)),
+                      builder: (_) => RestaurantPage(
+                            info: info,
+                            pins: widget.pins,
+                            pinsOnDisplay: widget.pinsOnDisplay,
+                          )),
                 ).then((val) => {widget.notifyMain()});
               },
               child: Container(
@@ -186,8 +194,13 @@ class Restaurants extends StatefulWidget {
   final notifyParent;
   final pins;
   final zipCode;
+  final pinsOnDisplay;
 
-  Restaurants({this.pins, this.zipCode, this.notifyParent});
+  Restaurants(
+      {this.pins,
+      this.zipCode,
+      this.notifyParent,
+      @required this.pinsOnDisplay});
   @override
   _RestaurantsState createState() => _RestaurantsState();
 }
@@ -225,6 +238,7 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
 
 class _RestaurantsState extends State<Restaurants> {
   var query = '', sort = 'friendliness', search = false;
+
   final ScrollController _scrollController = ScrollController();
   var page = 1;
   final _formKey = GlobalKey<FormState>();
@@ -244,6 +258,7 @@ class _RestaurantsState extends State<Restaurants> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var mobile = width < 500 ? true : false;
+    debugPrint("ADHGKSLJDHF ${widget.zipCode}");
     var zipCode = widget.zipCode;
     debugPrint('$page');
     isDisabled() {
@@ -409,7 +424,6 @@ class _RestaurantsState extends State<Restaurants> {
           future: getRestaurants(page, zipCode, sort, search, query),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              debugPrint('${snapshot.data}');
               if (snapshot.data![0] == 'no results') {
                 return Text('no results');
               } else {
@@ -418,8 +432,6 @@ class _RestaurantsState extends State<Restaurants> {
                     controller: _scrollController,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (_, int position) {
-                      debugPrint(
-                          'type ${snapshot.data![position]["friendliness"]}');
                       if (snapshot.data![position]["friendliness"] != null &&
                           snapshot.data![position]["friendliness"] != 'N/A') {
                         snapshot.data![position]["friendliness"] =
@@ -431,6 +443,7 @@ class _RestaurantsState extends State<Restaurants> {
                         pins: widget.pins,
                         notifyMain: widget.notifyParent,
                         restaurant: snapshot.data![position],
+                        pinsOnDisplay: widget.pinsOnDisplay,
                       );
                     },
                   );
@@ -469,6 +482,7 @@ class _RestaurantsState extends State<Restaurants> {
                               pins: widget.pins,
                               notifyMain: widget.notifyParent,
                               restaurant: snapshot.data![position],
+                              pinsOnDisplay: widget.pinsOnDisplay,
                             );
                           }
                         },

@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class Mainpage extends StatefulWidget {
-  final zipCode;
+  var zipCode;
   final pins;
 
   Mainpage({this.zipCode, this.pins});
@@ -259,7 +259,7 @@ class _MainpageState extends State<Mainpage> {
 
                           setState(() {
                             debugPrint('setting zipCode $formVal');
-                            zipCode = formVal;
+                            widget.zipCode = formVal;
 
                             // _displayRestaurants = !_displayRestaurants;
                           });
@@ -320,6 +320,7 @@ class _MainpageState extends State<Mainpage> {
                               builder: (_) => PinnedItems(
                                     pins: pins,
                                     notifyMain: refresh,
+                                    pinsOnDisplay: pinsOnDisplay,
                                   )),
                         ).then((val) => setState(() {}));
                       }
@@ -426,6 +427,7 @@ class _MainpageState extends State<Mainpage> {
                               pins: pins,
                               zipCode: zipCode,
                               notifyParent: refresh,
+                              pinsOnDisplay: pinsOnDisplay,
                             )
                           : Dishes(
                               pins: pins,
@@ -440,9 +442,9 @@ class _MainpageState extends State<Mainpage> {
               Expanded(
                   flex: 9,
                   child: PinnedItems(
-                    pins: pins,
-                    notifyMain: refresh,
-                  ))
+                      pins: pins,
+                      notifyMain: refresh,
+                      pinsOnDisplay: pinsOnDisplay))
           ],
         ));
   }

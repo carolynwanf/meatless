@@ -11,8 +11,9 @@ import 'appColors.dart';
 class PinnedItems extends StatefulWidget {
   final pins;
   final notifyMain;
+  final pinsOnDisplay;
 
-  PinnedItems({this.pins, this.notifyMain});
+  PinnedItems({this.pins, this.notifyMain, @required this.pinsOnDisplay});
 
   _PinnedItemsState createState() => _PinnedItemsState();
 }
@@ -257,8 +258,11 @@ class _PinnedItemsState extends State<PinnedItems> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (_) => RestaurantPage(
-                                                  info: itemList[0],
-                                                  pins: pins)),
+                                                    info: itemList[0],
+                                                    pins: pins,
+                                                    pinsOnDisplay:
+                                                        widget.pinsOnDisplay,
+                                                  )),
                                         );
                                       })),
                               Container(
