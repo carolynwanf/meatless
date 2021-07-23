@@ -272,9 +272,6 @@ class _ReviewFormState extends State<ReviewForm> {
                   } else {
                     _showToast("Error");
                   }
-
-                  // ScaffoldMessenger.of(context)
-                  //     .showF(SnackBar(content: Text('Submitting')));
                 }
               },
               child: Text('Submit'),

@@ -4,6 +4,7 @@ import 'package:sigh/appColors.dart';
 import 'dart:convert';
 import 'appColors.dart';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ContainsMeat extends StatefulWidget {
   final pins;
@@ -13,7 +14,51 @@ class ContainsMeat extends StatefulWidget {
 }
 
 class _ContainsMeatState extends State<ContainsMeat> {
+  var submittedToast;
+
+  @override
+  void initState() {
+    super.initState();
+    submittedToast = FToast();
+    submittedToast.init(context);
+  }
+
+  _showToast(text) {
+    var color = AppColors.accent;
+    if (text == 'Error') {
+      color = Colors.red;
+    }
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: color,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (text == 'Submitted') Icon(Icons.check, color: Colors.white),
+          if (text == "Error") Icon(Icons.cancel, color: Colors.white),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text("$text",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+
+    submittedToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 2),
+    );
+  }
+
   final _formKey = GlobalKey<FormState>();
+  var nameController = TextEditingController(),
+      emailController = TextEditingController();
 
   var report = {
         'problem': [],
@@ -86,8 +131,6 @@ class _ContainsMeatState extends State<ContainsMeat> {
       if (_formKey.currentState!.validate()) {
         _formKey.currentState!.save();
 
-        debugPrint('report: $report');
-
         var body = {'report': report, "id": widget.item['_id']};
 
         final response =
@@ -100,8 +143,24 @@ class _ContainsMeatState extends State<ContainsMeat> {
 
         debugPrint('$response');
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Submitting')));
+        if (response.statusCode == 200) {
+          nameController.clear();
+          emailController.clear();
+          setState(() {
+            nameProblem = false;
+
+            descProblem = false;
+
+            requirementsProblem = false;
+
+            imageProblem = false;
+
+            orderedProblem = false;
+          });
+          _showToast("Submitted");
+        } else {
+          _showToast("Error");
+        }
       }
     }
 
@@ -200,6 +259,7 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                         child: Container(
                                             width: dialogWidth / 3,
                                             child: TextFormField(
+                                                controller: nameController,
                                                 validator: (value) {
                                                   if (value == null ||
                                                       value.isEmpty) {
@@ -222,6 +282,7 @@ class _ContainsMeatState extends State<ContainsMeat> {
                                     Container(
                                         width: dialogWidth / 2,
                                         child: TextFormField(
+                                          controller: emailController,
                                           validator: (value) {
                                             RegExp validate = RegExp(
                                                 r"^[^\s@]+@[^\s@]+\.[^\s@]+$");
