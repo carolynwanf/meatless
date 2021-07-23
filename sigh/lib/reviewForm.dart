@@ -18,21 +18,6 @@ class ReviewForm extends StatefulWidget {
   _ReviewFormState createState() => _ReviewFormState();
 }
 
-// Future<List> sendReview(review) async {
-//   final String body = jsonEncode({"offset": offset});
-//   final response =
-//       await http.post(Uri.parse('http://localhost:4000/get-dishes'),
-//           headers: {
-//             'Accept': 'application/json',
-//             'Content-Type': 'application/json',
-//           },
-//           body: body);
-
-//   // if (response.body.length > 100) {
-//   return jsonDecode(response.body)['dishes'];
-//   // }
-// }
-
 class _ReviewFormState extends State<ReviewForm> {
   var submittedToast;
 
@@ -252,13 +237,23 @@ class _ReviewFormState extends State<ReviewForm> {
 
                   debugPrint('$body');
 
-                  final response = await http.post(
-                      Uri.parse('http://localhost:4000/review-or-rating'),
-                      headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                      },
-                      body: jsonEncode(body));
+                  final response =
+
+                      // await http.post(
+                      //     Uri.parse('http://localhost:4000/review-or-rating'),
+                      //     headers: {
+                      //       'Accept': 'application/json',
+                      //       'Content-Type': 'application/json',
+                      //     },
+                      //     body: jsonEncode(body));
+
+                      await http.post(
+                          Uri.parse('http://10.0.2.2:4000/review-or-rating'),
+                          headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                          },
+                          body: jsonEncode(body));
 
                   if (response.statusCode == 200) {
                     reviewController.clear();

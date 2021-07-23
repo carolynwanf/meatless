@@ -5,6 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'itemDialog.dart';
 import 'appColors.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Dishes extends StatefulWidget {
   final pins;
@@ -26,25 +27,68 @@ Future<List> getDishes(offset, zipCode, search, query) async {
   final response =
 
       // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
 
+  // for local ios + browser dev
+  // await http.post(Uri.parse('http://localhost:4000/get-dishes'),
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: body);
+
   return jsonDecode(response.body)['dishes'];
 }
 
 class _DishesState extends State<Dishes> {
+  var starToast;
+
+  @override
+  void initState() {
+    super.initState();
+    starToast = FToast();
+    starToast.init(context);
+  }
+
+  _showToast(text) {
+    var color = AppColors.accent;
+    if (text == 'Unstarred') {
+      color = Colors.black;
+    }
+
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: color,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (text == 'Starred') Icon(Icons.star, color: Colors.white),
+          if (text == "Unstarred") Icon(Icons.cancel, color: Colors.white),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text("$text",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+
+    starToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(milliseconds: 1500),
+    );
+  }
+
   var search = false, query = '', zipCode, pins;
   final ScrollController _scrollController = ScrollController();
   var page = 1;
@@ -57,10 +101,6 @@ class _DishesState extends State<Dishes> {
 
   void clearText() {
     fieldText.clear();
-  }
-
-  void initState() {
-    super.initState();
   }
 
   Widget dishDesc(item, currentPins) {
@@ -102,18 +142,13 @@ class _DishesState extends State<Dishes> {
 
     if (width < 500) {
       // mobile dish card
-      return Container(
-          height: height / 5 + 10,
+      return Padding(
+          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
           child: InkWell(
               hoverColor: AppColors.noHover,
               onTap: showItemDesc,
               onDoubleTap: !pinned
                   ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('starred!'),
-                            duration: Duration(milliseconds: 400)),
-                      );
                       var temp = currentPins;
 
                       temp['ids'].add(id);
@@ -123,14 +158,11 @@ class _DishesState extends State<Dishes> {
                       setState(() {
                         pins = temp;
                       });
+                      _showToast("Starred");
 
                       widget.notifyParent();
                     }
                   : () {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('removed from starred dishes'),
-                        duration: Duration(milliseconds: 400),
-                      ));
                       var temp = currentPins;
                       debugPrint('$temp');
                       temp['ids'].remove(id);
@@ -144,6 +176,8 @@ class _DishesState extends State<Dishes> {
                         debugPrint('setting state');
                         pins = temp;
                       });
+
+                      _showToast("Unstarred");
                       widget.notifyParent();
                     },
               child: Column(children: [
@@ -186,7 +220,7 @@ class _DishesState extends State<Dishes> {
                         if (image != 'none')
                           Container(
                               height: height / 6 + 8,
-                              width: width / 2 - 10,
+                              width: width / 2 - 15,
                               child: Card(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5.0)),

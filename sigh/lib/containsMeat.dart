@@ -134,7 +134,13 @@ class _ContainsMeatState extends State<ContainsMeat> {
         var body = {'report': report, "id": widget.item['_id']};
 
         final response =
-            await http.post(Uri.parse('http://localhost:4000/report'),
+            // await http.post(Uri.parse('http://localhost:4000/report'),
+            //     headers: {
+            //       'Accept': 'application/json',
+            //       'Content-Type': 'application/json',
+            //     },
+            //     body: jsonEncode(body));
+            await http.post(Uri.parse('http://10.0.2.2:4000/report'),
                 headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/json',

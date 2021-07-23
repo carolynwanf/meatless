@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'itemDialog.dart';
 import 'appColors.dart';
 import 'pinnedItems.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Header extends StatelessWidget {
   final maxHeight;
@@ -100,20 +101,20 @@ Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
       // for local android dev
-      // await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
-      //     headers: {
-      //       'Accept': 'application/json',
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: body);
-
-      // for local ios + browser dev
-      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
+      await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
+
+  // for local ios + browser dev
+  // await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -121,6 +122,50 @@ Future<List> getPageDishes(id) async {
 // stuff for restaurant page
 
 class _RestaurantPageState extends State<RestaurantPage> {
+  var starToast;
+
+  @override
+  void initState() {
+    super.initState();
+    starToast = FToast();
+    _dishes = getPageDishes(widget.info['id']);
+    starToast.init(context);
+  }
+
+  _showToast(text) {
+    var color = AppColors.accent;
+    if (text == 'Unstarred') {
+      color = Colors.black;
+    }
+
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: color,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (text == 'Starred') Icon(Icons.star, color: Colors.white),
+          if (text == "Unstarred") Icon(Icons.cancel, color: Colors.white),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text("$text",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+
+    starToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(milliseconds: 1500),
+    );
+  }
+
   refresh() {
     setState(() {
       pins = pins;
@@ -129,13 +174,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
   var pins;
   late Future<List> _dishes;
-
-  void initState() {
-    super.initState();
-    _dishes = getPageDishes(widget.info['id']);
-
-    // debugPrint('$_restaurants');
-  }
 
   Widget itemDesc(item, currentPins, width) {
     void showItemDesc() {
@@ -181,11 +219,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
               onTap: showItemDesc,
               onDoubleTap: !pinned
                   ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('starred!'),
-                            duration: Duration(milliseconds: 400)),
-                      );
                       var temp = currentPins;
 
                       temp['ids'].add(id);
@@ -195,12 +228,10 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       setState(() {
                         pins = temp;
                       });
+
+                      _showToast("Starred");
                     }
                   : () {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('removed from starred dishes'),
-                        duration: Duration(milliseconds: 400),
-                      ));
                       var temp = currentPins;
                       debugPrint('$temp');
                       temp['ids'].remove(id);
@@ -214,6 +245,8 @@ class _RestaurantPageState extends State<RestaurantPage> {
                         debugPrint('setting state');
                         pins = temp;
                       });
+
+                      _showToast("Unstarred");
                     },
               child: Column(children: [
                 Container(
