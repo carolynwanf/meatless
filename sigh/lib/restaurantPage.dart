@@ -101,20 +101,20 @@ Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
       // for local android dev
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-page-dishes'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // for local ios + browser dev
-  // await http.post(Uri.parse('http://localhost:4000/get-page-dishes'),
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -496,16 +496,16 @@ class _RestaurantPageState extends State<RestaurantPage> {
             padding: EdgeInsets.only(bottom: width < 500 ? 10 : 0),
             child: Container(
                 padding: EdgeInsets.all(width < 500 ? 10 : 20),
-                width: width,
                 color: Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(children: [
-                      Text(
+                      SizedBox(
+                          child: Text(
                         name,
                         style: AppStyles.bigTitle,
-                      ),
+                      )),
                       // Padding(
                       //     padding: EdgeInsets.only(left: 10),
                       //     child: OutlinedButton(
@@ -518,10 +518,12 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       //           color: Colors.red, fontWeight: FontWeight.w800),
                       //     )))
                     ]),
-                    Text(
-                      '$type • $friendliness% friendly',
-                      style: AppStyles.subtitleMobile,
-                    ),
+                    SizedBox(
+                      child: Text(
+                        '$type • $friendliness% friendly',
+                        style: AppStyles.subtitleMobile,
+                      ),
+                    )
                   ],
                 ))));
   }
@@ -533,7 +535,10 @@ class _RestaurantPageState extends State<RestaurantPage> {
     var maxHeight = 250 + MediaQuery.of(context).padding.top;
 
     var minHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
-    pins = widget.pins;
+
+    pins = widget.pins == null
+        ? {'ids': <String>{}, 'items': [], 'display': true}
+        : widget.pins;
     return Scaffold(
         appBar: mobile
             ? null
@@ -592,8 +597,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                       alignment: Alignment.center),
                                   if (pins['items'].length > 0)
                                     Container(
-                                        // decoration: BoxDecoration(
-                                        //     shape: BoxShape.circle, color: Colors.black),
                                         height: 30,
                                         width: 30,
                                         child: Text('${pins['items'].length}',
@@ -822,7 +825,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   drinks = webGrid(snapshot.data![3], pins, width);
                 }
               } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
+                return Text("Server down, try again later");
               }
 
               return Row(children: [

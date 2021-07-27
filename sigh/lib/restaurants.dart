@@ -23,6 +23,7 @@ class RestaurantCard extends StatefulWidget {
 }
 
 class _RestaurantCardState extends State<RestaurantCard> {
+  var displayImage = true;
   Widget build(BuildContext context) {
     var restaurant = widget.restaurant;
 
@@ -30,14 +31,30 @@ class _RestaurantCardState extends State<RestaurantCard> {
         type = restaurant['type'],
         friendliness = restaurant['friendliness'],
         id = restaurant['_id'],
-        mains = restaurant['totalVegItems'];
-    // var height = MediaQuery.of(context).size.height;
+        mains = restaurant['totalVegItems'],
+        image = restaurant['image'],
+        sides = restaurant['sides'],
+        desserts = restaurant['desserts'];
+    var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var info = {
       'name': name,
       'id': id,
     };
     var unfriendliness = 100 - friendliness;
+
+    if (image == null) {
+      displayImage = false;
+    }
+
+    var dishInfo = "$mains mains";
+
+    if (sides > 0) {
+      dishInfo = dishInfo + " • $sides sides";
+    }
+    if (desserts > 0) {
+      dishInfo = dishInfo + " • $desserts desserts";
+    }
 
     if (type.length > 30) {
       type = type.substring(0, 30);
@@ -51,11 +68,11 @@ class _RestaurantCardState extends State<RestaurantCard> {
       return PieChart(
         dataMap: dataMap,
         chartLegendSpacing: 32,
-        chartRadius: 50,
+        chartRadius: 60,
         colorList: [AppColors.primary, Color(0xFFEC873B)],
         initialAngleInDegree: 270,
         chartType: ChartType.ring,
-        ringStrokeWidth: 25,
+        ringStrokeWidth: 30,
         legendOptions: LegendOptions(
           showLegends: false,
         ),
@@ -69,13 +86,10 @@ class _RestaurantCardState extends State<RestaurantCard> {
       // restaurant tile
       return InkWell(
           onTap: () {
-            Navigator.push(
+            debugPrint('/restaurant/${info['name']}/${info['id']}');
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                  builder: (_) => RestaurantPage(
-                        info: info,
-                        pins: widget.pins,
-                      )),
+              '/restaurant/${info['name']}/${info['id']}',
             ).then((val) => {setState(() {}), widget.notifyMain()});
           },
           // restaurant information
@@ -83,7 +97,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
             children: [
               Container(
                   // height: height / 6,
-                  padding: EdgeInsets.only(bottom: 10, top: 10),
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -109,7 +123,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   width: width * (7 / 12),
                                   child: Text(
-                                    '$mains mains',
+                                    '$dishInfo',
                                     textAlign: TextAlign.left,
                                     style: AppStyles.detailMobile,
                                   )),
@@ -125,11 +139,31 @@ class _RestaurantCardState extends State<RestaurantCard> {
                               // kinds of items
                             ])),
                         // friendliness chart
+
                         Expanded(
-                            flex: 1,
-                            child: Padding(
-                                padding: EdgeInsets.only(right: 20),
-                                child: friendlinessChart()))
+                            flex: 2,
+                            child: displayImage
+                                ? ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        Image.network(
+                                          image,
+                                          alignment: Alignment.topCenter,
+                                          fit: BoxFit.cover,
+                                          width: height / 4,
+                                          height: height / 6,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    height: height / 6,
+                                    padding: EdgeInsets.only(right: 20),
+                                    child: Center(child: friendlinessChart())))
                       ])),
               Container(
                   width: width - 10, height: 1, color: AppColors.lightGrey)
@@ -140,13 +174,14 @@ class _RestaurantCardState extends State<RestaurantCard> {
           child: InkWell(
               hoverColor: AppColors.noHover,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => RestaurantPage(
-                            info: info,
-                            pins: widget.pins,
-                          )),
+                Navigator.pushNamed(
+                  context, '/restaurant/${info['name']}/${info['id']}',
+
+                  // MaterialPageRoute(
+                  //     builder: (_) => RestaurantPage(
+                  //           info: info,
+                  //           pins: widget.pins,
+                  //         )),
                 ).then((val) => {setState(() {}), widget.notifyMain()});
               },
               child: Container(
@@ -213,20 +248,20 @@ Future<List> getRestaurants(offset, zipCode, sort, search, query) async {
   final response =
 
       // for local android dev
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-restaurants'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // for local ios + browser dev
-  // await http.post(Uri.parse('http://localhost:4000/get-restaurants'),
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: body);
 
   return jsonDecode(response.body)['restaurants'];
 }
@@ -498,7 +533,7 @@ class _RestaurantsState extends State<Restaurants> {
                 }
               }
             } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
+              return Text("Server down, try again later");
             }
 
             // By default, show a loading spinner.

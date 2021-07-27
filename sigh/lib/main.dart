@@ -1,6 +1,7 @@
 // import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
+import 'package:sigh/restaurantPage.dart';
 
 import 'dishes.dart';
 import 'restaurants.dart';
@@ -18,6 +19,21 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
+      onGenerateRoute: (settings) {
+        // Handle '/details/:id'
+        var name = settings.name.toString();
+        var uri = Uri.parse(name);
+        debugPrint('${uri.pathSegments}');
+        if (uri.pathSegments.length == 3 &&
+            uri.pathSegments.first == 'restaurant') {
+          var name = uri.pathSegments[1];
+          var id = uri.pathSegments[2];
+          debugPrint('${uri.pathSegments}');
+          return MaterialPageRoute(
+              builder: (context) =>
+                  RestaurantPage(info: {"name": name, 'id': id}));
+        }
+      },
       title: 'Test App',
       theme: ThemeData(
           primaryColor: Colors.white,

@@ -237,23 +237,21 @@ class _ReviewFormState extends State<ReviewForm> {
 
                   debugPrint('$body');
 
-                  final response =
+                  final response = await http.post(
+                      Uri.parse('http://localhost:4000/review-or-rating'),
+                      headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                      },
+                      body: jsonEncode(body));
 
-                      // await http.post(
-                      //     Uri.parse('http://localhost:4000/review-or-rating'),
-                      //     headers: {
-                      //       'Accept': 'application/json',
-                      //       'Content-Type': 'application/json',
-                      //     },
-                      //     body: jsonEncode(body));
-
-                      await http.post(
-                          Uri.parse('http://10.0.2.2:4000/review-or-rating'),
-                          headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                          },
-                          body: jsonEncode(body));
+                  // await http.post(
+                  //     Uri.parse('http://10.0.2.2:4000/review-or-rating'),
+                  //     headers: {
+                  //       'Accept': 'application/json',
+                  //       'Content-Type': 'application/json',
+                  //     },
+                  //     body: jsonEncode(body));
 
                   if (response.statusCode == 200) {
                     reviewController.clear();

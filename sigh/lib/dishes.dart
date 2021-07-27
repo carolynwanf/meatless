@@ -27,20 +27,20 @@ Future<List> getDishes(offset, zipCode, search, query) async {
   final response =
 
       // for local android dev
-      await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
+      // await http.post(Uri.parse('http://10.0.2.2:4000/get-dishes'),
+      //     headers: {
+      //       'Accept': 'application/json',
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: body);
+
+      // for local ios + browser dev
+      await http.post(Uri.parse('http://localhost:4000/get-dishes'),
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
           body: body);
-
-  // for local ios + browser dev
-  // await http.post(Uri.parse('http://localhost:4000/get-dishes'),
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: body);
 
   return jsonDecode(response.body)['dishes'];
 }
@@ -140,6 +140,77 @@ class _DishesState extends State<Dishes> {
           }).then((val) => {setState(() {}), widget.notifyParent()});
     }
 
+    void addPin() {
+      var temp = currentPins;
+
+      temp['ids'].add(id);
+      temp['items'].add(item);
+      debugPrint('$temp');
+
+      setState(() {
+        pins = temp;
+      });
+      if (width < 500) {
+        _showToast("Starred");
+      }
+
+      widget.notifyParent();
+    }
+
+    void removePin() {
+      var temp = currentPins;
+      debugPrint('$temp');
+      temp['ids'].remove(id);
+      for (var i = 0; i < temp['items'].length; i++) {
+        if (temp['items'][i]['_id'] == id) {
+          temp['items'].removeAt(i);
+          break;
+        }
+      }
+      setState(() {
+        debugPrint('setting state');
+        pins = temp;
+      });
+
+      if (width < 500) {
+        _showToast("Unstarred");
+      }
+      widget.notifyParent();
+    }
+
+    Widget star() {
+      return InkWell(
+          onTap: !pinned
+              ? () {
+                  addPin();
+                }
+              : () {
+                  removePin();
+                },
+          hoverColor: AppColors.noHover,
+          child: Container(
+              height: 30,
+              width: 30,
+              child: Stack(
+                children: [
+                  Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.white),
+                      alignment: Alignment.center),
+                  Container(
+                      height: 30,
+                      width: 30,
+                      child: pinned
+                          ? Icon(Icons.star, color: AppColors.star)
+                          : Icon(Icons.star_border, color: AppColors.medGrey),
+                      alignment: Alignment.center),
+                ],
+              )));
+    }
+
     if (width < 500) {
       // mobile dish card
       return Padding(
@@ -149,36 +220,10 @@ class _DishesState extends State<Dishes> {
               onTap: showItemDesc,
               onDoubleTap: !pinned
                   ? () {
-                      var temp = currentPins;
-
-                      temp['ids'].add(id);
-                      temp['items'].add(item);
-                      debugPrint('$temp');
-
-                      setState(() {
-                        pins = temp;
-                      });
-                      _showToast("Starred");
-
-                      widget.notifyParent();
+                      addPin();
                     }
                   : () {
-                      var temp = currentPins;
-                      debugPrint('$temp');
-                      temp['ids'].remove(id);
-                      for (var i = 0; i < temp['items'].length; i++) {
-                        if (temp['items'][i]['_id'] == id) {
-                          temp['items'].removeAt(i);
-                          break;
-                        }
-                      }
-                      setState(() {
-                        debugPrint('setting state');
-                        pins = temp;
-                      });
-
-                      _showToast("Unstarred");
-                      widget.notifyParent();
+                      removePin();
                     },
               child: Column(children: [
                 Container(
@@ -193,12 +238,13 @@ class _DishesState extends State<Dishes> {
                             child: Column(children: [
                               // dish name
                               Container(
-                                  width: width / 2 - 10,
-                                  child: Text(
-                                    name,
-                                    style: AppStyles.headerMobile,
-                                    textAlign: TextAlign.left,
-                                  )),
+                                width: width / 2 - 10,
+                                child: Text(
+                                  name,
+                                  style: AppStyles.headerMobile,
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
                               // dish description if it exists
                               if (description != 'none')
                                 Container(
@@ -219,24 +265,30 @@ class _DishesState extends State<Dishes> {
                         // image if it exists
                         if (image != 'none')
                           Container(
-                              height: height / 6 + 8,
+                              height: height / 6,
                               width: width / 2 - 15,
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5.0)),
-                                clipBehavior: Clip.antiAlias,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    Image.network(
-                                      image,
-                                      alignment: Alignment.topCenter,
-                                      fit: BoxFit.cover,
-                                      width: height / 4,
-                                      height: height / 6,
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5)),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        Image.network(
+                                          image,
+                                          alignment: Alignment.topCenter,
+                                          fit: BoxFit.cover,
+                                          width: height / 4,
+                                          height: height / 6,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Positioned(
+                                      bottom: 10, right: 5, child: star()),
+                                ],
                               )),
                         // placeholder image if image does not exist
                         if (image == 'none')
@@ -247,9 +299,16 @@ class _DishesState extends State<Dishes> {
                                       BorderRadius.all(Radius.circular(5))),
                               height: height / 6 - 5,
                               width: height / 4 - 10,
-                              child: Center(
-                                  child: Text('no image',
-                                      style: TextStyle(color: Colors.white))))
+                              child: Stack(
+                                children: [
+                                  Center(
+                                      child: Text('no image',
+                                          style:
+                                              TextStyle(color: Colors.white))),
+                                  Positioned(
+                                      bottom: 10, right: 5, child: star())
+                                ],
+                              ))
                       ],
                     )),
                 // divider
@@ -332,35 +391,10 @@ class _DishesState extends State<Dishes> {
                     child: InkWell(
                         onTap: !pinned
                             ? () {
-                                debugPrint('pressed');
-                                var temp = currentPins;
-
-                                temp['ids'].add(id);
-                                temp['items'].add(item);
-                                debugPrint('$temp');
-
-                                setState(() {
-                                  pins = temp;
-                                });
-
-                                widget.notifyParent();
+                                addPin();
                               }
                             : () {
-                                debugPrint('pressed');
-                                var temp = currentPins;
-                                debugPrint('$temp');
-                                temp['ids'].remove(id);
-                                for (var i = 0; i < temp['items'].length; i++) {
-                                  if (temp['items'][i]['_id'] == id) {
-                                    temp['items'].removeAt(i);
-                                    break;
-                                  }
-                                }
-                                setState(() {
-                                  debugPrint('setting state');
-                                  pins = temp;
-                                });
-                                widget.notifyParent();
+                                removePin();
                               },
                         hoverColor: AppColors.noHover,
                         child: Container(
@@ -596,7 +630,7 @@ class _DishesState extends State<Dishes> {
                     }
                   }
                 } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
+                  return Text("Server down, try again later");
                 }
 
                 // By default, show a loading spinner.
