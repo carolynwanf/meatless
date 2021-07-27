@@ -111,7 +111,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                               Text(
                                 '$price',
                                 textAlign: TextAlign.left,
-                                style: TextStyle(color: AppColors.accent),
+                                style: AppStyles.detail,
                               )
                             ]))),
                 // image if it exists

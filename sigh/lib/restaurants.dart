@@ -179,29 +179,46 @@ class _RestaurantCardState extends State<RestaurantCard> {
                     .then((val) => {setState(() {}), widget.notifyMain()});
               },
               child: Container(
-                  height: 250,
+                  height: 260,
                   width: 200,
                   padding: EdgeInsets.all(10),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                          padding: EdgeInsets.fromLTRB(10, 10, 10, width / 70),
-                          child: friendlinessChart()),
-                      Text(
-                        name,
-                        style: AppStyles.header,
-                        textAlign: TextAlign.center,
-                      ),
+                          padding: EdgeInsets.fromLTRB(5, 5, 5, 10),
+                          width: 190,
+                          height: 110,
+                          child: displayImage
+                              ? ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5)),
+                                  child: Image.network(image,
+                                      fit: BoxFit.cover,
+                                      width: 180,
+                                      height: 60))
+                              : friendlinessChart()),
+                      Padding(
+                          padding: EdgeInsets.only(bottom: 5),
+                          child: Text(
+                            name,
+                            style: AppStyles.header,
+                            textAlign: TextAlign.center,
+                          )),
                       if (name != type)
-                        Text(type,
-                            style: AppStyles.subtitle,
-                            textAlign: TextAlign.center),
+                        Padding(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(type,
+                                style: AppStyles.subtitle,
+                                textAlign: TextAlign.center)),
                       Container(
                           padding: EdgeInsets.only(bottom: 5),
-                          child: Text('$mains mains',
-                              textAlign: TextAlign.left,
-                              style: AppStyles.detail)),
+                          child: Text(
+                            '$dishInfo',
+                            textAlign: TextAlign.center,
+                            style: AppStyles.detail,
+                          )),
                       Container(
                           child: Text('$friendliness',
                               textAlign: TextAlign.left,
@@ -492,7 +509,7 @@ class _RestaurantsState extends State<Restaurants> {
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 10),
                       child: GridView.builder(
                         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          mainAxisExtent: 250,
+                          mainAxisExtent: 260,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                           maxCrossAxisExtent: 220,
