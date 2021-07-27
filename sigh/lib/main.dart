@@ -20,18 +20,20 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       onGenerateRoute: (settings) {
-        // Handle '/details/:id'
+        // Handle '/restaurant/:id'
         var name = settings.name.toString();
         var uri = Uri.parse(name);
-        debugPrint('${uri.pathSegments}');
-        if (uri.pathSegments.length == 3 &&
+        debugPrint(
+            '${uri.pathSegments}, ${uri.pathSegments.length}, ${uri.pathSegments.first}');
+        if (uri.pathSegments.length == 2 &&
             uri.pathSegments.first == 'restaurant') {
-          var name = uri.pathSegments[1];
-          var id = uri.pathSegments[2];
-          debugPrint('${uri.pathSegments}');
+          var args = settings.arguments as Map;
+
+          var info = args['info'];
+          var pins = args['pins'];
+          debugPrint('args, $args');
           return MaterialPageRoute(
-              builder: (context) =>
-                  RestaurantPage(info: {"name": name, 'id': id}));
+              builder: (context) => RestaurantPage(info: info, pins: pins));
         }
       },
       title: 'Test App',

@@ -174,15 +174,9 @@ class _RestaurantCardState extends State<RestaurantCard> {
           child: InkWell(
               hoverColor: AppColors.noHover,
               onTap: () {
-                Navigator.pushNamed(
-                  context, '/restaurant/${info['name']}/${info['id']}',
-
-                  // MaterialPageRoute(
-                  //     builder: (_) => RestaurantPage(
-                  //           info: info,
-                  //           pins: widget.pins,
-                  //         )),
-                ).then((val) => {setState(() {}), widget.notifyMain()});
+                Navigator.pushNamed(context, '/restaurant/${info['id']}',
+                        arguments: {'info': info, 'pins': widget.pins})
+                    .then((val) => {setState(() {}), widget.notifyMain()});
               },
               child: Container(
                   height: 250,
