@@ -7,6 +7,7 @@ import 'appColors.dart';
 import 'pinnedItems.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+// collapsing header for mobile
 class Header extends StatelessWidget {
   final maxHeight;
   final minHeight;
@@ -97,6 +98,7 @@ class RestaurantPage extends StatefulWidget {
   _RestaurantPageState createState() => _RestaurantPageState();
 }
 
+// gets restaurant's dishes
 Future<List> getPageDishes(id) async {
   final String body = jsonEncode({"id": id});
   final response =
@@ -532,17 +534,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                         name,
                         style: AppStyles.bigTitle,
                       )),
-                      // Padding(
-                      //     padding: EdgeInsets.only(left: 10),
-                      //     child: OutlinedButton(
-                      //       onPressed: () {
-                      //         launch
-                      //       };
-                      //         child: Text(
-                      //       'D',
-                      //       style: TextStyle(
-                      //           color: Colors.red, fontWeight: FontWeight.w800),
-                      //     )))
                     ]),
                     SizedBox(
                       child: Text(
@@ -811,14 +802,14 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     elevation: 3,
                     stretch: true,
                     pinned: true,
-                    title: imageExists ? null : Text(widget.info['name']),
+                    title: imageExists ? null : Text(restaurant['name']),
                     expandedHeight: imageExists ? 250 : null,
                     flexibleSpace: imageExists
                         ? Header(
                             maxHeight: maxHeight,
                             minHeight: minHeight,
                             image: snapshot.data![4]['image'],
-                            name: widget.info['name'],
+                            name: restaurant['name'],
                           )
                         : null,
 

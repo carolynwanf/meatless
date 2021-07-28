@@ -33,7 +33,8 @@ class _MyAppState extends State<MyApp> {
           var pins = args['pins'];
           debugPrint('args, $args');
           return MaterialPageRoute(
-              builder: (context) => RestaurantPage(info: info, pins: pins));
+              builder: (context) => RestaurantPage(info: info, pins: pins),
+              settings: settings);
         }
       },
       title: 'Test App',

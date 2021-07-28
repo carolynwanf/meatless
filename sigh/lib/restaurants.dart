@@ -82,15 +82,23 @@ class _RestaurantCardState extends State<RestaurantCard> {
       );
     }
 
+    navigateToRestaurantPage(name) {
+      var words = name.split(' ');
+      var noSpaces = words[0];
+      for (var i = 1; i < words.length; i++) {
+        noSpaces = '$noSpaces-${words[i]}';
+      }
+
+      Navigator.pushNamed(context, '/restaurant/$noSpaces',
+              arguments: {'info': info, 'pins': widget.pins})
+          .then((val) => {setState(() {}), widget.notifyMain()});
+    }
+
     if (width < 500) {
       // restaurant tile
       return InkWell(
           onTap: () {
-            debugPrint('/restaurant/${info['name']}/${info['id']}');
-            Navigator.pushNamed(
-              context,
-              '/restaurant/${info['name']}/${info['id']}',
-            ).then((val) => {setState(() {}), widget.notifyMain()});
+            navigateToRestaurantPage(info['name']);
           },
           // restaurant information
           child: Column(
@@ -174,9 +182,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
           child: InkWell(
               hoverColor: AppColors.noHover,
               onTap: () {
-                Navigator.pushNamed(context, '/restaurant/${info['id']}',
-                        arguments: {'info': info, 'pins': widget.pins})
-                    .then((val) => {setState(() {}), widget.notifyMain()});
+                navigateToRestaurantPage(info['name']);
               },
               child: Container(
                   height: 260,
