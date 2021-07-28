@@ -301,6 +301,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                       fit: BoxFit.cover,
                                       width: height / 4,
                                       height: height / 6,
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return Container(
+                                            height: height / 6,
+                                            width: height / 4,
+                                            color: AppColors.lightGrey,
+                                            child: Center(
+                                                child: Text(
+                                              "can't load image",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            )));
+                                      },
                                     ),
                                   ],
                                 ),
@@ -356,6 +370,18 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               fit: BoxFit.cover,
                               width: double.maxFinite,
                               height: height / 6,
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return Container(
+                                    height: height / 6,
+                                    width: double.maxFinite,
+                                    color: AppColors.lightGrey,
+                                    child: Center(
+                                        child: Text(
+                                      "can't load image",
+                                      style: TextStyle(color: Colors.white),
+                                    )));
+                              },
                             ),
                           ],
                         ),
@@ -676,6 +702,20 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                     child: Image.network(
                                       restaurant['image'],
                                       fit: BoxFit.cover,
+                                      height: 300,
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return Container(
+                                            height: 300,
+                                            color: AppColors.lightGrey,
+                                            child: Center(
+                                                child: Text(
+                                              "can't load image",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            )));
+                                      },
                                     )))));
                   }
                 }
