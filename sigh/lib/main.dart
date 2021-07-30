@@ -37,7 +37,7 @@ class _MyAppState extends State<MyApp> {
               settings: settings);
         }
       },
-      title: 'Test App',
+      title: 'Meatless',
       theme: ThemeData(
           primaryColor: Colors.white,
           accentColor: AppColors.accent,
