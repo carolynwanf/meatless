@@ -118,6 +118,10 @@ class _DishesState extends State<Dishes> {
       description = description.substring(0, 55);
       description = description + "...";
     }
+    if (name.length > 50) {
+      name = name.substring(0, 50);
+      name = name + "...";
+    }
 
     if (image != 'none') {
       image = image.split(" 1920w,");
@@ -386,8 +390,8 @@ class _DishesState extends State<Dishes> {
                   ),
                 ]),
                 Positioned(
-                    bottom: 10,
-                    left: 5,
+                    top: 10,
+                    right: 10,
                     child: InkWell(
                         onTap: !pinned
                             ? () {

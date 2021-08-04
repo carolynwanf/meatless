@@ -193,6 +193,11 @@ class _RestaurantPageState extends State<RestaurantPage> {
         id = item['_id'],
         price = item['price'];
 
+    if (name.length > 50) {
+      name = name.substring(0, 50);
+      name = name + "...";
+    }
+
     final height = MediaQuery.of(context).size.height,
         width = MediaQuery.of(context).size.width;
 
