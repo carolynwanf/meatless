@@ -23,7 +23,7 @@ class _ItemDialogState extends State<ItemDialog> {
     var width = MediaQuery.of(context).size.width;
     var dialogWidth = (width < 619 ? width : 619).toDouble();
     var height = MediaQuery.of(context).size.height;
-    var dialogHeight = (height < 800 ? height : 800).toDouble();
+    var dialogHeight = (height < 1000 ? height : 800).toDouble();
     var item = widget.item,
         id = item['_id'],
         image = item['images'],
@@ -61,6 +61,19 @@ class _ItemDialogState extends State<ItemDialog> {
       image = image[1];
     }
     var pinned = pins['ids'].contains(id);
+
+    navigateToRestaurantPage(name) {
+      var words = name.split(' ');
+      var noSpaces = words[0];
+      for (var i = 1; i < words.length; i++) {
+        noSpaces = '$noSpaces-${words[i]}';
+      }
+
+      Navigator.pushNamed(context, '/restaurant/$noSpaces',
+              arguments: {'info': info, 'pins': pins})
+          .then((val) => {setState(() {})});
+    }
+
     return Dialog(
         insetPadding: dialogWidth < 619
             ? EdgeInsets.all(0)
@@ -172,14 +185,8 @@ class _ItemDialogState extends State<ItemDialog> {
                                                 ? AppStyles.detail
                                                 : AppStyles.detailMobile),
                                         onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) => RestaurantPage(
-                                                      info: info,
-                                                      pins: pins,
-                                                    )),
-                                          ).then((val) => {setState(() {})});
+                                          navigateToRestaurantPage(
+                                              info['name']);
                                         }))
                               ],
                             ))),

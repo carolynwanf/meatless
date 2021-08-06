@@ -185,6 +185,18 @@ class _PinnedItemsState extends State<PinnedItems> {
         ])));
   }
 
+  navigateToRestaurantPage(name, info) {
+    var words = name.split(' ');
+    var noSpaces = words[0];
+    for (var i = 1; i < words.length; i++) {
+      noSpaces = '$noSpaces-${words[i]}';
+    }
+
+    Navigator.pushNamed(context, '/restaurant/$noSpaces',
+            arguments: {'info': info, 'pins': pins})
+        .then((val) => {setState(() {}), widget.notifyMain()});
+  }
+
   Widget build(BuildContext context) {
     pins = widget.pins;
     var width = MediaQuery.of(context).size.width > 500
@@ -248,17 +260,8 @@ class _PinnedItemsState extends State<PinnedItems> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18)),
                                       onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => RestaurantPage(
-                                                    info: itemList[0],
-                                                    pins: pins,
-                                                  )),
-                                        ).then((val) => {
-                                              setState(() {}),
-                                              widget.notifyMain()
-                                            });
+                                        navigateToRestaurantPage(
+                                            itemList[0]['name'], itemList[0]);
                                       })),
                               Container(
                                   width: MediaQuery.of(context).size.width -

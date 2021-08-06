@@ -32,6 +32,7 @@ dependencies:
   http: ^0.13.3
   pie_chart: ^5.0.0
   fluttertoast: ^8.0.7
+  localstore: ^1.2.0
 
 dev_dependencies:
   flutter_test:

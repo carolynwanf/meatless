@@ -302,7 +302,7 @@ class _DishesState extends State<Dishes> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(5))),
                               height: height / 6 - 5,
-                              width: height / 4 - 10,
+                              width: width / 2 - 15,
                               child: Stack(
                                 children: [
                                   Center(

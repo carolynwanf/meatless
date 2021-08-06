@@ -334,7 +334,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(5))),
                               height: height / 6 - 5,
-                              width: height / 4 - 10,
+                              width: width / 2 - 15,
                               child: Center(
                                   child: Text('no image',
                                       style: TextStyle(color: Colors.white))))
