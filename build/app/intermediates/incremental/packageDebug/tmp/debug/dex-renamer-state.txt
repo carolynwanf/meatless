@@ -1,0 +1,4 @@
+#Thu Jul 22 20:50:58 EDT 2021
+base.0=/Users/bubird/Documents/GitHub/flutter-test/sigh/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
