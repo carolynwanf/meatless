@@ -6,18 +6,15 @@ import 'package:http/http.dart' as http;
 import 'itemDialog.dart';
 import 'appColors.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Dishes extends StatefulWidget {
-  final pins;
-  final zipCode;
-
-  final notifyParent;
-
   Dishes({
-    this.pins,
     this.zipCode,
     this.notifyParent,
   });
+
+  final zipCode, notifyParent;
   _DishesState createState() => _DishesState();
 }
 
@@ -48,11 +45,37 @@ Future<List> getDishes(offset, zipCode, search, query) async {
 class _DishesState extends State<Dishes> {
   var starToast;
 
+  var pins;
+
+  Future getPins() async {
+    var pins;
+    await SharedPreferences.getInstance().then((prefs) {
+      pins =
+          prefs.getString('pins') ?? jsonEncode({'items': [], 'display': true});
+    });
+    pins = jsonDecode(pins);
+    return pins;
+  }
+
+  Future<void> savePins(pins) async {
+    final temp = jsonEncode(pins);
+    await SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('pins', temp);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     starToast = FToast();
     starToast.init(context);
+
+    getPins().then((value) => {
+          debugPrint('$value, value'),
+          setState(() {
+            pins = value;
+          })
+        });
   }
 
   _showToast(text) {
@@ -89,7 +112,7 @@ class _DishesState extends State<Dishes> {
     );
   }
 
-  var search = false, query = '', zipCode, pins;
+  var search = false, query = '', zipCode;
   final ScrollController _scrollController = ScrollController();
   var page = 1;
 
@@ -147,12 +170,12 @@ class _DishesState extends State<Dishes> {
     void addPin() {
       var temp = currentPins;
 
-      temp['ids'].add(id);
       temp['items'].add(item);
       debugPrint('$temp');
 
       setState(() {
         pins = temp;
+        savePins(temp);
       });
       if (width < 500) {
         _showToast("Starred");
@@ -164,7 +187,7 @@ class _DishesState extends State<Dishes> {
     void removePin() {
       var temp = currentPins;
       debugPrint('$temp');
-      temp['ids'].remove(id);
+
       for (var i = 0; i < temp['items'].length; i++) {
         if (temp['items'][i]['_id'] == id) {
           temp['items'].removeAt(i);
@@ -174,6 +197,7 @@ class _DishesState extends State<Dishes> {
       setState(() {
         debugPrint('setting state');
         pins = temp;
+        savePins(temp);
       });
 
       if (width < 500) {
@@ -430,7 +454,7 @@ class _DishesState extends State<Dishes> {
   }
 
   Widget build(BuildContext context) {
-    var pins = widget.pins, zipCode = widget.zipCode;
+    var zipCode = widget.zipCode;
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     var mobile = width > 500 ? false : true;
@@ -596,8 +620,12 @@ class _DishesState extends State<Dishes> {
                     // labels items from snapshot as pinned/not based on state
                     for (var i = 0; i < snapshot.data!.length; i++) {
                       var itemId = snapshot.data![i]["_id"];
+                      var pinnedIds = <String>{};
 
-                      if (pins['ids'].contains(itemId)) {
+                      for (var j = 0; j < pins['items'].length; j++) {
+                        pinnedIds.add(pins['items'][j]['_id']);
+                      }
+                      if (pinnedIds.contains(itemId)) {
                         snapshot.data![i]['pinned'] = true;
                       } else {
                         snapshot.data![i]['pinned'] = false;

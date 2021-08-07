@@ -1,5 +1,8 @@
 // import 'package:flutter/foundation.dart';
 
+import 'dart:convert';
+// import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:sigh/restaurantPage.dart';
 
@@ -8,8 +11,12 @@ import 'restaurants.dart';
 // import 'restaurantPage.dart';
 import 'pinnedItems.dart';
 import 'appColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -57,18 +64,45 @@ class _MyAppState extends State<MyApp> {
 // }
 
 class HomePage extends StatefulWidget {
-  HomePage();
+  const HomePage();
 
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  var pins = {'ids': <String>{}, 'items': [], 'display': true};
+  var pins;
+
+  getPins() async {
+    var pins;
+    await SharedPreferences.getInstance().then((prefs) {
+      pins =
+          prefs.getString('pins') ?? jsonEncode({'items': [], 'display': true});
+    });
+    pins = jsonDecode(pins);
+    return pins;
+  }
+
+  void initState() {
+    super.initState();
+    getPins().then((value) => {
+          debugPrint('$value, value'),
+          setState(() {
+            pins = value;
+          })
+        });
+  }
+
   var zipCode = '';
   final _formKey = GlobalKey<FormState>();
   final zipCodeController = TextEditingController();
 
   Widget build(BuildContext context) {
+    if (pins == null) {
+      setState(() {
+        pins = {'items': [], 'display': true};
+      });
+    }
+    debugPrint('$pins, build');
     var height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Center(
@@ -145,8 +179,8 @@ class _HomePageState extends State<HomePage> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (_) => Mainpage(
-                                                  zipCode: zipCode,
-                                                  pins: pins)),
+                                                    zipCode: zipCode,
+                                                  )),
                                         );
                                       }
                                     }),
@@ -169,8 +203,9 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        Mainpage(zipCode: zipCode, pins: pins)),
+                                    builder: (_) => Mainpage(
+                                          zipCode: zipCode,
+                                        )),
                               );
                             }
                           },
@@ -182,10 +217,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class Mainpage extends StatefulWidget {
+  Mainpage({this.zipCode});
   var zipCode;
-  final pins;
 
-  Mainpage({this.zipCode, this.pins});
   _MainpageState createState() => _MainpageState();
 }
 
@@ -198,11 +232,43 @@ class _MainpageState extends State<Mainpage> {
     setState(() {});
   }
 
+  Future getPins() async {
+    var pins;
+    await SharedPreferences.getInstance().then((prefs) {
+      pins =
+          prefs.getString('pins') ?? jsonEncode({'items': [], 'display': true});
+    });
+    pins = jsonDecode(pins);
+    return pins;
+  }
+
+  Future<void> savePins(pins) async {
+    final temp = jsonEncode(pins);
+    await SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('pins', temp);
+    });
+  }
+
+  void initState() {
+    super.initState();
+    getPins().then((value) => {
+          debugPrint('$value, value'),
+          setState(() {
+            pins = value;
+          })
+        });
+  }
+
   final _formKey = GlobalKey<FormState>();
 
   Widget build(BuildContext context) {
+    if (pins == null) {
+      setState(() {
+        pins = {'items': [], 'display': true};
+      });
+    }
     zipCode = widget.zipCode;
-    pins = widget.pins;
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -325,6 +391,7 @@ class _MainpageState extends State<Mainpage> {
                       var toSet = !pins['display'];
                       setState(() {
                         pins['display'] = toSet;
+                        savePins(pins);
                       });
                       if (width < 1000) {
                         Navigator.push(
@@ -441,7 +508,6 @@ class _MainpageState extends State<Mainpage> {
                               notifyParent: refresh,
                             )
                           : Dishes(
-                              pins: pins,
                               zipCode: zipCode,
                               notifyParent: refresh,
                             ),

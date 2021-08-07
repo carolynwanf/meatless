@@ -6,6 +6,7 @@ import 'itemDialog.dart';
 import 'appColors.dart';
 import 'pinnedItems.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // collapsing header for mobile
 class Header extends StatelessWidget {
@@ -175,6 +176,14 @@ class _RestaurantPageState extends State<RestaurantPage> {
   }
 
   var pins;
+
+  Future<void> savePins(pins) async {
+    final temp = jsonEncode(pins);
+    await SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('pins', temp);
+    });
+  }
+
   late Future<List> _dishes;
 
   Widget itemDesc(item, currentPins, width) {
@@ -228,12 +237,12 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   ? () {
                       var temp = currentPins;
 
-                      temp['ids'].add(id);
                       temp['items'].add(item);
                       debugPrint('$temp');
 
                       setState(() {
                         pins = temp;
+                        savePins(temp);
                       });
 
                       _showToast("Starred");
@@ -241,7 +250,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   : () {
                       var temp = currentPins;
                       debugPrint('$temp');
-                      temp['ids'].remove(id);
+
                       for (var i = 0; i < temp['items'].length; i++) {
                         if (temp['items'][i]['_id'] == id) {
                           temp['items'].removeAt(i);
@@ -251,6 +260,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       setState(() {
                         debugPrint('setting state');
                         pins = temp;
+                        savePins(temp);
                       });
 
                       _showToast("Unstarred");
@@ -436,19 +446,19 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 debugPrint('pressed');
                                 var temp = currentPins;
 
-                                temp['ids'].add(id);
                                 temp['items'].add(item);
                                 debugPrint('$temp');
 
                                 setState(() {
                                   pins = temp;
+                                  savePins(temp);
                                 });
                               }
                             : () {
                                 debugPrint('pressed');
                                 var temp = currentPins;
                                 debugPrint('$temp');
-                                temp['ids'].remove(id);
+
                                 for (var i = 0; i < temp['items'].length; i++) {
                                   if (temp['items'][i]['_id'] == id) {
                                     temp['items'].removeAt(i);
@@ -458,6 +468,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 setState(() {
                                   debugPrint('setting state');
                                   pins = temp;
+                                  savePins(temp);
                                 });
                               },
                         hoverColor: AppColors.noHover,
@@ -572,7 +583,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       height: 1.0,
                     ),
                     preferredSize: Size.fromHeight(1.0)),
-                iconTheme: IconThemeData(color: AppColors.medGrey),
+                // iconTheme: IconThemeData(color: AppColors.medGrey),
                 actions: [
                   Padding(
                       padding: EdgeInsets.only(right: 10, top: 12),
@@ -582,13 +593,13 @@ class _RestaurantPageState extends State<RestaurantPage> {
                             var toSet = !pins['display'];
                             setState(() {
                               pins['display'] = toSet;
+                              savePins(pins);
                             });
                             if (width < 1000) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (_) => PinnedItems(
-                                          pins: pins,
                                           notifyMain: refresh,
                                         )),
                               ).then((val) => setState(() {}));
@@ -670,12 +681,17 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
               if (snapshot.hasData) {
                 var restaurant = snapshot.data![4];
+                var pinnedIds = <String>{};
+
+                for (var j = 0; j < pins['items'].length; j++) {
+                  pinnedIds.add(pins['items'][j]['_id']);
+                }
                 // assigning dishes pinned status based on pinned state
                 for (var i = 0; i < snapshot.data!.length - 1; i++) {
                   for (var j = 0; j < snapshot.data![i].length; j++) {
                     var itemId = snapshot.data![i][j]["_id"];
 
-                    if (pins['ids'].contains(itemId)) {
+                    if (pinnedIds.contains(itemId)) {
                       snapshot.data![i][j]['pinned'] = true;
                     } else {
                       snapshot.data![i][j]['pinned'] = false;
@@ -751,6 +767,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 var toSet = !pins['display'];
                                 setState(() {
                                   pins['display'] = toSet;
+                                  savePins(pins);
                                 });
 
                                 if (width < 1000) {
@@ -758,7 +775,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) => PinnedItems(
-                                              pins: pins,
                                               notifyMain: refresh,
                                             )),
                                   ).then((val) => setState(() {}));
@@ -890,7 +906,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   Expanded(
                       flex: 9,
                       child: PinnedItems(
-                        pins: pins,
                         notifyMain: refresh,
                       ))
               ]);

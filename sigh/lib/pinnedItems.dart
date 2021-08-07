@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'restaurantPage.dart';
 import 'itemDialog.dart';
 import 'appColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class PinnedItems extends StatefulWidget {
   final pins;
@@ -41,6 +43,13 @@ class _PinnedItemsState extends State<PinnedItems> {
     });
 
     return sorted;
+  }
+
+  Future<void> savePins(pins) async {
+    final temp = jsonEncode(pins);
+    await SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('pins', temp);
+    });
   }
 
   Widget starredDish(item) {
@@ -161,7 +170,6 @@ class _PinnedItemsState extends State<PinnedItems> {
                             onPressed: () {
                               var temp = pins;
 
-                              temp['ids'].remove(id);
                               for (var i = 0; i < temp['items'].length; i++) {
                                 if (temp['items'][i]['_id'] == id) {
                                   temp['items'].removeAt(i);
@@ -170,6 +178,7 @@ class _PinnedItemsState extends State<PinnedItems> {
                               }
                               setState(() {
                                 pins = temp;
+                                savePins(temp);
                               });
 
                               widget.notifyMain();

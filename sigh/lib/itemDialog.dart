@@ -60,7 +60,14 @@ class _ItemDialogState extends State<ItemDialog> {
 
       image = image[1];
     }
-    var pinned = pins['ids'].contains(id);
+
+    var pinnedIds = <String>{};
+
+    for (var j = 0; j < pins['items'].length; j++) {
+      pinnedIds.add(pins['items'][j]['_id']);
+    }
+
+    var pinned = pinnedIds.contains(id);
 
     navigateToRestaurantPage(name) {
       var words = name.split(' ');

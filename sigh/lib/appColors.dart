@@ -14,6 +14,50 @@ class AppColors {
   static var noHover = Colors.white.withOpacity(0);
 }
 
+// class LocalStorage {
+//   Future<String> get _localPath async {
+//     final directory = await getApplicationDocumentsDirectory();
+
+//     return directory.path;
+//   }
+
+//   Future<File> get _localFile async {
+//     final path = await _localPath;
+//     return File('$path/pins.json');
+//   }
+
+//   Future<Object> readPins() async {
+//     try {
+//       final file = await _localFile;
+
+//       // Read the file
+//       final contents = await file.readAsString();
+
+//       return jsonDecode(contents);
+//     } catch (e) {
+//       // If encountering an error, return 0
+//       return e;
+//     }
+//   }
+
+//   Future<File> writePins(pins) async {
+//     debugPrint('$pins, write');
+//     final file = await _localFile;
+//     final write = jsonEncode(pins);
+//     debugPrint('$write, encoded');
+//     // Write the file
+//     return file.writeAsString(write);
+//   }
+
+//   Future<File> initiatePins() async {
+//     final file = await _localFile;
+//     final write = jsonEncode({'ids': <String>{}, 'items': [], 'display': true});
+
+//     // Write the file
+//     return file.writeAsString(write);
+//   }
+// }
+
 class AppStyles {
   static var header = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
   static var headerMobile =
